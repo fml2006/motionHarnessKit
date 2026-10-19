@@ -1,0 +1,19 @@
+{
+  "source": "heygen-com/hyperframes",
+  "commit": "cea0bad7931122bd93680006978c0d9007daa3d4",
+  "installed": "2026-10-19T05:48:15Z",
+  "skills": {
+    "hyperframes": "6ef04c743e34f0b2",
+    "hyperframes-core": "66fc3e623a910923",
+    "hyperframes-animation": "eeadb8a12feaaba8",
+    "hyperframes-keyframes": "a3d43b98955b1366",
+    "hyperframes-creative": "043c4bc84b16a96f",
+    "hyperframes-cli": "35688a15a6d0617b",
+    "hyperframes-registry": "d7c1885fb4cce2cf",
+    "hyperframes-audio": "780c9d4d8d23ab40",
+    "media-use": "1a2c3f1c16ab3ef7",
+    "motion-graphics": "67bd36b53df3b7e0",
+    "general-video": "f288a7bc7eb1a1cf",
+    "faceless-explainer": "47a0783444abc45a"
+  }
+}

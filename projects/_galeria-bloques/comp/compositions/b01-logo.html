@@ -1,0 +1,65 @@
+<!doctype html>
+<!--
+  bm-block: logo-sting
+  Uso: firma de marca (apertura corta o cierre). Usa los SVG de brand/ inline (BRAND.logo).
+  Reglas de logo: sin deformar, sin rotar, sin glow. El isotipo escala; el wordmark se revela con máscara.
+  Duración sugerida: 2-3 s.
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"tagline","type":"string","label":"Tagline (opcional)","default":"","maxLength":60},
+    {"id":"exit","type":"enum","label":"Salida","default":"none","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":2.6,"min":1,"max":30,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>logo-sting</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; }
+        #root .ls { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4cqmin; }
+        #root .ls-logo { height: 14cqmin; display: flex; align-items: center; }
+        #root .ls-logo svg { height: 100%; width: auto; display: block; overflow: visible; }
+        #root .ls-tag { text-align: center; }
+      </style>
+      <div id="root" data-composition-id="b01-logo">
+        <div class="bm-frame">
+          <div class="bm-bg"></div>
+          <div class="bm-safe ls">
+            <div class="ls-logo"></div>
+            <p class="bm-body bm-muted ls-tag"></p>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ tagline: "", exit: "none", dur: 2.6 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          var holder = q(".ls-logo");
+          holder.innerHTML = BRAND.logo.svgPrimary || BRAND.logo.svgMark || "";
+          var svg = holder.querySelector("svg");
+          var tag = q(".ls-tag");
+          if (v.tagline) tag.textContent = v.tagline; else tag.remove();
+          var tl = gsap.timeline({ paused: true });
+          if (svg) {
+            // Convención: en tu SVG marcá <g data-part="mark"> y <g data-part="wordmark">. Sin eso, se anima el logo entero.
+            var mark = svg.querySelector('[data-part="mark"]');
+            var wordGroup = svg.querySelector('[data-part="wordmark"]');
+            var word = wordGroup ? wordGroup.firstElementChild : null;
+            if (mark) tl.fromTo(mark, { opacity: 0, scale: 0.6, transformOrigin: "50% 50%" }, { opacity: 1, scale: 1, duration: BRAND.dur("enter"), ease: BRAND.ease("enter") }, 0.15);
+            if (word) tl.fromTo(word, { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: BRAND.dur("enter"), ease: BRAND.ease("enter") }, 0.45);
+            if (!mark && !word) tl.fromTo(svg, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: BRAND.dur("enter"), ease: BRAND.ease("enter") }, 0.15);
+          }
+          if (tag.isConnected) BM.fadeUp(tl, tag, 0.9, { yPercent: 30 });
+          BM.exit(tl, q(".ls"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
+          window.__timelines["b01-logo"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

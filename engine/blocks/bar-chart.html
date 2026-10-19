@@ -1,0 +1,94 @@
+<!doctype html>
+<!--
+  bm-block: bar-chart
+  Uso: comparar 2-6 valores. Barras horizontales desde CERO (nunca truncar el eje), valores con conteo.
+  "items": "Etiqueta: valor" por línea. "highlight": etiqueta que lleva el acento (1 sola).
+  REGLA: "source" obligatoria; mismo período/unidad para todas las barras.
+  Duración sugerida: 6-8 s.
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"title","type":"string","label":"Título","default":"Tiempo de primer corte (horas)","maxLength":70},
+    {"id":"items","type":"string","label":"Items (Etiqueta: valor, \\n entre items)","default":"Tradicional: 32\nPlantillas: 14\nIA + harness: 6","maxLength":400},
+    {"id":"unit","type":"string","label":"Unidad/sufijo","default":" h","maxLength":8},
+    {"id":"decimals","type":"number","label":"Decimales","default":0,"min":0,"max":2,"step":1},
+    {"id":"highlight","type":"string","label":"Etiqueta destacada","default":"IA + harness","maxLength":40},
+    {"id":"source","type":"string","label":"Fuente (obligatoria)","default":"Fuente: datos internos de ejemplo — reemplazar","maxLength":90},
+    {"id":"exit","type":"enum","label":"Salida","default":"fade","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":7,"min":1,"max":30,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>bar-chart</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; }
+        #root .bc { display: flex; flex-direction: column; justify-content: center; gap: 4.5cqmin; }
+        #root .bc-rows { display: flex; flex-direction: column; gap: 3cqmin; }
+        #root .bc-row { display: grid; grid-template-columns: 30cqw 1fr; align-items: center; gap: 3cqmin; }
+        #root .bc-label { font-size: var(--fs-body); color: var(--c-text-muted); }
+        #root .bc-track { position: relative; height: 6cqmin; display: flex; align-items: center; }
+        #root .bc-bar { height: 100%; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; background: color-mix(in srgb, var(--c-text-muted) 48%, var(--c-background)); transform-origin: left center; }
+        #root .bc-row.is-hl .bc-bar { background: var(--c-accent); }
+        #root .bc-row.is-hl .bc-label { color: var(--c-text); }
+        #root .bc-val { margin-left: 2cqmin; font-family: var(--font-display); font-weight: var(--w-display); font-size: var(--fs-h3); white-space: nowrap; }
+        #root .bc-axis { position: absolute; left: 0; top: -1.5cqmin; bottom: -1.5cqmin; width: var(--stroke); background: var(--c-border); }
+        @container (orientation: portrait) {
+          #root .bc-row { grid-template-columns: 1fr; gap: 1.2cqmin; }
+        }
+      </style>
+      <div id="root" data-composition-id="__ID__">
+        <div class="bm-frame">
+          <div class="bm-bg grid"></div>
+          <div class="bm-safe bc">
+            <h3 class="bm-h2 bc-title"></h3>
+            <div class="bc-rows"></div>
+            <div class="bm-label bc-src"></div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ title: "", items: "", unit: "", decimals: 0, highlight: "", source: "", exit: "fade", dur: 7 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          var titleLines = BM.lines(q(".bc-title"), v.title);
+          q(".bc-src").textContent = v.source;
+          var data = String(v.items).replace(/\\n/g, "\n").split("\n").map(function (s) {
+            var i = s.lastIndexOf(":");
+            return i < 0 ? null : { label: s.slice(0, i).trim(), value: parseFloat(s.slice(i + 1).replace(",", ".")) };
+          }).filter(function (d) { return d && isFinite(d.value); });
+          var max = Math.max.apply(null, data.map(function (d) { return d.value; }).concat([1e-9]));
+          var rowsEl = q(".bc-rows");
+          var rows = data.map(function (d) {
+            var row = document.createElement("div");
+            row.className = "bc-row" + (d.label === v.highlight ? " is-hl" : "");
+            row.innerHTML = '<div class="bc-label"></div><div class="bc-track"><div class="bc-axis"></div><div class="bc-bar"></div><div class="bc-val bm-num"></div></div>';
+            row.querySelector(".bc-label").textContent = d.label;
+            // el ancho máximo deja lugar al valor: 78% del track
+            row.querySelector(".bc-bar").style.width = (78 * d.value) / max + "%";
+            rowsEl.appendChild(row);
+            return { row: row, bar: row.querySelector(".bc-bar"), val: row.querySelector(".bc-val"), d: d };
+          });
+
+          var tl = gsap.timeline({ paused: true });
+          BM.revealLines(tl, titleLines, 0.1);
+          rows.forEach(function (r, i) {
+            var at = 0.6 + i * BRAND.stagger("items") * 2;
+            tl.fromTo(r.row.querySelector(".bc-label"), { opacity: 0 }, { opacity: 1, duration: BRAND.dur("short"), ease: BRAND.ease("standard") }, at);
+            tl.fromTo(r.bar, { scaleX: 0 }, { scaleX: 1, duration: BRAND.dur("long"), ease: BRAND.ease("standard") }, at);
+            tl.fromTo(r.val, { opacity: 0 }, { opacity: 1, duration: BRAND.dur("short") }, at + 0.1);
+            BM.countUp(tl, r.val, r.d.value, at, { decimals: Number(v.decimals), suffix: v.unit, duration: BRAND.dur("long") });
+          });
+          tl.fromTo(q(".bc-src"), { opacity: 0 }, { opacity: 1, duration: BRAND.dur("short") }, 0.6 + rows.length * BRAND.stagger("items") * 2 + 0.6);
+          BM.exit(tl, q(".bc"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
+          window.__timelines["__ID__"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

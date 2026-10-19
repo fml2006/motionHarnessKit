@@ -1,0 +1,75 @@
+<!doctype html>
+<!--
+  bm-block: stat-hit
+  Uso: UN dato duro con conteo. El número es el momento de acento del frame.
+  REGLA: "source" es obligatoria. Si el dato no tiene fuente verificable, no va en pantalla.
+  Duración sugerida: 4-6 s.
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"value","type":"number","label":"Valor","default":73},
+    {"id":"decimals","type":"number","label":"Decimales","default":0,"min":0,"max":3,"step":1},
+    {"id":"prefix","type":"string","label":"Prefijo","default":"","maxLength":4},
+    {"id":"suffix","type":"string","label":"Sufijo","default":"%","maxLength":6},
+    {"id":"label","type":"string","label":"Qué mide (≤8 palabras)","default":"de los equipos ya usa agentes","maxLength":60},
+    {"id":"context","type":"string","label":"Contexto (opcional)","default":"","maxLength":90},
+    {"id":"source","type":"string","label":"Fuente (obligatoria)","default":"Fuente: completar antes de publicar","maxLength":90},
+    {"id":"exit","type":"enum","label":"Salida","default":"fade","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":5,"min":1,"max":30,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>stat-hit</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; }
+        #root .sh { display: flex; flex-direction: column; justify-content: center; gap: 2.2cqmin; }
+        #root .sh-num { font-family: var(--font-display); font-weight: var(--w-display); font-size: calc(var(--fs-hero) * 1.55); letter-spacing: -0.04em; line-height: 0.9; color: var(--c-accent); font-variant-numeric: tabular-nums; }
+        #root .sh-bar { width: 22cqmin; height: 0.6cqmin; background: var(--c-accent); transform-origin: left center; }
+        #root .sh-label { max-width: 70cqw; }
+        #root .sh-ctx { max-width: 64cqw; }
+        #root .sh-src { position: absolute; left: 0; bottom: 0; }
+        @container (orientation: portrait) {
+          #root .sh-label, #root .sh-ctx { max-width: 100%; }
+        }
+      </style>
+      <div id="root" data-composition-id="__ID__">
+        <div class="bm-frame">
+          <div class="bm-bg grid"></div>
+          <div class="bm-safe sh">
+            <div class="sh-num bm-num"></div>
+            <div class="sh-bar"></div>
+            <div class="bm-h3 sh-label"></div>
+            <p class="bm-body bm-muted sh-ctx"></p>
+            <div class="bm-label sh-src"></div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ value: 0, decimals: 0, prefix: "", suffix: "", label: "", context: "", source: "", exit: "fade", dur: 5 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          q(".sh-label").textContent = v.label;
+          var ctx = q(".sh-ctx");
+          if (v.context) ctx.textContent = v.context; else ctx.remove();
+          q(".sh-src").textContent = v.source;
+
+          var tl = gsap.timeline({ paused: true });
+          BM.fadeUp(tl, q(".sh-num"), 0.15, { yPercent: 12 });
+          BM.countUp(tl, q(".sh-num"), v.value, 0.2, { decimals: Number(v.decimals), prefix: v.prefix, suffix: v.suffix, locale: (BRAND.motion && document.documentElement.lang) || "es-AR" });
+          BM.drawLine(tl, q(".sh-bar"), 0.5, "x");
+          BM.fadeUp(tl, q(".sh-label"), 0.7, { yPercent: 30 });
+          if (ctx.isConnected) BM.fadeUp(tl, ctx, 1.0, { yPercent: 30 });
+          tl.fromTo(q(".sh-src"), { opacity: 0 }, { opacity: 1, duration: BRAND.dur("short"), ease: BRAND.ease("standard") }, 1.2);
+          BM.exit(tl, q(".sh"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
+          window.__timelines["__ID__"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

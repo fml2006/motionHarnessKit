@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "HYPERFRAMES_NO_TELEMETRY": "1",
+    "HYPERFRAMES_NO_UPDATE_CHECK": "1",
+    "DO_NOT_TRACK": "1",
+    "HYPERFRAMES_SKIP_SKILLS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(node scripts/:*)",
+      "Bash(bash scripts/:*)",
+      "Bash(npx hyperframes lint:*)",
+      "Bash(npx hyperframes check:*)",
+      "Bash(npx hyperframes snapshot:*)",
+      "Bash(npx hyperframes timeline:*)",
+      "Bash(npx hyperframes preview:*)",
+      "Bash(npx hyperframes render:*)",
+      "Bash(npx hyperframes keyframes:*)",
+      "Bash(npx hyperframes docs:*)",
+      "Bash(npx hyperframes catalog:*)",
+      "Bash(npx hyperframes transcribe:*)",
+      "Bash(npx hyperframes audio:*)",
+      "Bash(ffprobe:*)"
+    ],
+    "ask": [
+      "Bash(npx hyperframes add:*)",
+      "Bash(npx hyperframes tts:*)",
+      "Bash(npx skills add:*)",
+      "Bash(npm install:*)"
+    ],
+    "deny": [
+      "Bash(npx hyperframes publish:*)",
+      "Bash(npx hyperframes cloud:*)",
+      "Bash(npx hyperframes lambda:*)",
+      "Bash(npx hyperframes cloudrun:*)",
+      "Bash(npx hyperframes auth:*)",
+      "Bash(npx hyperframes feedback:*)",
+      "Bash(npx hyperframes telemetry enable:*)",
+      "Bash(npx hyperframes upgrade:*)",
+      "Edit(brand/dist/**)",
+      "Write(brand/dist/**)",
+      "Edit(projects/*/formats/**)",
+      "Write(projects/*/formats/**)",
+      "Bash(npx hyperframes skills:*)",
+      "Bash(npx hyperframes@latest:*)",
+      "Bash(npx skills update:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/after-edit.mjs\"",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}

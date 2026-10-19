@@ -1,0 +1,110 @@
+<!doctype html>
+<!--
+  bm-block: code-reveal
+  Uso: mostrar código real (≤ 12 líneas) con reveal por línea y resaltado de las líneas clave.
+  REGLA: el código mostrado tiene que compilar/ejecutar o estar marcado como pseudocódigo. Nada inventado.
+  "code": líneas separadas por \n. "highlight": números de línea separados por coma (ej. "3,4").
+  Duración sugerida: 1 s + 0.35 s por línea + BRAND.hold(caption).
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"filename","type":"string","label":"Archivo","default":"agent.ts","maxLength":40},
+    {"id":"code","type":"string","label":"Código (\\n entre líneas)","default":"const tools = [search, readFile];\nconst agent = new Agent({ model, tools });\n\n// el loop: pensar → usar herramienta → observar\nconst result = await agent.run(\"Resumí el repo\");\nconsole.log(result.text);","maxLength":900},
+    {"id":"highlight","type":"string","label":"Líneas a resaltar","default":"5","maxLength":20},
+    {"id":"caption","type":"string","label":"Explicación (líneas con |)","default":"Un agente es un *loop*:|decide, usa una herramienta|y vuelve a decidir.","maxLength":120},
+    {"id":"exit","type":"enum","label":"Salida","default":"fade","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":7,"min":1,"max":30,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>code-reveal</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; }
+        #root .cr { display: flex; align-items: center; gap: 5cqmin; }
+        #root .cr-win { --code-avail: 45cqw; flex: 0 0 60%; background: var(--c-code-background); border: var(--stroke) solid var(--c-code-line); border-radius: var(--radius-md); overflow: hidden; }
+        #root .cr-bar { display: flex; align-items: center; gap: 1.2cqmin; padding: 1.6cqmin 2.2cqmin; border-bottom: var(--stroke) solid var(--c-code-line); }
+        #root .cr-dot { width: 1.3cqmin; height: 1.3cqmin; border-radius: 50%; background: var(--c-code-line); }
+        #root .cr-file { margin-left: 1.2cqmin; font-family: var(--font-mono); font-size: var(--fs-label); color: var(--c-code-chrome); }
+        #root .cr-body { position: relative; padding: 2.4cqmin 0; font-size: max(2.2cqmin, min(var(--fs-code), calc(var(--code-avail) / (var(--code-chars, 40) * 0.61)))); }
+        /* código con líneas largas: caption arriba y código a lo ancho (nunca bajar del mínimo legible) */
+        #root .cr.is-wide { flex-direction: column-reverse; align-items: stretch; justify-content: center; gap: 4cqmin; }
+        #root .cr.is-wide .cr-win { flex: 0 0 auto; --code-avail: 76cqw; }
+        @container (orientation: portrait) { #root .cr.is-wide .cr-win { --code-avail: 62cqw; } }
+        #root .cr-line { position: relative; display: flex; gap: 2.4cqmin; padding: 0 3cqmin 0 0; white-space: pre; color: var(--c-code-text); }
+        #root .cr-ln { flex: 0 0 5.5cqmin; text-align: right; color: var(--c-code-comment); opacity: 0.7; }
+        #root .cr-hl { position: absolute; left: 0; right: 0; background: rgba(255, 255, 255, 0.06); border-left: 0.5cqmin solid var(--c-accent); transform-origin: left center; }
+        #root .tok-keyword { color: var(--c-code-keyword); }
+        #root .tok-string { color: var(--c-code-string); }
+        #root .tok-number { color: var(--c-code-number); }
+        #root .tok-comment { color: var(--c-code-comment); }
+        #root .tok-fn { color: var(--c-code-function); }
+        #root .cr-cap { flex: 1 1 auto; }
+        @container (orientation: portrait) {
+          #root .cr { flex-direction: column-reverse; justify-content: center; align-items: stretch; gap: 6cqmin; }
+          #root .cr-win { flex: 0 0 auto; --code-avail: 66cqw; }
+        }
+      </style>
+      <div id="root" data-composition-id="__ID__">
+        <div class="bm-frame">
+          <div class="bm-bg grid"></div>
+          <div class="bm-safe cr">
+            <div class="cr-win">
+              <div class="cr-bar"><span class="cr-dot"></span><span class="cr-dot"></span><span class="cr-dot"></span><span class="cr-file"></span></div>
+              <div class="cr-body bm-code"></div>
+            </div>
+            <h3 class="bm-h3 cr-cap"></h3>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ filename: "", code: "", highlight: "", caption: "", exit: "fade", dur: 7 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          q(".cr-file").textContent = v.filename;
+          var body = q(".cr-body");
+          var src = String(v.code).replace(/\\n/g, "\n").split("\n");
+          var maxChars = src.reduce(function (m, l) { return Math.max(m, l.length); }, 20);
+          body.style.setProperty("--code-chars", Math.max(maxChars, 34));
+          // > 40 caracteres no entran legibles al 60 % del ancho: layout ancho
+          if (maxChars > 40) q(".cr").classList.add("is-wide");
+          var hl = String(v.highlight || "").split(",").map(function (s) { return parseInt(s, 10); }).filter(function (n) { return n > 0; });
+          var lineEls = src.map(function (code, i) {
+            var row = document.createElement("div");
+            row.className = "cr-line";
+            row.innerHTML = '<span class="cr-ln">' + (i + 1) + "</span><span>" + (BM.highlightCode(code) || " ") + "</span>";
+            body.appendChild(row);
+            return row;
+          });
+          var hlBoxes = hl.filter(function (n) { return n <= lineEls.length; }).map(function (n) {
+            var box = document.createElement("div");
+            box.className = "cr-hl";
+            lineEls[n - 1].prepend(box);
+            box.style.top = "0";
+            box.style.bottom = "0";
+            return box;
+          });
+          var capLines = v.caption ? BM.lines(q(".cr-cap"), v.caption) : [];
+
+          var tl = gsap.timeline({ paused: true });
+          tl.fromTo(q(".cr-win"), { opacity: 0, yPercent: 4 }, { opacity: 1, yPercent: 0, duration: BRAND.dur("enter"), ease: BRAND.ease("enter") }, 0.1);
+          tl.fromTo(lineEls, { opacity: 0, x: -12 }, { opacity: 1, x: 0, duration: BRAND.dur("short"), ease: BRAND.ease("enter"), stagger: 0.22 }, 0.45);
+          var codeDone = 0.45 + BRAND.dur("short") + (lineEls.length - 1) * 0.22;
+          if (hlBoxes.length) {
+            tl.fromTo(hlBoxes, { scaleX: 0 }, { scaleX: 1, duration: BRAND.dur("enter"), ease: BRAND.ease("standard"), stagger: 0.1 }, codeDone + 0.2);
+            var others = lineEls.filter(function (_, i) { return hl.indexOf(i + 1) === -1; });
+            tl.to(others, { opacity: 0.45, duration: BRAND.dur("short"), ease: BRAND.ease("standard") }, codeDone + 0.2);
+          }
+          if (capLines.length) BM.revealLines(tl, capLines, codeDone + 0.3);
+          BM.exit(tl, q(".cr"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
+          window.__timelines["__ID__"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

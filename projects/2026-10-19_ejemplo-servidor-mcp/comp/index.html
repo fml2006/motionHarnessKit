@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es-AR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Qué es un servidor MCP · landscape</title>
+    <!-- GENERADO por scripts/build-roots.mjs desde scenes.json. No editar: cambiá scenes.json o compositions/*.html -->
+    <link rel="stylesheet" href="brand/tokens.css" />
+    <script src="brand/vendor/gsap.min.js"></script>
+    <script src="brand/vendor/CustomEase.min.js"></script>
+    <script src="brand/tokens.js"></script>
+    <script src="brand/bm-motion.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { background: var(--c-background); overflow: hidden; }
+      #root { width: 100%; height: 100%; position: relative; overflow: hidden; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="46" data-width="1920" data-height="1080" data-fps="30">
+      <!-- s01-hook · kinetic-statement · HOOK (tensión). VO: 'Tu modelo de IA es brillante… pero no ve nada de tu empresa.' · acceptance: se entiende sin sonido  -->
+      <div
+        id="scene-s01-hook"
+        class="clip"
+        data-composition-id="s01-hook"
+        data-composition-src="compositions/s01-hook.html"
+        data-variable-values='{"exit":"none","text":"Sin herramientas, tu IA *no ve* tus datos.","size":"h1","dur":4.5}'
+        data-start="0"
+        data-duration="4.5"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <!-- s02-titulo · title-card · Promesa. VO: 'Para eso existe MCP.' -->
+      <div
+        id="scene-s02-titulo"
+        class="clip"
+        data-composition-id="s02-titulo"
+        data-composition-src="compositions/s02-titulo.html"
+        data-variable-values='{"exit":"none","kicker":"Explainer","headline":"Qué es un|*servidor MCP*","subtitle":"El enchufe estándar entre IA y sistemas.","dur":6}'
+        data-start="4.5"
+        data-duration="6"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <!-- s03-problema · split-compare · Problema. Claim C-002 (N×M → N+M es el argumento de diseño del protocolo). do_not: números inventados -->
+      <div
+        id="scene-s03-problema"
+        class="clip"
+        data-composition-id="s03-problema"
+        data-composition-src="compositions/s03-problema.html"
+        data-variable-values='{"exit":"none","title":"Integrar *todo* con todo","leftTitle":"Sin estándar","leftItems":"Un conector por app\nN × M piezas","rightTitle":"Con MCP","rightItems":"Un protocolo abierto\nN + M conectores","dur":8}'
+        data-start="10.5"
+        data-duration="8"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <!-- s04-como · steps-flow · Mecanismo. Claim C-003 (arquitectura host/cliente/servidor). Un paso a la vez, en sincronía con la VO. -->
+      <div
+        id="scene-s04-como"
+        class="clip"
+        data-composition-id="s04-como"
+        data-composition-src="compositions/s04-como.html"
+        data-variable-values='{"exit":"none","title":"Cómo funciona","steps":"Host — la app de IA\nCliente — habla MCP\nServidor — expone herramientas\nTu sistema — archivos, bases, APIs","dur":9}'
+        data-start="18.5"
+        data-duration="9"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <!-- s05-config · code-reveal · Prueba concreta. Claim C-004 (formato mcpServers + paquete oficial server-filesystem). Verificar contra la doc vigente a -->
+      <div
+        id="scene-s05-config"
+        class="clip"
+        data-composition-id="s05-config"
+        data-composition-src="compositions/s05-config.html"
+        data-variable-values='{"exit":"none","filename":".mcp.json","code":"{\n  \"mcpServers\": {\n    \"filesystem\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"@modelcontextprotocol/server-filesystem\",\n        \"./docs\"\n      ]\n    }\n  }\n}","highlight":"3,4,7","caption":"Conectar un servidor es *una* entrada de configuración.","dur":8.5}'
+        data-start="27.5"
+        data-duration="8.5"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <!-- s06-origen · kinetic-statement · Credibilidad. Claim C-001. -->
+      <div
+        id="scene-s06-origen"
+        class="clip"
+        data-composition-id="s06-origen"
+        data-composition-src="compositions/s06-origen.html"
+        data-variable-values='{"exit":"none","text":"Protocolo *abierto*, publicado por Anthropic en noviembre de 2024.","dur":5}'
+        data-start="36"
+        data-duration="5"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+      <!-- s07-cta · end-card · CTA único. -->
+      <div
+        id="scene-s07-cta"
+        class="clip"
+        data-composition-id="s07-cta"
+        data-composition-src="compositions/s07-cta.html"
+        data-variable-values='{"exit":"none","cta":"Probalo hoy con|*un* servidor","link":"modelcontextprotocol.io","note":"Ejemplo del motion-harness-kit · Elementos asistidos por IA","dur":5}'
+        data-start="41"
+        data-duration="5"
+        data-track-index="1"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+
+
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

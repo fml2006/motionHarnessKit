@@ -1,0 +1,60 @@
+<!doctype html>
+<!--
+  bm-block: chapter
+  Uso: separador de capítulo/sección en piezas de 2+ minutos (bumper). Corto y consistente en toda la serie.
+  Duración sugerida: 2-3 s.
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"number","type":"string","label":"Número","default":"02","maxLength":4},
+    {"id":"title","type":"string","label":"Título del capítulo","default":"Cómo se arma el pipeline","maxLength":60},
+    {"id":"kicker","type":"string","label":"Kicker (opcional)","default":"Capítulo","maxLength":24},
+    {"id":"exit","type":"enum","label":"Salida","default":"up","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":2.6,"min":1,"max":30,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>chapter</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; }
+        #root .ch { display: flex; flex-direction: column; justify-content: center; gap: 2.4cqmin; }
+        #root .ch-num { font-family: var(--font-display); font-weight: var(--w-display); font-size: calc(var(--fs-hero) * 1.4); line-height: 0.9; color: var(--c-primary); letter-spacing: -0.04em; }
+        #root .ch-rule { width: 100%; height: var(--stroke); background: var(--c-border); transform-origin: left center; }
+      </style>
+      <div id="root" data-composition-id="__ID__">
+        <div class="bm-frame">
+          <div class="bm-bg"></div>
+          <div class="bm-safe ch">
+            <div class="bm-kicker ch-kicker"></div>
+            <div class="ch-num"></div>
+            <div class="ch-rule"></div>
+            <h2 class="bm-h2 ch-title"></h2>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ number: "01", title: "", kicker: "", exit: "up", dur: 2.6 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          var k = q(".ch-kicker");
+          if (v.kicker) k.textContent = v.kicker; else k.remove();
+          var num = BM.lines(q(".ch-num"), v.number);
+          var title = BM.lines(q(".ch-title"), v.title);
+          var tl = gsap.timeline({ paused: true });
+          if (k.isConnected) BM.fadeUp(tl, k, 0.05, { yPercent: 40 });
+          BM.revealLines(tl, num, 0.1);
+          BM.drawLine(tl, q(".ch-rule"), 0.3, "x", { duration: BRAND.dur("emphasis") });
+          BM.revealLines(tl, title, 0.45);
+          BM.exit(tl, q(".ch"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
+          window.__timelines["__ID__"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

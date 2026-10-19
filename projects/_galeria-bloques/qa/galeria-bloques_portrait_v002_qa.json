@@ -1,0 +1,66 @@
+{
+  "file": "/home/user/motion-harness-kit/projects/_galeria-bloques/renders/galeria-bloques_portrait_v002.mp4",
+  "verdict": "PASS con advertencias",
+  "rows": [
+    {
+      "status": "INFO",
+      "check": "Archivo",
+      "detail": "galeria-bloques_portrait_v002.mp4 · 1080×1920 · 30.00 fps · 71.60 s · 2.5 MB · h264/yuv420p · sin audio"
+    },
+    {
+      "status": "INFO",
+      "check": "Plataforma",
+      "detail": "YouTube Shorts — inferida por aspecto; usá --platform para otra"
+    },
+    {
+      "status": "PASS",
+      "check": "Resolución",
+      "detail": "1080×1920 (esperado 1080×1920)"
+    },
+    {
+      "status": "PASS",
+      "check": "fps",
+      "detail": "30.00 (rango 24–60)"
+    },
+    {
+      "status": "PASS",
+      "check": "Codec de video",
+      "detail": "h264 (esperado h264)"
+    },
+    {
+      "status": "PASS",
+      "check": "Duración",
+      "detail": "71.6 s ≤ 180 s"
+    },
+    {
+      "status": "PASS",
+      "check": "Fast start (moov al inicio)",
+      "detail": "sí"
+    },
+    {
+      "status": "WARN",
+      "check": "Audio",
+      "detail": "El render no tiene pista de audio (OK para overlays o piezas mudas; no para entregables con sonido)."
+    },
+    {
+      "status": "WARN",
+      "check": "Negros a mitad de pieza",
+      "detail": "64.00–64.50 s"
+    },
+    {
+      "status": "WARN",
+      "check": "Congelados ≥ 4 s",
+      "detail": "19.8 s (4.2 s) — ¿hold intencional o escena muerta?; 32.0 s (5.0 s) — ¿hold intencional o escena muerta?; 48.0 s (5.0 s) — ¿hold intencional o escena muerta?; 54.6 s (4.4 s) — ¿hold intencional o escena muerta?; 59.6 s (4.4 s) — ¿hold intencional o escena muerta?"
+    },
+    {
+      "status": "PASS",
+      "check": "Fotosensibilidad (heurística WCAG 2.3.1)",
+      "detail": "máx 0 destellos/s — heurística de frame completo; para entregas sensibles correr EA IRIS o PEAT"
+    },
+    {
+      "status": "INFO",
+      "check": "Contact sheet",
+      "detail": "/home/user/motion-harness-kit/projects/_galeria-bloques/qa/galeria-bloques_portrait_v002_contact.jpg"
+    }
+  ]
+}

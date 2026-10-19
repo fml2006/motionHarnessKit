@@ -1,0 +1,76 @@
+{
+  "file": "/home/user/motion-harness-kit/projects/_galeria-bloques/renders/galeria-bloques_landscape_v002.mp4",
+  "verdict": "PASS con advertencias",
+  "rows": [
+    {
+      "status": "INFO",
+      "check": "Archivo",
+      "detail": "galeria-bloques_landscape_v002.mp4 · 1920×1080 · 30.00 fps · 71.60 s · 2.3 MB · h264/yuv420p · sin audio"
+    },
+    {
+      "status": "INFO",
+      "check": "Plataforma",
+      "detail": "YouTube (largo) — inferida por aspecto; usá --platform para otra"
+    },
+    {
+      "status": "PASS",
+      "check": "Resolución",
+      "detail": "1920×1080 (esperado 1920×1080)"
+    },
+    {
+      "status": "PASS",
+      "check": "fps",
+      "detail": "30.00 (rango 24–60)"
+    },
+    {
+      "status": "PASS",
+      "check": "Codec de video",
+      "detail": "h264 (esperado h264)"
+    },
+    {
+      "status": "PASS",
+      "check": "Pixel format",
+      "detail": "yuv420p"
+    },
+    {
+      "status": "PASS",
+      "check": "Duración",
+      "detail": "71.6 s ≤ 43200 s"
+    },
+    {
+      "status": "PASS",
+      "check": "Peso",
+      "detail": "2.3 MB ≤ 262144 MB"
+    },
+    {
+      "status": "PASS",
+      "check": "Fast start (moov al inicio)",
+      "detail": "sí"
+    },
+    {
+      "status": "WARN",
+      "check": "Audio",
+      "detail": "El render no tiene pista de audio (OK para overlays o piezas mudas; no para entregables con sonido)."
+    },
+    {
+      "status": "WARN",
+      "check": "Negros a mitad de pieza",
+      "detail": "64.00–64.70 s"
+    },
+    {
+      "status": "WARN",
+      "check": "Congelados ≥ 4 s",
+      "detail": "19.6 s (4.4 s) — ¿hold intencional o escena muerta?; 31.4 s (4.9 s) — ¿hold intencional o escena muerta?; 47.9 s (5.1 s) — ¿hold intencional o escena muerta?; 54.5 s (4.5 s) — ¿hold intencional o escena muerta?; 59.6 s (4.4 s) — ¿hold intencional o escena muerta?"
+    },
+    {
+      "status": "PASS",
+      "check": "Fotosensibilidad (heurística WCAG 2.3.1)",
+      "detail": "máx 0 destellos/s — heurística de frame completo; para entregas sensibles correr EA IRIS o PEAT"
+    },
+    {
+      "status": "INFO",
+      "check": "Contact sheet",
+      "detail": "/home/user/motion-harness-kit/projects/_galeria-bloques/qa/galeria-bloques_landscape_v002_contact.jpg"
+    }
+  ]
+}

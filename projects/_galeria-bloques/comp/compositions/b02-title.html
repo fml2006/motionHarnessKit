@@ -1,0 +1,83 @@
+<!doctype html>
+<!--
+  bm-block: title-card
+  Uso: apertura de la pieza o de una sección. Kicker + titular (1-3 líneas) + bajada.
+  Texto: separá líneas con "|" y marcá UNA palabra de acento con *asteriscos*.
+  Duración sugerida: 3.5-5 s.
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"kicker","type":"string","label":"Kicker (1-4 palabras)","default":"Explainer","maxLength":32},
+    {"id":"headline","type":"string","label":"Titular (líneas con |, acento con *)","default":"Qué es un *agente*|y por qué importa","maxLength":90},
+    {"id":"subtitle","type":"string","label":"Bajada","default":"En 60 segundos, sin jerga.","maxLength":90},
+    {"id":"showMark","type":"boolean","label":"Mostrar isotipo","default":true},
+    {"id":"bg","type":"enum","label":"Fondo","default":"grid","options":[{"value":"grid","label":"Grilla"},{"value":"glow","label":"Glow"},{"value":"solid","label":"Sólido"}]},
+    {"id":"exit","type":"enum","label":"Salida","default":"fade","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":4.5,"min":1,"max":30,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>title-card</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; }
+        #root .tc { display: flex; flex-direction: column; justify-content: center; gap: 3cqmin; }
+        #root .tc-top { display: flex; align-items: center; gap: 2.4cqmin; }
+        #root .tc-mark { width: 7cqmin; height: 7cqmin; display: block; }
+        #root .tc-mark svg { width: 100%; height: 100%; display: block; }
+        #root .tc-rule { width: 9cqmin; height: 0.35cqmin; background: var(--c-primary); transform-origin: left center; }
+        #root .tc-headline { max-width: 82cqw; }
+        #root .tc-sub { max-width: 70cqw; }
+        @container (orientation: portrait) {
+          #root .tc { justify-content: center; gap: 4cqmin; }
+          #root .tc-headline { max-width: 100%; }
+        }
+      </style>
+      <div id="root" data-composition-id="b02-title">
+        <div class="bm-frame">
+          <div class="bm-bg tc-bg"></div>
+          <div class="bm-safe tc">
+            <div class="tc-top">
+              <div class="tc-mark bm-logo"></div>
+              <div class="tc-rule"></div>
+              <div class="bm-kicker tc-kicker"></div>
+            </div>
+            <h1 class="bm-h1 tc-headline"></h1>
+            <p class="bm-body bm-muted tc-sub"></p>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ kicker: "Explainer", headline: "Qué es un *agente*|y por qué importa", subtitle: "", showMark: true, bg: "grid", exit: "fade", dur: 4.5 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          q(".tc-bg").classList.add(v.bg === "glow" ? "glow" : v.bg === "solid" ? "solid" : "grid");
+          if (v.bg === "glow") q(".tc-bg").classList.add("grid");
+          var mark = q(".tc-mark");
+          if (v.showMark && BRAND.logo.svgMark) mark.innerHTML = BRAND.logo.svgMark; else mark.remove();
+          q(".tc-kicker").textContent = v.kicker;
+          var lines = BM.lines(q(".tc-headline"), v.headline);
+          var sub = q(".tc-sub");
+          if (v.subtitle) sub.textContent = v.subtitle; else sub.remove();
+
+          var tl = gsap.timeline({ paused: true });
+          var t = 0.15;
+          if (mark.isConnected) tl.fromTo(mark, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: BRAND.dur("enter"), ease: BRAND.ease("enter") }, t);
+          BM.drawLine(tl, q(".tc-rule"), t + 0.1, "x", { duration: BRAND.dur("enter") });
+          BM.fadeUp(tl, q(".tc-kicker"), t + 0.2, { yPercent: 40 });
+          BM.revealLines(tl, lines, t + 0.35);
+          var afterLines = t + 0.35 + BRAND.dur("enter") + (lines.length - 1) * BRAND.stagger("lines");
+          if (sub.isConnected) BM.fadeUp(tl, sub, afterLines - 0.1, { yPercent: 30 });
+          var exitAt = Number(v.dur) - BRAND.dur("exit") - 0.05;
+          BM.exit(tl, q(".tc"), exitAt, v.exit);
+          window.__timelines["b02-title"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

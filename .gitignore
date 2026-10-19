@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+# artefactos y cachés de HyperFrames
+**/.hyperframes/
+**/renders/work-*/
+**/renders/.*hf-transaction*
+# variantes de formato: se regeneran con npm run build:roots
+projects/*/formats/

@@ -1,0 +1,109 @@
+{
+  "$comment": "EJEMPLO RESUELTO del motion-harness-kit. Plan de escenas ejecutable derivado de 02_storyboard.md.",
+  "title": "Qué es un servidor MCP",
+  "slug": "ejemplo-servidor-mcp",
+  "type": "explainer",
+  "date": "2026-10-19",
+  "master": "landscape",
+  "formats": [
+    "landscape",
+    "portrait"
+  ],
+  "defaultTransition": "cut",
+  "crossfade": 0.4,
+  "audio": {
+    "voiceover": {
+      "src": "",
+      "volume": 1
+    },
+    "music": {
+      "src": "",
+      "volume": 0.25
+    }
+  },
+  "scenes": [
+    {
+      "id": "s01-hook",
+      "block": "kinetic-statement",
+      "duration": 4.5,
+      "vars": {
+        "text": "Sin herramientas, tu IA *no ve* tus datos.",
+        "size": "h1"
+      },
+      "notes": "HOOK (tensión). VO: 'Tu modelo de IA es brillante… pero no ve nada de tu empresa.' · acceptance: se entiende sin sonido en 3 s"
+    },
+    {
+      "id": "s02-titulo",
+      "block": "title-card",
+      "duration": 6,
+      "vars": {
+        "kicker": "Explainer",
+        "headline": "Qué es un|*servidor MCP*",
+        "subtitle": "El enchufe estándar entre IA y sistemas."
+      },
+      "notes": "Promesa. VO: 'Para eso existe MCP.'"
+    },
+    {
+      "id": "s03-problema",
+      "block": "split-compare",
+      "duration": 8,
+      "vars": {
+        "title": "Integrar *todo* con todo",
+        "leftTitle": "Sin estándar",
+        "leftItems": "Un conector por app\nN × M piezas",
+        "rightTitle": "Con MCP",
+        "rightItems": "Un protocolo abierto\nN + M conectores"
+      },
+      "notes": "Problema. Claim C-002 (N×M → N+M es el argumento de diseño del protocolo). do_not: números inventados"
+    },
+    {
+      "id": "s04-como",
+      "block": "steps-flow",
+      "duration": 9,
+      "vars": {
+        "title": "Cómo funciona",
+        "steps": "Host — la app de IA\nCliente — habla MCP\nServidor — expone herramientas\nTu sistema — archivos, bases, APIs"
+      },
+      "notes": "Mecanismo. Claim C-003 (arquitectura host/cliente/servidor). Un paso a la vez, en sincronía con la VO."
+    },
+    {
+      "id": "s05-config",
+      "block": "code-reveal",
+      "duration": 8.5,
+      "vars": {
+        "filename": ".mcp.json",
+        "code": "{\n  \"mcpServers\": {\n    \"filesystem\": {\n      \"command\": \"npx\",\n      \"args\": [\n        \"-y\",\n        \"@modelcontextprotocol/server-filesystem\",\n        \"./docs\"\n      ]\n    }\n  }\n}",
+        "highlight": "3,4,7",
+        "caption": "Conectar un servidor es *una* entrada de configuración."
+      },
+      "notes": "Prueba concreta. Claim C-004 (formato mcpServers + paquete oficial server-filesystem). Verificar contra la doc vigente antes de publicar."
+    },
+    {
+      "id": "s06-origen",
+      "block": "kinetic-statement",
+      "duration": 5,
+      "vars": {
+        "text": "Protocolo *abierto*, publicado por Anthropic en noviembre de 2024."
+      },
+      "notes": "Credibilidad. Claim C-001."
+    },
+    {
+      "id": "s07-cta",
+      "block": "end-card",
+      "duration": 5,
+      "vars": {
+        "cta": "Probalo hoy con|*un* servidor",
+        "link": "modelcontextprotocol.io",
+        "note": "Ejemplo del motion-harness-kit · Elementos asistidos por IA"
+      },
+      "notes": "CTA único.",
+      "formats": {
+        "portrait": {
+          "vars": {
+            "cta": "Probalo hoy|con *un* servidor"
+          }
+        }
+      }
+    }
+  ]
+}

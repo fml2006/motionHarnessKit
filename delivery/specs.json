@@ -1,0 +1,42 @@
+{
+  "$comment": "Specs de entrega por plataforma (oct-2026). Las plataformas cambian specs varias veces al año: confirmá contra la ayuda oficial antes de cada campaña. 'verified:false' = fuentes secundarias contradictorias.",
+  "loudness": { "integratedLUFS": -14, "toleranceLU": 1, "truePeakDBTP": -1 },
+  "platforms": {
+    "youtube": {
+      "label": "YouTube (largo)", "aspect": "16:9", "width": 1920, "height": 1080, "fps": [24, 60],
+      "videoCodec": ["h264"], "audioCodec": ["aac"], "audioSampleRate": 48000, "pixFmt": ["yuv420p"],
+      "maxDurationS": 43200, "maxSizeMB": 262144, "faststart": true, "verified": true,
+      "notes": "H.264 High, GOP = fps/2, BT.709, moov al inicio. Bitrate 1080p30 ≈ 8 Mbps (12 Mbps a 60 fps)."
+    },
+    "shorts": {
+      "label": "YouTube Shorts", "aspect": "9:16", "width": 1080, "height": 1920, "fps": [24, 60],
+      "videoCodec": ["h264"], "audioCodec": ["aac"], "maxDurationS": 180, "faststart": true, "verified": true,
+      "notes": "Hasta 3 min. Más ancho que cuadrado no clasifica como Short."
+    },
+    "reels": {
+      "label": "Instagram / Facebook Reels", "aspect": "9:16", "width": 1080, "height": 1920, "fps": [24, 60],
+      "videoCodec": ["h264"], "audioCodec": ["aac"], "maxDurationS": 180, "maxSizeMB": 4096, "faststart": true, "verified": false,
+      "notes": "Portada se ve 3:4 en la grilla: lo crítico al centro. Safe zone: 14% arriba, 35% abajo, 6% lados."
+    },
+    "tiktok": {
+      "label": "TikTok", "aspect": "9:16", "width": 1080, "height": 1920, "fps": [24, 60],
+      "videoCodec": ["h264"], "audioCodec": ["aac"], "maxDurationS": 600, "maxSizeMB": 287, "faststart": true, "verified": false,
+      "notes": "Límite de peso en móvil ≈287 MB (web: más). Columna de botones a la derecha."
+    },
+    "linkedin": {
+      "label": "LinkedIn (orgánico)", "aspect": ["16:9", "1:1", "4:5", "9:16"], "maxWidth": 1920, "fps": [24, 30],
+      "videoCodec": ["h264"], "audioCodec": ["aac"], "maxDurationS": 900, "maxSizeMB": 5120, "faststart": true, "verified": false,
+      "notes": "Acepta SRT. En feed, 1:1 o 4:5 ocupan más pantalla que 16:9."
+    },
+    "x": {
+      "label": "X", "aspect": ["16:9", "1:1", "9:16"], "maxWidth": 1920, "maxHeight": 1920, "fps": [24, 60],
+      "videoCodec": ["h264"], "audioCodec": ["aac"], "maxDurationS": 140, "maxSizeMB": 512, "faststart": true, "verified": false,
+      "notes": "Cuentas gratis: 2:20 y 512 MB. H.265 rechazado."
+    }
+  },
+  "archive": {
+    "master": "ProRes 422 HQ (10 bit) + PCM 48 kHz/24 bit",
+    "alpha": "ProRes 4444 (hyperframes render --format mov) o WebM VP9 con alpha",
+    "sourceOfTruth": "El proyecto (scenes.json + compositions + brand + lockfile) con tag de versión: permite re-render en cualquier formato o idioma."
+  }
+}

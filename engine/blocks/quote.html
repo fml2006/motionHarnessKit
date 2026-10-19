@@ -1,0 +1,64 @@
+<!doctype html>
+<!--
+  bm-block: quote
+  Uso: cita textual con atribución (cliente, experto, documentación oficial).
+  REGLA: cita literal y verificable; si es paráfrasis, no uses comillas. Pedí permiso para citar personas.
+  Duración sugerida: BRAND.hold(cita) + 2 s.
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"quote","type":"string","label":"Cita (líneas con |)","default":"La herramienta no reemplaza el criterio:|lo *multiplica*.","maxLength":200},
+    {"id":"author","type":"string","label":"Autor","default":"Nombre Apellido","maxLength":50},
+    {"id":"role","type":"string","label":"Rol / organización","default":"Directora creativa, Empresa","maxLength":70},
+    {"id":"exit","type":"enum","label":"Salida","default":"fade","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":6,"min":1,"max":30,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>quote</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; }
+        #root .qt { display: flex; flex-direction: column; justify-content: center; gap: 4cqmin; }
+        #root .qt-mark { font-family: var(--font-display); font-weight: var(--w-display); font-size: calc(var(--fs-hero) * 1.4); line-height: 0.6; color: var(--c-primary); height: 0.45em; }
+        #root .qt-text { max-width: 80cqw; }
+        #root .qt-attr { display: flex; align-items: center; gap: 2.4cqmin; }
+        #root .qt-rule { width: 6cqmin; height: var(--stroke); background: var(--c-text-muted); transform-origin: left center; }
+        #root .qt-author { font-weight: 600; font-size: var(--fs-body); }
+        @container (orientation: portrait) { #root .qt-text { max-width: 100%; } }
+      </style>
+      <div id="root" data-composition-id="__ID__">
+        <div class="bm-frame">
+          <div class="bm-bg grid"></div>
+          <div class="bm-safe qt">
+            <div class="qt-mark">“</div>
+            <blockquote class="bm-h2 qt-text"></blockquote>
+            <div class="qt-attr"><div class="qt-rule"></div><div><div class="qt-author"></div><div class="bm-label qt-role"></div></div></div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ quote: "", author: "", role: "", exit: "fade", dur: 6 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          var lines = BM.lines(q(".qt-text"), v.quote);
+          q(".qt-author").textContent = v.author;
+          q(".qt-role").textContent = v.role;
+          var tl = gsap.timeline({ paused: true });
+          tl.fromTo(q(".qt-mark"), { opacity: 0, yPercent: 20 }, { opacity: 1, yPercent: 0, duration: BRAND.dur("enter"), ease: BRAND.ease("enter") }, 0.1);
+          BM.revealLines(tl, lines, 0.3);
+          var after = 0.3 + BRAND.dur("enter") + (lines.length - 1) * BRAND.stagger("lines") + 0.3;
+          BM.drawLine(tl, q(".qt-rule"), after, "x");
+          BM.fadeUp(tl, [q(".qt-author"), q(".qt-role")], after + 0.15, { yPercent: 30, stagger: 0.08 });
+          BM.exit(tl, q(".qt"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
+          window.__timelines["__ID__"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

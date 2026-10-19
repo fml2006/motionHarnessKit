@@ -1,0 +1,66 @@
+<!doctype html>
+<!--
+  bm-block: lower-third
+  Uso: identificar a una persona/fuente sobre video (talking head, entrevista, demo).
+  Fondo TRANSPARENTE por defecto: renderizá con `--format mov` (ProRes 4444 + alpha) o `--format webm`
+  para usarlo como overlay en Premiere / DaVinci / CapCut, o montalo sobre un <video> en la composición.
+  Duración sugerida: 4-6 s (nunca menos de BRAND.hold(nombre + rol)).
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"name","type":"string","label":"Nombre","default":"Nombre Apellido","maxLength":40},
+    {"id":"role","type":"string","label":"Rol","default":"Staff Engineer · Plataforma","maxLength":60},
+    {"id":"side","type":"enum","label":"Lado","default":"left","options":[{"value":"left","label":"Izquierda"},{"value":"right","label":"Derecha"}]},
+    {"id":"transparent","type":"boolean","label":"Fondo transparente","default":true},
+    {"id":"exit","type":"enum","label":"Salida","default":"fade","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":5,"min":1,"max":30,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>lower-third</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; }
+        #root .lt { display: flex; align-items: flex-end; justify-content: flex-start; }
+        #root .lt.right { justify-content: flex-end; }
+        #root .lt-box { display: flex; align-items: stretch; gap: 2cqmin; padding: 2cqmin 3cqmin 2cqmin 2cqmin; background: var(--c-surface); border-radius: var(--radius-md); }
+        #root .lt-bar { width: 0.7cqmin; background: var(--c-primary); border-radius: 1cqmin; transform-origin: center bottom; }
+        #root .lt-text { display: flex; flex-direction: column; gap: 0.6cqmin; }
+        #root .lt-name { font-family: var(--font-display); font-weight: var(--w-display); font-size: var(--fs-h3); letter-spacing: var(--track-display); line-height: 1.05; }
+        @container (orientation: portrait) { #root .lt { align-items: flex-end; } }
+      </style>
+      <div id="root" data-composition-id="__ID__">
+        <div class="bm-frame">
+          <div class="bm-safe lt">
+            <div class="lt-box">
+              <div class="lt-bar"></div>
+              <div class="lt-text"><div class="lt-name"></div><div class="bm-label lt-role"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ name: "", role: "", side: "left", transparent: true, exit: "fade", dur: 5 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          if (v.transparent === true || v.transparent === "true") q(".bm-frame").classList.add("is-transparent");
+          if (v.side === "right") q(".lt").classList.add("right");
+          var nameLines = BM.lines(q(".lt-name"), v.name);
+          q(".lt-role").textContent = v.role;
+          var tl = gsap.timeline({ paused: true });
+          tl.fromTo(q(".lt-box"), { opacity: 0, xPercent: v.side === "right" ? 6 : -6 }, { opacity: 1, xPercent: 0, duration: BRAND.dur("enter"), ease: BRAND.ease("enter") }, 0.1);
+          BM.drawLine(tl, q(".lt-bar"), 0.2, "y", { duration: BRAND.dur("enter") });
+          BM.revealLines(tl, nameLines, 0.3);
+          BM.fadeUp(tl, q(".lt-role"), 0.55, { yPercent: 40 });
+          BM.exit(tl, q(".lt-box"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
+          window.__timelines["__ID__"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

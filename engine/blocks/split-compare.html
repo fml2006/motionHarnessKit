@@ -1,0 +1,93 @@
+<!doctype html>
+<!--
+  bm-block: split-compare
+  Uso: A vs B, antes/después, mito/realidad. 2-4 ítems por lado, paralelos en estructura.
+  Lado derecho = la conclusión (lleva el color primario). En 9:16 se apila automáticamente.
+  Duración sugerida: 7-9 s.
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"title","type":"string","label":"Título (opcional)","default":"","maxLength":70},
+    {"id":"leftTitle","type":"string","label":"Título izquierda","default":"Sin harness","maxLength":40},
+    {"id":"leftItems","type":"string","label":"Items izquierda (\\n entre items)","default":"Prompt distinto cada vez\nColores y fuentes a ojo\nRevisión al final","maxLength":300},
+    {"id":"rightTitle","type":"string","label":"Título derecha","default":"Con harness","maxLength":40},
+    {"id":"rightItems","type":"string","label":"Items derecha (\\n entre items)","default":"Brief y storyboard versionados\nTokens de marca obligatorios\nQA automático en cada render","maxLength":300},
+    {"id":"exit","type":"enum","label":"Salida","default":"fade","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":8,"min":1,"max":30,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>split-compare</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; }
+        #root .sc { display: flex; flex-direction: column; justify-content: center; gap: 5cqmin; }
+        #root .sc-cols { display: grid; grid-template-columns: 1fr var(--stroke) 1fr; gap: 6cqmin; }
+        #root .sc-col { display: flex; flex-direction: column; gap: 2.6cqmin; }
+        #root .sc-head { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-text-muted); }
+        #root .sc-col.is-right .sc-head { color: var(--c-primary); }
+        #root .sc-item { display: flex; gap: 2cqmin; align-items: baseline; font-size: var(--fs-body); line-height: 1.25; color: var(--c-text-muted); }
+        #root .sc-col.is-right .sc-item { color: var(--c-text); }
+        #root .sc-bullet { flex: 0 0 auto; width: 1.4cqmin; height: 1.4cqmin; border-radius: 50%; background: var(--c-border); transform: translateY(-0.3cqmin); }
+        #root .sc-col.is-right .sc-bullet { background: var(--c-primary); }
+        #root .sc-div { background: var(--c-border); transform-origin: center top; }
+        @container (orientation: portrait) {
+          #root .sc-cols { grid-template-columns: 1fr; grid-template-rows: auto var(--stroke) auto; gap: 5cqmin; }
+          #root .sc-div { transform-origin: left center; }
+        }
+      </style>
+      <div id="root" data-composition-id="__ID__">
+        <div class="bm-frame">
+          <div class="bm-bg grid"></div>
+          <div class="bm-safe sc">
+            <h3 class="bm-h2 sc-title"></h3>
+            <div class="sc-cols">
+              <div class="sc-col is-left"><div class="sc-head"></div></div>
+              <div class="sc-div"></div>
+              <div class="sc-col is-right"><div class="sc-head"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ title: "", leftTitle: "", leftItems: "", rightTitle: "", rightItems: "", exit: "fade", dur: 8 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          var title = q(".sc-title");
+          var titleLines = v.title ? BM.lines(title, v.title) : (title.remove(), []);
+          function fill(col, head, items) {
+            col.querySelector(".sc-head").textContent = head;
+            return String(items).replace(/\\n/g, "\n").split("\n").map(function (s) { return s.trim(); }).filter(Boolean).slice(0, 4).map(function (s) {
+              var it = document.createElement("div");
+              it.className = "sc-item";
+              it.innerHTML = '<span class="sc-bullet"></span><span></span>';
+              it.lastChild.textContent = s;
+              col.appendChild(it);
+              return it;
+            });
+          }
+          var L = fill(q(".is-left"), v.leftTitle, v.leftItems);
+          var R = fill(q(".is-right"), v.rightTitle, v.rightItems);
+          var portrait = root.getBoundingClientRect().height > root.getBoundingClientRect().width;
+
+          var tl = gsap.timeline({ paused: true });
+          var t = 0.1;
+          if (titleLines.length) { BM.revealLines(tl, titleLines, t); t += 0.5; }
+          BM.drawLine(tl, q(".sc-div"), t, portrait ? "x" : "y", { duration: BRAND.dur("emphasis") });
+          BM.fadeUp(tl, q(".is-left .sc-head"), t + 0.2, { yPercent: 40 });
+          BM.fadeUp(tl, L, t + 0.4, { yPercent: 25, stagger: BRAND.stagger("items") * 2 });
+          var rAt = t + 0.4 + L.length * BRAND.stagger("items") * 2 + 0.6;
+          BM.fadeUp(tl, q(".is-right .sc-head"), rAt, { yPercent: 40 });
+          BM.fadeUp(tl, R, rAt + 0.2, { yPercent: 25, stagger: BRAND.stagger("items") * 2 });
+          BM.exit(tl, q(".sc"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
+          window.__timelines["__ID__"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

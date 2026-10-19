@@ -1,0 +1,22 @@
+{
+  "title": "Galería de bloques de marca",
+  "slug": "galeria-bloques",
+  "master": "landscape",
+  "formats": ["landscape", "portrait", "square"],
+  "defaultTransition": "cut",
+  "scenes": [
+    { "id": "b01-logo", "block": "logo-sting", "duration": 3, "vars": { "tagline": "Tecnología explicada con claridad" } },
+    { "id": "b02-title", "block": "title-card", "duration": 4.5, "vars": {} },
+    { "id": "b03-statement", "block": "kinetic-statement", "duration": 4.5, "vars": {} },
+    { "id": "b04-stat", "block": "stat-hit", "duration": 5, "vars": { "context": "Encuesta a 1.200 equipos de ingeniería.", "source": "Fuente: dato de ejemplo — reemplazar" } },
+    { "id": "b05-code", "block": "code-reveal", "duration": 7, "vars": {} },
+    { "id": "b06-terminal", "block": "terminal", "duration": 6, "vars": { "caption": "Un comando, un MP4 determinista." } },
+    { "id": "b07-chart", "block": "bar-chart", "duration": 7, "vars": {} },
+    { "id": "b08-steps", "block": "steps-flow", "duration": 8, "vars": {} },
+    { "id": "b09-compare", "block": "split-compare", "duration": 8, "vars": { "title": "Mismo modelo, otro *proceso*" } },
+    { "id": "b10-quote", "block": "quote", "duration": 6, "vars": {} },
+    { "id": "b11-lower", "block": "lower-third", "duration": 5, "vars": { "transparent": false } },
+    { "id": "b12-chapter", "block": "chapter", "duration": 2.6, "vars": {} },
+    { "id": "b13-end", "block": "end-card", "duration": 5, "vars": { "note": "Este video incluye elementos asistidos por IA." } }
+  ]
+}

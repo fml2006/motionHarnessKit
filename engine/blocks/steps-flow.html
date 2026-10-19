@@ -1,0 +1,92 @@
+<!doctype html>
+<!--
+  bm-block: steps-flow
+  Uso: proceso o arquitectura simple en 2-5 pasos (pipeline, flujo de datos, cómo funciona X).
+  "steps": "Título — descripción corta" por línea. Horizontal en 16:9, vertical en 9:16 (automático).
+  Duración sugerida: 1.5 s + 1.6 s por paso.
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"title","type":"string","label":"Título","default":"Cómo trabaja un agente","maxLength":70},
+    {"id":"steps","type":"string","label":"Pasos (Título — descripción, \\n entre pasos)","default":"Pedido — vos describís el objetivo\nPlan — el modelo decide el próximo paso\nHerramienta — ejecuta: busca, lee, escribe\nObserva — evalúa el resultado y repite","maxLength":600},
+    {"id":"exit","type":"enum","label":"Salida","default":"fade","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":8,"min":1,"max":30,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>steps-flow</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; }
+        #root .sf { display: flex; flex-direction: column; justify-content: center; gap: 6cqmin; }
+        #root .sf-row { display: flex; align-items: stretch; }
+        #root .sf-step { flex: 1 1 0; display: flex; flex-direction: column; gap: 1.6cqmin; padding: 3cqmin; }
+        #root .sf-num { width: 6cqmin; height: 6cqmin; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--c-surface-alt); font-family: var(--font-mono); font-size: var(--fs-label); color: var(--c-primary); }
+        #root .sf-step.is-last .sf-num { background: var(--c-primary); color: var(--c-on-primary); }
+        #root .sf-name { font-family: var(--font-display); font-weight: var(--w-display); font-size: var(--fs-h3); letter-spacing: var(--track-display); }
+        #root .sf-desc { font-size: var(--fs-caption); color: var(--c-text-muted); line-height: 1.3; }
+        #root .sf-link { flex: 0 0 4cqmin; align-self: center; height: var(--stroke); background: var(--c-primary); transform-origin: left center; margin-top: -10cqmin; }
+        @container (orientation: portrait) {
+          #root .sf-row { flex-direction: column; }
+          #root .sf-step { flex: 0 0 auto; flex-direction: row; align-items: center; gap: 3cqmin; padding: 1.6cqmin 0; }
+          #root .sf-step .sf-text { display: flex; flex-direction: column; gap: 0.8cqmin; }
+          #root .sf-link { flex: 0 0 4.5cqmin; width: var(--stroke); height: auto; align-self: flex-start; margin: 0 0 0 3cqmin; transform-origin: center top; }
+        }
+      </style>
+      <div id="root" data-composition-id="__ID__">
+        <div class="bm-frame">
+          <div class="bm-bg grid"></div>
+          <div class="bm-safe sf">
+            <h3 class="bm-h2 sf-title"></h3>
+            <div class="sf-row"></div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ title: "", steps: "", exit: "fade", dur: 8 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          var titleLines = BM.lines(q(".sf-title"), v.title);
+          var steps = String(v.steps).replace(/\\n/g, "\n").split("\n").map(function (s) { return s.trim(); }).filter(Boolean).slice(0, 5);
+          var row = q(".sf-row");
+          var stepEls = [];
+          var links = [];
+          var portrait = root.getBoundingClientRect().height > root.getBoundingClientRect().width;
+          steps.forEach(function (s, i) {
+            var parts = s.split(/\s+[—–-]\s+/);
+            var el = document.createElement("div");
+            el.className = "sf-step" + (i === steps.length - 1 ? " is-last" : "");
+            el.innerHTML = '<div class="sf-num"></div><div class="sf-text"><div class="sf-name"></div><div class="sf-desc"></div></div>';
+            el.querySelector(".sf-num").textContent = String(i + 1).padStart(2, "0");
+            el.querySelector(".sf-name").textContent = parts[0];
+            el.querySelector(".sf-desc").textContent = parts.slice(1).join(" — ");
+            row.appendChild(el);
+            stepEls.push(el);
+            if (i < steps.length - 1) {
+              var link = document.createElement("div");
+              link.className = "sf-link";
+              row.appendChild(link);
+              links.push(link);
+            }
+          });
+
+          var tl = gsap.timeline({ paused: true });
+          BM.revealLines(tl, titleLines, 0.1);
+          var per = Math.max(0.9, (Number(v.dur) - 2.2) / Math.max(steps.length, 1));
+          stepEls.forEach(function (el, i) {
+            var at = 0.8 + i * per;
+            tl.fromTo(el, { opacity: 0, yPercent: 10 }, { opacity: 1, yPercent: 0, duration: BRAND.dur("enter"), ease: BRAND.ease("enter") }, at);
+            if (links[i]) BM.drawLine(tl, links[i], at + BRAND.dur("enter") * 0.8, portrait ? "y" : "x", { duration: BRAND.dur("short") * 1.5 });
+          });
+          BM.exit(tl, q(".sf"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
+          window.__timelines["__ID__"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

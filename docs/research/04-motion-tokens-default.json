@@ -1,0 +1,507 @@
+{
+  "meta": {
+    "name": "motion-tokens-default",
+    "version": "1.0.0",
+    "date": "2026-10-19",
+    "companion_doc": "04-fundamentos-motion.md",
+    "units": {
+      "duration": "ms",
+      "distance": "px @1920x1080 unless noted",
+      "stagger": "ms",
+      "frames": "f"
+    },
+    "default_fps": 30,
+    "confidence_legend": {
+      "official": "Sistema/estándar oficial (Material, Carbon, WCAG, SMPTE/EBU, NN/g, Netflix)",
+      "secondary": "Fuentes de terceros coincidentes, no verificadas contra el original",
+      "repo": "Reglas de los skills HyperFrames (hyperframes-animation / hyperframes-creative)",
+      "practice": "Criterio de estudio; calibrar con renders reales"
+    },
+    "usage": "Pasar este JSON a la IA en el prompt. Usar nombres semánticos (ease.enter, duration.base). No inventar valores fuera de estos rangos sin justificarlo."
+  },
+
+  "fps": {
+    "default": 30,
+    "screen_recording": 60,
+    "cinematic": 24,
+    "frame_ms": { "24": 41.667, "25": 40, "30": 33.333, "60": 16.667 },
+    "ms_to_frames_formula": "frames = round(ms * fps / 1000)"
+  },
+
+  "duration": {
+    "scale": {
+      "instant": 100,
+      "micro": 150,
+      "fast": 250,
+      "base": 400,
+      "moderate": 600,
+      "slow": 800,
+      "deliberate": 1200,
+      "cinematic": 2000
+    },
+    "by_role": {
+      "micro_feedback":      { "range": [100, 200], "default": 150, "ease": "enter", "note": "click, toggle, check, hover", "confidence": "official" },
+      "button_press_down":   { "range": [80, 120], "default": 100, "ease": "exit-soft", "confidence": "repo" },
+      "button_press_release":{ "range": [200, 300], "default": 250, "spring": "settle", "confidence": "repo" },
+      "enter_small":         { "range": [250, 400], "default": 350, "ease": "enter", "note": "chip, label, icon", "confidence": "practice" },
+      "enter_medium":        { "range": [400, 600], "default": 500, "ease": "enter", "note": "card, headline line", "confidence": "repo" },
+      "enter_hero":          { "range": [600, 1000], "default": 800, "ease": "enter-punch", "note": "hero visible <= 500 ms after scene start", "confidence": "repo" },
+      "first_motion_offset": { "range": [100, 300], "default": 200, "note": "never start at t=0", "confidence": "repo" },
+      "exit_ratio_of_enter": { "range": [0.6, 0.75], "default": 0.65, "ease": "exit", "note": "between scenes the transition IS the exit; only final scene exits", "confidence": "repo" },
+      "exit_small":          { "range": [150, 300], "default": 250, "ease": "exit", "confidence": "practice" },
+      "move_on_screen":      { "range": [400, 700], "default": 500, "ease": "move", "confidence": "practice" },
+      "scene_transition": {
+        "high_energy":   { "range": [150, 300], "default": 250, "ease_gsap": "power4 / expo", "confidence": "repo" },
+        "medium_energy": { "range": [300, 500], "default": 400, "ease_gsap": "power2 / power3", "confidence": "repo" },
+        "calm":          { "range": [500, 800], "default": 650, "ease_gsap": "sine.inOut / power1", "confidence": "repo" },
+        "outro":         { "range": [600, 1000], "default": 800, "type": "crossfade or dip to black", "confidence": "repo" }
+      },
+      "camera_zoom":         { "range": [1000, 2000], "default": 1400, "ease": "camera", "note": "<800 teleports, >2500 drags", "confidence": "repo" },
+      "count_up":            { "range": [1200, 2500], "default": 1500, "ease": "enter", "note": "no overshoot, Math.round, tabular-nums; suffix after", "confidence": "repo" },
+      "chart_transition":    { "range": [700, 1200], "default": 1000, "ease": "move", "note": "staged: axes, then marks, then labels", "confidence": "official" },
+      "svg_draw_segment":    { "range": [300, 800], "default": 500, "ease": "enter-gentle", "next_segment_start_pct": [0.7, 0.8], "confidence": "repo" },
+      "code_line_reveal":    { "range": [250, 350], "default": 300, "stagger": [80, 150], "confidence": "practice" },
+      "lower_third":         { "in": [400, 600], "hold": [4000, 5000], "out": [300, 400], "total": [3000, 6000], "confidence": "practice" },
+      "logo_sting":          { "total": [2000, 4000], "default": 3000, "final_lockup_hold": [1000, 1500], "confidence": "practice" },
+      "ambient_loop_period": { "range": [1500, 3000], "default": 2500, "ease": "ambient", "confidence": "repo" },
+      "typing": {
+        "cps_slow_dramatic": [3, 5],
+        "cps_natural": [8, 12],
+        "cps_tech_code": [15, 20],
+        "cps_fill_blocks": 30,
+        "terminal_output_per_line_ms": [30, 80],
+        "caret_blink_cycle_ms": [500, 800],
+        "confidence": "repo"
+      }
+    },
+    "speed_weight_registers": {
+      "energetic_urgent": [150, 300],
+      "professional_default": [300, 500],
+      "gravity_luxury": [500, 800],
+      "cinematic_emotional": [800, 2000],
+      "rule": "slowest scene ~3x the fastest; max 2 tweens with same ease per scene",
+      "confidence": "repo"
+    }
+  },
+
+  "easing": {
+    "team_defaults": {
+      "enter":            { "css": "cubic-bezier(0.165, 0.84, 0.44, 1)",  "gsap": "power3.out", "remotion": "Easing.bezier(0.165, 0.84, 0.44, 1)", "use": "default entrance (house)" },
+      "enter-gentle":     { "css": "cubic-bezier(0.215, 0.61, 0.355, 1)", "gsap": "power2.out", "remotion": "Easing.bezier(0.215, 0.61, 0.355, 1)", "use": "secondary elements, strokes" },
+      "enter-punch":      { "css": "cubic-bezier(0.19, 1, 0.22, 1)",      "gsap": "expo.out",   "remotion": "Easing.bezier(0.19, 1, 0.22, 1)", "use": "hero, slam, mask reveal, premium snap" },
+      "enter-emphasized": { "css": "cubic-bezier(0.05, 0.7, 0.1, 1)",     "gsap": "CustomEase", "remotion": "Easing.bezier(0.05, 0.7, 0.1, 1)", "use": "M3 emphasized decelerate; expressive entrances" },
+      "exit":             { "css": "cubic-bezier(0.55, 0.055, 0.675, 0.19)", "gsap": "power2.in", "remotion": "Easing.bezier(0.55, 0.055, 0.675, 0.19)", "use": "default exit" },
+      "exit-soft":        { "css": "cubic-bezier(0.55, 0.085, 0.68, 0.53)", "gsap": "power1.in", "remotion": "Easing.bezier(0.55, 0.085, 0.68, 0.53)", "use": "press down, gentle exits" },
+      "exit-hard":        { "css": "cubic-bezier(0.895, 0.03, 0.685, 0.22)", "gsap": "power3.in", "remotion": "Easing.bezier(0.895, 0.03, 0.685, 0.22)", "use": "exit into a velocity-matched cut" },
+      "exit-emphasized":  { "css": "cubic-bezier(0.3, 0, 0.8, 0.15)",     "gsap": "CustomEase", "remotion": "Easing.bezier(0.3, 0, 0.8, 0.15)", "use": "M3 emphasized accelerate" },
+      "move":             { "css": "cubic-bezier(0.2, 0, 0, 1)",          "gsap": "CustomEase", "remotion": "Easing.bezier(0.2, 0, 0, 1)", "use": "M3 standard; on-screen reposition" },
+      "move-symmetric":   { "css": "cubic-bezier(0.645, 0.045, 0.355, 1)", "gsap": "power2.inOut", "remotion": "Easing.bezier(0.645, 0.045, 0.355, 1)", "use": "symmetric moves, push transitions" },
+      "camera":           { "css": "cubic-bezier(0.77, 0, 0.175, 1)",     "gsap": "power3.inOut", "remotion": "Easing.bezier(0.77, 0, 0.175, 1)", "use": "virtual camera zoom/pan" },
+      "ambient":          { "css": "cubic-bezier(0.445, 0.05, 0.55, 0.95)", "gsap": "sine.inOut", "remotion": "Easing.bezier(0.445, 0.05, 0.55, 0.95)", "use": "loops, Ken Burns, breathing (sparingly)" },
+      "linear":           { "css": "linear", "gsap": "none", "remotion": "Easing.linear", "use": "typing, constant scroll, time-bound progress, data flow packets" },
+      "step":             { "css": "steps(1)", "gsap": "steps(1)", "remotion": "Math.floor-based", "use": "caret blink, discrete swaps" },
+      "overshoot-playful-RESTRICTED": { "css": "cubic-bezier(0.34, 1.56, 0.64, 1)", "gsap": "back.out(1.7)", "remotion": "Easing.bezier(0.34, 1.56, 0.64, 1)", "overshoot_pct": 10, "use": "ONLY explicitly playful register; never data, opacity, logos" }
+    },
+    "direction_rules": {
+      "entering": ".out (decelerate)",
+      "leaving": ".in (accelerate)",
+      "moving_between_visible_positions": ".inOut",
+      "confidence": "repo + official"
+    },
+    "reference_systems": {
+      "material3": {
+        "emphasized": "path (CSS approx cubic-bezier(0.2, 0, 0, 1))",
+        "emphasized_decelerate": "cubic-bezier(0.05, 0.7, 0.1, 1)",
+        "emphasized_accelerate": "cubic-bezier(0.3, 0, 0.8, 0.15)",
+        "standard": "cubic-bezier(0.2, 0, 0, 1)",
+        "standard_decelerate": "cubic-bezier(0, 0, 0, 1)",
+        "standard_accelerate": "cubic-bezier(0.3, 0, 1, 1)",
+        "legacy_m2_standard": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "durations_ms": {
+          "short1": 50, "short2": 100, "short3": 150, "short4": 200,
+          "medium1": 250, "medium2": 300, "medium3": 350, "medium4": 400,
+          "long1": 450, "long2": 500, "long3": 550, "long4": 600,
+          "extra_long1": 700, "extra_long2": 800, "extra_long3": 900, "extra_long4": 1000
+        },
+        "suggested_pairs_ms": { "emphasized_enter": 400, "emphasized_exit": 200, "standard_enter": 250, "standard_exit": 200 },
+        "confidence": "official (emphasized_decelerate/accelerate), secondary (standard, durations), practice (standard_accelerate, legacy)"
+      },
+      "carbon": {
+        "productive": { "standard": "cubic-bezier(0.2, 0, 0.38, 0.9)", "entrance": "cubic-bezier(0, 0, 0.38, 0.9)", "exit": "cubic-bezier(0.2, 0, 1, 0.9)" },
+        "expressive": { "standard": "cubic-bezier(0.4, 0.14, 0.3, 1)", "entrance": "cubic-bezier(0, 0, 0.3, 1)", "exit": "cubic-bezier(0.4, 0.14, 1, 1)" },
+        "durations_ms": { "fast-01": 70, "fast-02": 110, "moderate-01": 150, "moderate-02": 240, "slow-01": 400, "slow-02": 700 },
+        "confidence": "official (curves, 70/150/400), secondary (110/240/700)"
+      },
+      "fluent2": {
+        "durations_ms": { "ultraFast": 50, "faster": 100, "fast": 150, "normal": 200, "gentle": 250, "slow": 300, "slower": 400, "ultraSlow": 500 },
+        "curves": {
+          "decelerateMax": "cubic-bezier(0.1, 0.9, 0.2, 1)",
+          "decelerateMid": "cubic-bezier(0, 0, 0, 1)",
+          "decelerateMin": "cubic-bezier(0.33, 0, 0.1, 1)",
+          "accelerateMax": "cubic-bezier(0.9, 0.1, 1, 0.2)",
+          "accelerateMid": "cubic-bezier(1, 0, 1, 1)",
+          "accelerateMin": "cubic-bezier(0.8, 0, 0.78, 1)",
+          "easyEaseMax": "cubic-bezier(0.8, 0, 0.2, 1)",
+          "easyEase": "cubic-bezier(0.33, 0, 0.67, 1)",
+          "linear": "cubic-bezier(0, 0, 1, 1)"
+        },
+        "confidence": "secondary (decelerateMax/Mid, accelerateMax, easyEaseMax, 50/500ms), practice (rest)"
+      },
+      "atlassian": { "hover_press_ms": [50, 150], "enter_exit_move_ms": [150, 400], "dropdown_enter_ms": 150, "modal_enter_ms": 250, "confidence": "official" },
+      "nngroup": { "ui_range_ms": [100, 500], "simple_feedback_ms": 100, "feels_slow_from_ms": 500, "confidence": "official" },
+      "material1_mobile": { "typical_ms": 300, "enter_ms": 225, "exit_ms": 195, "full_screen_max_ms": 375, "confidence": "official" }
+    }
+  },
+
+  "spring": {
+    "formula": {
+      "damping_ratio": "zeta = damping / (2 * sqrt(stiffness * mass))",
+      "overshoot": "exp(-pi * zeta / sqrt(1 - zeta^2)) for zeta < 1"
+    },
+    "presets": {
+      "settle": {
+        "zeta": 1.0, "overshoot_pct": 0,
+        "remotion": { "mass": 1, "stiffness": 100, "damping": 20 },
+        "remotion_settle_99pct_ms": 660,
+        "gsap_springEase": { "response": 0.4, "dampingFraction": 1.0, "approx_duration_ms": 590 },
+        "swiftui": ".smooth (duration 0.5, bounce 0)",
+        "use": "DEFAULT: product, enterprise, data-adjacent, serious tone"
+      },
+      "alive": {
+        "zeta": 0.8, "overshoot_pct": 1.5,
+        "remotion": { "mass": 1, "stiffness": 170, "damping": 21 },
+        "gsap_springEase": { "response": 0.4, "dampingFraction": 0.82 },
+        "swiftui": ".snappy (~bounce 0.15)",
+        "use": "felt-not-seen settle; UI arrivals, cards, icons. Not on opacity/color/data"
+      },
+      "playful_RESTRICTED": {
+        "zeta": 0.65, "overshoot_pct": 7,
+        "remotion": { "mass": 1, "stiffness": 120, "damping": 14 },
+        "gsap_springEase": { "response": 0.45, "dampingFraction": 0.65 },
+        "swiftui": ".bouncy (~bounce 0.3)",
+        "use": "ONLY explicitly playful brand/beat"
+      },
+      "remotion_default_WARNING": {
+        "remotion": { "mass": 1, "stiffness": 100, "damping": 10 },
+        "zeta": 0.5, "overshoot_pct": 16,
+        "use": "Do not use unmodified for tech/brand work"
+      }
+    },
+    "rules": [
+      "Overshooting springs only on transforms; split opacity into its own power2.out tween",
+      "Never overshoot numbers, data marks, logos, grid-aligned elements",
+      "Prefer closed-form (seek-safe) springs in deterministic renders"
+    ],
+    "confidence": "remotion defaults official; derived values computed; presets repo/practice"
+  },
+
+  "stagger": {
+    "per_letter":      { "range": [20, 40], "default": 30, "max_chars": 15 },
+    "per_word": {
+      "urgent_hook": 40,
+      "conversational_default": 80,
+      "documentary": 150,
+      "ceremonial": 250,
+      "caption_cinematic": [200, 220]
+    },
+    "per_line":        { "range": [80, 150], "default": 100 },
+    "list_or_cards":   { "range": [40, 80], "default": 60, "formula": "min(60, 500 / item_count)" },
+    "child_after_parent_follow_through": { "range": [60, 120], "default": 80 },
+    "svg_segments_start_at_pct_of_previous": [0.7, 0.8],
+    "group_total_max_ms": 500,
+    "max_items_before_switching_to_wipe": 9,
+    "order": "by importance / reading order, not DOM order",
+    "overlap": "next starts before previous settles (waterfall: 1-2 frames overlap)",
+    "confidence": "repo (most), practice (per_line, child_after_parent)"
+  },
+
+  "distance": {
+    "micro": [4, 8],
+    "small": [16, 24],
+    "medium": [40, 60],
+    "large": [80, 150],
+    "scene_partial_push": 230,
+    "productive_range": [16, 40],
+    "expressive_range": [60, 200],
+    "scale_from": { "subtle_settle": [1.06, 1.1], "standard_pop": [0.8, 0.9], "icon_pop": 0, "slam": [1.4, 2.0], "zoom_through_exit_to": 1.2, "zoom_through_enter_from": 0.75 },
+    "blur_px": { "text_max_at_cut": 10, "fullframe_at_cut": [18, 20], "blur_in_text": [8, 14], "dof_background": [4, 12] },
+    "rule": "longer distance or bigger element => longer duration",
+    "confidence": "repo + practice"
+  },
+
+  "hold": {
+    "text_formula": "max(1500, 800 + 350 * words, chars / 15 * 1000) ms",
+    "text_formula_technical_multiplier": 1.2,
+    "text_min_ms": 1500,
+    "text_examples_ms": { "2_words": 1500, "5_words": 2550, "8_words": 3600, "12_words": 5000 },
+    "with_voiceover": "appear on spoken word (±100 ms), stay until phrase end + 400-600 ms",
+    "after_camera_zoom_ms": { "min": 1000, "ideal": [1500, 2000] },
+    "after_count_up_ms": { "min": 1000 },
+    "chart_read_ms": { "min": 800, "with_message": [1500, 3000] },
+    "final_lockup_ms": [1000, 2000],
+    "intermediate_sequence_entry_ms": [500, 1000],
+    "scene_with_one_idea_min_ms": [2000, 3000],
+    "rhythm_hit_no_reading_ms": [500, 1000],
+    "scene_structure_pct": { "build": [0, 30], "breathe": [30, 70], "resolve": [70, 100] },
+    "director_test": "read the on-screen text aloud twice at normal pace during playback",
+    "confidence": "repo (zoom/count/lockup/structure), practice (formula)"
+  },
+
+  "reading": {
+    "narration_words_per_second": 2.5,
+    "narration_wpm": 150,
+    "tts_wpm": [145, 155],
+    "subtitle_bbc_wpm": [160, 180],
+    "subtitle_cps": { "es_adult": 17, "es_children": 13, "en_adult": 20 },
+    "onscreen_min_dwell_cps": 13,
+    "onscreen_words_per_second_rule": "1 s per 2-3 words",
+    "max_words_per_line": 7,
+    "max_lines_onscreen_text": 3,
+    "ideas_per_screen": 1,
+    "spanish_length_factor_vs_english": 1.1,
+    "confidence": "repo (narration), secondary (BBC, Netflix es, legibility.info, Biteable), practice (en_adult, limits)"
+  },
+
+  "captions": {
+    "max_chars_per_line": { "landscape": 42, "broadcast_bbc": 37, "vertical_9x16": [25, 32] },
+    "max_lines": { "landscape": 2, "vertical": 3 },
+    "min_duration_ms": 833,
+    "max_duration_ms": 7000,
+    "min_gap_frames": 2,
+    "cap_height_pct_of_frame_height": [3.5, 5],
+    "font_size_px": { "1920x1080": [40, 55], "1080x1920": [65, 95] },
+    "per_word_min_visible_ms": 400,
+    "segment_on_pause_ms": 250,
+    "contrast_min_ratio": 4.5,
+    "animate_only": ["translateY", "scale", "opacity", "clip-path"],
+    "never_animate": ["letter-spacing", "filter: blur", "font-weight"],
+    "accent_colors_max": 1,
+    "confidence": "secondary (Netflix/BBC), repo (sizes, animation), practice (gap, vertical)"
+  },
+
+  "typography_px": {
+    "1920x1080_fullscreen": { "hero_display": [120, 240], "headline": [64, 120], "headline_min": 60, "subhead": [40, 56], "body": [28, 42], "body_min": 24, "label_data": [18, 24], "label_min": 18, "code_mono": [28, 40], "code_max_visible_lines": 15 },
+    "1080w_in_feed": { "headline_min": 90, "body_min": 32, "label_min": 24 },
+    "1080x1920_vertical": { "headline": [90, 140], "body": [44, 60], "captions": [65, 95] },
+    "scale_factor": { "720p": 0.667, "1080p": 1, "4k": 2 },
+    "display_tracking_em": [-0.05, -0.02],
+    "weight_contrast": "300 vs 900 (not 400 vs 700)",
+    "numbers": "font-variant-numeric: tabular-nums",
+    "hero_width_pct_of_frame": [60, 80],
+    "decorative_opacity_pct": [12, 25],
+    "border_px": [2, 4],
+    "confidence": "repo (most), practice (vertical headline/body)"
+  },
+
+  "safe_areas": {
+    "landscape_16x9_1920x1080": {
+      "action_safe_93pct":       { "inset_px": { "x": 67, "y": 38 },  "box": { "x": [67, 1853], "y": [38, 1042] }, "confidence": "official SMPTE ST 2046-1 / EBU R95" },
+      "title_safe_90pct":        { "inset_px": { "x": 96, "y": 54 },  "box": { "x": [96, 1824], "y": [54, 1026] }, "confidence": "official SMPTE ST 2046-1 / EBU R95" },
+      "legacy_title_safe_80pct": { "inset_px": { "x": 192, "y": 108 }, "box": { "x": [192, 1728], "y": [108, 972] }, "confidence": "repo (Premiere/HyperFrames Studio defaults)" },
+      "youtube_extra": { "avoid_bottom_px": [110, 130], "end_screen_last_seconds": [5, 20], "confidence": "practice" }
+    },
+    "landscape_16x9_3840x2160": {
+      "title_safe_90pct": { "inset_px": { "x": 192, "y": 108 } },
+      "action_safe_93pct": { "inset_px": { "x": 134, "y": 76 } }
+    },
+    "vertical_9x16_1080x1920": {
+      "meta_reels_stories_ads": { "top_px": 269, "bottom_px": 672, "left_px": 65, "right_px": 65, "pct": { "top": 14, "bottom": 35, "sides": 6 }, "bottom_with_disclaimer_pct": 40, "confidence": "secondary" },
+      "tiktok_approx": { "top_px": [108, 160], "bottom_px": [320, 480], "right_px": [120, 140], "left_px": 60, "confidence": "secondary (sources disagree)" },
+      "youtube_shorts_approx": { "top_px": [120, 250], "bottom_px": [300, 390], "right_px": 120, "left_px": 60, "confidence": "secondary" },
+      "universal_conservative": { "top_px": 270, "bottom_px": 672, "left_px": 65, "right_px": 150, "content_box": { "x": [65, 930], "y": [270, 1248] }, "confidence": "practice (worst case per edge)" },
+      "universal_organic": { "top_px": 250, "bottom_px": 500, "left_px": 60, "right_px": 150, "confidence": "secondary synthesis" },
+      "captions_y_band": [1050, 1250],
+      "note": "Platform UIs change several times a year; verify with current overlay templates before delivery"
+    },
+    "square_1x1_1080x1080": { "side_margin_px": [54, 65], "bottom_reserve_pct": [10, 12], "confidence": "practice" },
+    "portrait_4x5_1080x1350": { "side_margin_px": [54, 65], "bottom_reserve_pct": [10, 12], "confidence": "practice" }
+  },
+
+  "grid": {
+    "1920x1080": { "columns": 12, "margin_px": 96, "gutter_px": 24, "column_px": 122, "baseline_px": 8, "thirds_x": [640, 1280], "thirds_y": [360, 720] },
+    "1080x1920": { "columns": [4, 6], "margin_px": 65 },
+    "1080x1080": { "columns": 6, "margin_px": [54, 65] },
+    "content_padding_min_px": 80,
+    "confidence": "practice (grid), repo (padding)"
+  },
+
+  "color_and_effects": {
+    "accent_colors_max": 1,
+    "avoid_pure": ["#000000", "#FFFFFF"],
+    "glow_peak_opacity": { "subtle": 0.15, "default": 0.30, "hard_ceiling": 0.45 },
+    "ambient_glow_breathe_period_ms": [2500, 4000],
+    "dim_non_focus_opacity": [0.3, 0.4],
+    "grain_for_dither_pct": [1, 2],
+    "no_fullscreen_linear_gradients_on_dark": true,
+    "particles_max_per_event": 40,
+    "text_contrast_min": 4.5,
+    "text_contrast_target_small_video": 7,
+    "motion_blur": { "standard_shutter_deg": 180, "heavy_smear_deg": [360, 720], "only_on": "fast moves (slam, whip, spin, scale punch); 1-3 per piece; never on text being read" },
+    "confidence": "repo (glow, gradients, particles, blur usage), official (4.5:1), practice (rest)"
+  },
+
+  "ambient": {
+    "scale_amplitude": [0.008, 0.015],
+    "y_amplitude_px": [2, 3],
+    "period_ms": [1500, 3000],
+    "concurrent_elements_rule": "amplitude <= default / sqrt(N); stagger periods (e.g. 2.1/1.9/2.4 s)",
+    "doctrine": "prefer stillness; subtle jitter is the only sanctioned aliveness in holds; no lazy breathing; no slow pan/push in back half",
+    "confidence": "repo"
+  },
+
+  "camera": {
+    "zoom_factor": { "context": [1.3, 1.6], "typical": [1.6, 2.0], "detail_max": 3.0 },
+    "zoom_duration_ms": [1000, 2000],
+    "zoom_start_after_layout_ms": [500, 1500],
+    "dwell_after_zoom_ms": [1000, 2000],
+    "target_max_pct_of_frame": 88,
+    "min_between_zoom_changes_ms": [2000, 3000],
+    "raster_source_resolution": ">= rendered size * zoom factor",
+    "perspective_px": [1000, 1500],
+    "parallax_background_speed_ratio": [0.2, 0.5],
+    "confidence": "repo (zoom), practice (rest)"
+  },
+
+  "screen_recording": {
+    "record_fps": 60,
+    "record_scale": 2,
+    "cursor_scale": [1.5, 2.0],
+    "cursor_arrive_before_click_ms": [200, 400],
+    "click_compress_scale": [0.9, 0.95],
+    "click_ripple_ms": [300, 500],
+    "window_padding_pct_of_frame": [5, 8],
+    "dead_time_speedup": [2, 4],
+    "confidence": "practice + repo (ripple, compress)"
+  },
+
+  "transitions": {
+    "system_rule": "1 primary (60-70% of scene changes) + 1-2 accents; never a different transition per scene",
+    "meaning": {
+      "hard_cut": "energy continuity / wake up",
+      "crossfade": "this continues / time passes",
+      "push": "next in sequence",
+      "zoom_through": "going deeper / state change",
+      "inverse_zoom_through": "arriving / payoff",
+      "morph": "same thing, transformed",
+      "match_cut": "this connects to that",
+      "whip_pan": "energy / lateral move in continuous space",
+      "dip_to_black": "end of chapter"
+    },
+    "presets_ms": {
+      "hard_cut": 0,
+      "crossfade": [300, 800],
+      "blur_crossfade": [500, 800],
+      "dip_to_color": [500, 1000],
+      "push": [300, 500],
+      "wipe": [300, 600],
+      "morph": [400, 800],
+      "zoom_through": { "exit": 200, "exit_ease": "power3.in", "enter": 500, "enter_ease": "expo.out" },
+      "whip_pan": { "exit": 300, "exit_ease": "power3.in", "enter": 300, "enter_ease": "power3.out", "distance_px": 400, "blur_px": 24 },
+      "cut_the_curve": { "exit": [200, 400], "enter_gte_exit": true, "distance_px": 230, "eases": "power4.in -> power4.out" },
+      "mask_shape": [400, 800]
+    },
+    "velocity_match_tolerance_pct": 5,
+    "transition_is_the_exit": true,
+    "confidence": "repo"
+  },
+
+  "audio": {
+    "frames_per_beat_formula": "fps * 60 / BPM",
+    "frames_per_beat_at_30fps": { "90": 20, "100": 18, "120": 15, "150": 12 },
+    "tempo_bpm": { "explainer_corporate": [90, 115], "launch_hype": [120, 140], "premium_calm": [70, 90] },
+    "cut_offset_frames": { "range": [-2, 0], "note": "cut on beat or 1-2 frames before; never after" },
+    "av_sync_detectability_ms": { "audio_lead": 45, "audio_lag": 125, "source": "ITU-R BT.1359 (practice, unverified here)" },
+    "sfx": {
+      "whoosh_ms": [300, 800], "whoosh_sync": "peak at max velocity / cut",
+      "hit_sync": "landing frame",
+      "ui_click_ms": [20, 80], "ui_click_sync": "contact frame (min scale)",
+      "riser_bars": [1, 4],
+      "max_accent_density": "1 per 1-2 s"
+    },
+    "music_under_vo_db": [-20, -12],
+    "loudness": { "web_youtube_lufs": -14, "broadcast_ebu_r128_lufs": -23, "atsc_a85_lkfs": -24, "true_peak_dbtp_max": -1 },
+    "audio_reactive_text_scale_pct": [3, 6],
+    "audio_reactive_shapes_scale_pct": [10, 30],
+    "beat_source_of_truth": "single BEATS[] array",
+    "confidence": "repo (beats array, audio-reactive), practice (rest)"
+  },
+
+  "data_viz": {
+    "bars_from_zero": true,
+    "bar_transform_origin": "bottom",
+    "constant_scale_across_comparable_scenes": true,
+    "area_encoding": "scale radius by sqrt(value)",
+    "count_up": { "duration_ms": [1200, 2500], "rounding": "Math.round", "overshoot": false, "suffix": "after count lands", "label": "before count peaks" },
+    "staged_transition_ms": 1000,
+    "highlight": { "accent_on_key": true, "others_opacity": [0.3, 0.4] },
+    "scrub_points": [10, 40],
+    "scrub_duration_ms": [1500, 3000],
+    "max_metrics_per_screen": 3,
+    "avoid": ["pie charts", "dual axis", "3D charts", "6+ panel dashboards", "gridlines/legends unless magnitude is the message"],
+    "final_hold_ms": [1500, 3000],
+    "confidence": "official (staging, Heer & Robertson), repo (count, avoid), practice (sqrt, hold)"
+  },
+
+  "accessibility": {
+    "max_flashes_per_second": 3,
+    "team_target_max_flashes_per_second": 2,
+    "general_flash_luminance_change_pct": 10,
+    "darker_image_relative_luminance_below": 0.8,
+    "red_flash": "avoid any flashing saturated red",
+    "flash_area_limit": "25% of any 10-degree visual field (0.006 sr) ~ 341x256 px block on 1024x768 reference",
+    "flash_area_rule_of_thumb_1080p": "any flash larger than ~240x240 px (~2.8% of frame) counts",
+    "reduced_motion_map": {
+      "translate_scale_zoom": "crossfade 150-250 ms",
+      "parallax": "off",
+      "camera_moves": "off (cut instead)",
+      "ambient_loops": "off",
+      "holds": "keep"
+    },
+    "video_safe_limits": {
+      "zoom_through_or_camera_zoom": "<= 1 per 5 s, <= 2x",
+      "fullframe_rotation_deg_max": 15,
+      "parallax_bg_shift_pct_of_width_max": 5,
+      "screen_shake": "<= 3 oscillations of <= 10 px"
+    },
+    "captions_required": true,
+    "confidence": "official (WCAG 2.3.1/2.3.2/2.3.3/2.2.2/1.2.2/1.4.3), practice (team targets, video limits, 1080p derivation)"
+  },
+
+  "personality_presets": {
+    "productive": {
+      "duration_multiplier": 0.8,
+      "ease_enter": "cubic-bezier(0, 0, 0.38, 0.9)",
+      "ease_exit": "cubic-bezier(0.2, 0, 1, 0.9)",
+      "ease_standard": "cubic-bezier(0.2, 0, 0.38, 0.9)",
+      "spring": "settle",
+      "distance_px": [16, 40],
+      "stagger_ms": [40, 60],
+      "transitions": ["hard_cut", "cut_the_curve", "push", "crossfade"],
+      "ambient": "stillness or minimal jitter",
+      "share_of_runtime_pct": [70, 80],
+      "source": "Carbon productive"
+    },
+    "expressive": {
+      "duration_multiplier": 1.25,
+      "ease_enter": "cubic-bezier(0.05, 0.7, 0.1, 1)",
+      "ease_exit": "cubic-bezier(0.3, 0, 0.8, 0.15)",
+      "ease_standard": "cubic-bezier(0.4, 0.14, 0.3, 1)",
+      "spring": "alive (non-data elements only)",
+      "distance_px": [60, 200],
+      "stagger_ms": [80, 150],
+      "transitions": ["zoom_through", "mask_shape", "match_cut", "morph"],
+      "ambient": "one bounded glow or drift",
+      "share_of_runtime_pct": [20, 30],
+      "source": "Carbon expressive + M3 emphasized"
+    }
+  },
+
+  "review_blockers": [
+    "text hold below formula / fails read-twice test",
+    "text moving while it must be read",
+    "overshoot on data, opacity, or logos (or bouncy default)",
+    "content outside platform safe area",
+    "dishonest data (non-zero bar baseline, silent rescale, inexact count)",
+    "WCAG 2.3.1 flash violation, saturated red flashes, captions over 17 cps (es)"
+  ]
+}

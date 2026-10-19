@@ -1,0 +1,65 @@
+<!doctype html>
+<!--
+  bm-block: end-card
+  Uso: cierre con UN llamado a la acción + dónde ir. Un solo CTA (no tres).
+  Duración sugerida: 4-6 s (en YouTube, 5-20 s si vas a usar pantallas finales nativas: dejá zona libre).
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"cta","type":"string","label":"CTA (líneas con |, acento con *)","default":"Bajá el kit y|*probalo* con tu marca","maxLength":90},
+    {"id":"link","type":"string","label":"Link / handle","default":"tumarca.com/kit","maxLength":60},
+    {"id":"note","type":"string","label":"Nota legal / disclosure (opcional)","default":"","maxLength":120},
+    {"id":"exit","type":"enum","label":"Salida","default":"none","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":5,"min":1,"max":30,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>end-card</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; }
+        #root .ec { display: flex; flex-direction: column; justify-content: center; gap: 4cqmin; }
+        #root .ec-logo { height: 6cqmin; }
+        #root .ec-logo svg { height: 100%; width: auto; display: block; }
+        #root .ec-chip { align-self: flex-start; font-size: var(--fs-body); padding: 1.4cqmin 3cqmin; background: var(--c-primary); color: var(--c-on-primary); font-weight: 600; }
+        #root .ec-note { position: absolute; left: 0; right: 0; bottom: 0; }
+      </style>
+      <div id="root" data-composition-id="__ID__">
+        <div class="bm-frame">
+          <div class="bm-bg grid glow"></div>
+          <div class="bm-safe ec">
+            <div class="ec-logo bm-logo"></div>
+            <h2 class="bm-h1 ec-cta"></h2>
+            <div class="bm-chip ec-chip"></div>
+            <div class="bm-label ec-note"></div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ cta: "", link: "", note: "", exit: "none", dur: 5 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          var logo = q(".ec-logo");
+          logo.innerHTML = BRAND.logo.svgPrimary || BRAND.logo.svgMark || "";
+          var lines = BM.lines(q(".ec-cta"), v.cta);
+          q(".ec-chip").textContent = v.link;
+          var note = q(".ec-note");
+          if (v.note) note.textContent = v.note; else note.remove();
+          var tl = gsap.timeline({ paused: true });
+          BM.fadeUp(tl, logo, 0.1, { yPercent: 30 });
+          BM.revealLines(tl, lines, 0.3);
+          var after = 0.3 + BRAND.dur("enter") + (lines.length - 1) * BRAND.stagger("lines");
+          tl.fromTo(q(".ec-chip"), { opacity: 0, scale: 0.92, transformOrigin: "0% 50%" }, { opacity: 1, scale: 1, duration: BRAND.dur("enter"), ease: BRAND.ease("enter") }, after);
+          if (note.isConnected) tl.fromTo(note, { opacity: 0 }, { opacity: 1, duration: BRAND.dur("short") }, after + 0.4);
+          BM.exit(tl, q(".ec"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
+          window.__timelines["__ID__"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>
