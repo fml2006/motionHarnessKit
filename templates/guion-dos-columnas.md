@@ -3,6 +3,19 @@
 > Gate **G3**. Dueño: Guionista · Aprueba: Director creativo + SME (exactitud) + Legal (si hay comparativos) · Sign-off: Cliente.
 > Archivo: `01_guion.md` (lo copia `npm run new`). Al firmar, la narración bloqueada queda en la sección **"VO limpia"** al final (formato SCRIPT de HyperFrames, abajo), que es lo que recibe el locutor o el TTS.
 
+## Treatment (gate G2: se aprueba antes de escribir el guion)
+Una página. El director creativo elige un hook y una dirección; recién ahí se escribe la tabla de abajo.
+- **Mensaje único** (del brief, una oración):
+- **Hooks candidatos** (2–3, cada uno en ≤ 12 palabras):
+  1.
+  2.
+  3.
+- **Estructura** (Hook → Problema → Solución → Prueba → CTA u otra de la guía) y beats con % de duración:
+- **Tono y referencias** (2–3 links o stills, con qué tomar de cada uno):
+- **Bloques previstos** (de `engine/blocks/README.md`) y momentos héroe (el 10–20 % que se pule a mano):
+- **Claims que va a necesitar** (IDs de `research/claims.csv`; si falta alguno, se pide antes de seguir):
+- **Aprobado G2:** ___ (director creativo) · fecha ___ · hook elegido: ___
+
 ## Cabecera
 | Campo | Valor |
 |---|---|

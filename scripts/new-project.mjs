@@ -88,6 +88,7 @@ const copies = [
   ["legal-checklist.md", "qa/legal-checklist.md"],
   ["delivery-checklist.md", "delivery/delivery-checklist.md"],
   ["provenance.yaml.md", "PROVENANCE.md"],
+  ["claims.csv", "research/claims.csv"],
 ];
 copies.push(["horas.csv", "review/HORAS.csv"]);
 for (const [src, dst] of copies) if (existsSync(join(T, src))) copyFileSync(join(T, src), join(dir, dst));
@@ -135,10 +136,10 @@ Horas reales por rol y gate: \`review/HORAS.csv\` (se cargan a medida que se tra
 - [ ] G7b Gate de contenido: \`npm run build:roots -- ${date}_${slug} --strict\` sin errores (placeholders, claims, tokens)
 - [ ] G8 Revisión R1 / R2 → \`review/R*.md\` + \`review/CHANGELOG.md\`
 - [ ] G9 Picture lock
-- [ ] G10 Mezcla a −14 LUFS / −1 dBTP (npm run loudnorm)
-- [ ] G11 Captions revisados por humano
-- [ ] G12-G13 Master + versiones (scripts/master.sh)
-- [ ] G14 QA final + checklist legal → \`qa/\`
+- [ ] G10 Mezcla aprobada por una persona (pistas en scenes.json → audio); deliver la normaliza al objetivo de cada plataforma
+- [ ] G11 Captions revisados por humano → \`captions.srt\` (se queman en portrait/feed)
+- [ ] G12-G13 Master + versiones: \`npm run deliver -- ${date}_${slug} --platform youtube,reels\` (ARCHIVE ProRes 422 HQ + DELIVERY H.264, re-medición de loudness)
+- [ ] G14 QA final por plataforma (deliver lo corre; 0 FAIL) + checklist legal → \`qa/\`
 - [ ] G15 Entrega + archivo (tag de versión del proyecto)
 
 ## Comandos
@@ -147,7 +148,8 @@ Horas reales por rol y gate: \`review/HORAS.csv\` (se cargan a medida que se tra
 npm run build:roots -- ${date}_${slug}     # scenes.json → comp/ + formats/
 npm run frames -- ${date}_${slug}          # un frame clave por escena (styleframes / review)
 npm run render -- ${date}_${slug} --quality draft   # animatic / revisión
-npm run render -- ${date}_${slug} --quality high    # final
+npm run render -- ${date}_${slug} --quality high    # final con gate estricto (tras el picture lock)
+npm run deliver -- ${date}_${slug} --platform youtube,reels   # master + entregables + QA por plataforma
 npm run qa -- ${date}_${slug}
 cd projects/${date}_${slug}/comp && npx hyperframes preview   # Studio para ajustes finos
 \`\`\`
