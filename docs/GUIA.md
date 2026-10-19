@@ -1,6 +1,6 @@
 # Motion graphics con IA: guía de uso para el equipo de video
 
-> Versión Markdown de la guía publicada (documento editable con comentarios en Claude Docs). Generada el 2026-10-19, después de la revisión adversarial (ver `docs/VERIFICACION.md`).
+> Versión Markdown de la guía publicada (documento editable con comentarios en Claude Docs). Generada el 2026-10-19 para el kit v1.2 (multimarca + orquestador `/pieza`). Para arrancar: `docs/EMPEZAR.md`. Verificación: `docs/VERIFICACION.md`.
 
 Oct 19, 2026 · @Facundo Lemos
 
@@ -84,7 +84,7 @@ La IA ejecuta bien un gusto que alguien sabe articular con números; no lo inven
 11. **≤ 3 destellos por segundo** (WCAG 2.3.1) y nunca rojo saturado parpadeando.
 12. **Mejor quieto que mal movido:** nada de "respiración" en loop ni paneos de relleno.
 
-**Tokens de motion por defecto del kit** (Material 3, Carbon y las reglas de HyperFrames; se cambian en `brand/brand.config.json`):
+**Tokens de motion por defecto del kit** (Material 3, Carbon y las reglas de HyperFrames; cada marca los ajusta en `brands/<marca>/brand.config.json`):
 
 | Uso | Duración | Curva (cubic-bezier) | Equivale a |
 | --- | --- | --- | --- |
@@ -229,7 +229,7 @@ El motion se vende con el sonido y se pierde en la entrega: estas son las especi
 
 Los videos del kit y la descarga del zip están en su página: [Motion Harness Kit](https://claude.ai/artifact/VcYVRMMxVjBTFVnXXzKmAv).
 
-![Los 13 bloques de marca del kit en 16:9, con los datos de demostración rotulados como ficticios](img/galeria-bloques-16x9.jpg)
+![Los 13 bloques de marca del kit en 16:9 con la marca por defecto, con los datos de demostración rotulados como ficticios](img/galeria-bloques-16x9.jpg)
 
 ![Los mismos bloques adaptados automáticamente a 9:16, dentro de la safe zone de Reels, TikTok y Shorts](img/galeria-bloques-9x16.jpg)
 
@@ -237,24 +237,25 @@ Los videos del kit y la descarga del zip están en su página: [Motion Harness K
 
 | Pieza | Qué hace | Dónde |
 | --- | --- | --- |
-| Sistema de marca | Un JSON genera tokens CSS/JS, `frame.md` para HyperFrames, `MOTION.md` y `brand.md` compatibles con el pack del video, theme de Remotion, brand board y reporte de contraste (27 pares) | `brand/brand.config.json` → `npm run brand` |
-| 13 bloques de marca | Título, afirmación cinética, dato con conteo, código, terminal, barras, pasos, comparación, cita, lower third, capítulo, logo y cierre. Parametrizables, en 4 formatos, con placeholders visibles (⟦COMPLETAR⟧) en vez de datos de ejemplo creíbles | `engine/blocks/` (catálogo generado) |
-| Proyecto por pieza | Preproducción numerada, registro de claims, horas por rol y gate, `scenes.json` con la marca fijada (brandLock), composición maestra y variantes por formato | `npm run new -- <slug> --type explainer` |
+| Estudio de marcas | Una carpeta por marca: su JSON genera tokens CSS/JS, `frame.md` para HyperFrames, `MOTION.md` y `brand.md`, theme de Remotion, brand board y reporte de contraste. Cada marca suma su *look*, su `LOOK.md` y sus bloques firma | `brands/<marca>/` → `npm run brand` |
+| 13 bloques de marca | Título, afirmación cinética, dato con conteo, código, terminal, barras, pasos, comparación, cita, lower third, capítulo, logo y cierre. Parametrizables, en 4 formatos, con placeholders visibles (⟦COMPLETAR⟧) en vez de datos de ejemplo creíbles, y que cambian de composición según el look de la marca | `engine/blocks/` (catálogo generado) |
+| Orquestador | `/pieza` lleva la pieza de punta a punta con los subagentes de cada rol y una aprobación humana por checkpoint; el estado queda en `pipeline.json` | `.claude/skills/pieza/`, `npm run pipeline` |
+| Proyecto por pieza | Preproducción numerada, registro de claims, horas por rol y gate, `scenes.json` con la marca fijada (brandLock), composición maestra y variantes por formato | `npm run new -- <slug> --brand <marca>` |
 | Gates automáticos | Build estricto (placeholders, cifras sin claim firmado, valores fuera de marca), lint y check por código de salida, QA que corta el render si da FAIL | `build:roots --strict`, `render`, `deliver` |
-| Skills | `/marca`, `/brief`, `/guion`, `/storyboard`, `/producir`, `/revisar`, `/entregar`, más 12 skills de HyperFrames fijadas a un commit (las 5 de workflow propio solo corren si una persona las pide) | `.claude/skills/` |
+| Skills de fase | `/marca`, `/brief`, `/guion`, `/storyboard`, `/producir`, `/revisar`, `/entregar` (las recetas que encadena `/pieza`), más 12 skills de HyperFrames fijadas a un commit (las 5 de workflow propio solo corren si una persona las pide) | `.claude/skills/` |
 | Subagentes por rol | Productor, investigador, guionista, director de arte, storyboarder, motion designer, editor y sonido, QA | `.claude/agents/` |
 | Reglas y permisos | `CLAUDE.md` de la casa, hook que valida cada edición, comandos de nube, publicación y telemetría denegados en sus distintas formas de invocación (una mitigación: el control fuerte son las managed settings y el egress) | `CLAUDE.md`, `.claude/settings.json` |
 | Entrega y QA | Master ProRes 422 HQ y entregable H.264, loudness normalizado y re-medido, specs por plataforma (incluye 4:5, eventos y broadcast), negros, congelados, fotosensibilidad, contact sheets y un autotest de la cadena | `npm run deliver`, `qa`, `selftest`, `doctor` |
 | Plantillas | Brief con confidencialidad, treatment y guion a dos columnas, storyboard ejecutable, review, anti-slop, QA, legal, entrega, naming, RACI, procedencia, claims y horas | `templates/` |
-| Ejemplo resuelto | Un explainer de 46 s con brief, claims, guion, storyboard, 4 versiones y su changelog. No publicable a propósito: sus claims no tienen la firma del SME y el build estricto lo frena | `projects/2026-10-19_ejemplo-servidor-mcp/` |
+| Ejemplo resuelto | Un explainer de 46 s con brief, claims, guion, storyboard, varias versiones y su changelog. No publicable a propósito: sus claims no tienen la firma del SME y el build estricto lo frena | `projects/2026-10-19_ejemplo-servidor-mcp/` |
 
 **Setear tu marca en 5 pasos**
 
 1. Prerrequisitos: Node 22 o superior, ffmpeg, git y Claude Code. Docker es opcional (`--docker` da renders idénticos entre máquinas).
 2. `npm install`, `npm run setup` (apaga la telemetría de HyperFrames y descarga el Chrome fijado), `npm run doctor` y `npm run selftest` (prueba la cadena de audio y master de punta a punta).
-3. En Claude Code, `/marca`: una entrevista en dos tandas que pide hex reales, fuentes con licencia para video, el logo en SVG (con `data-part="mark"` y `data-part="wordmark"` si se quiere animar por partes) y 3–5 referencias en `brand/references/`. También se puede editar `brand/brand.config.json` a mano, con autocompletado.
-4. `npm run brand`: valida, genera todo y reporta contraste. Después, `npm run frames -- _galeria-bloques` (y `--format portrait` o `--format feed`) muestra los 13 bloques con tu marca.
-5. Los proyectos existentes quedan protegidos: cada `scenes.json` guarda la marca con la que se hizo (brandLock) y el build se frena si cambió. Para pasar una pieza a la marca nueva, `npm run build:roots -- <proyecto> --rebrand` (queda en su changelog). Para clientes con marcas distintas, un repo o una rama por marca.
+3. En Claude Code, `/marca`: crea o edita una marca en `brands/<marca>/` con una entrevista en dos tandas que pide hex reales, fuentes con licencia para video, el logo en SVG (con `data-part="mark"` y `data-part="wordmark"` si se quiere animar por partes), 3–5 referencias, el *look* y los bloques firma, y escribe su `LOOK.md`.
+4. `npm run brand -- <marca>`: valida, genera todo y reporta contraste. Después, `npm run brand:compare -- _galeria-bloques --brands <marca>,<otra>` muestra los 13 bloques con tu marca al lado de las demás.
+5. Los proyectos existentes quedan protegidos: cada `scenes.json` guarda la marca con la que se hizo (brandLock) y el build se frena si cambió. Para pasar una pieza a la versión nueva de su marca, o a otra marca, `npm run build:roots -- <proyecto> [--brand <otra>] --rebrand` (queda en su changelog).
 
 La prueba de que la marca es realmente un parámetro: la misma pieza, sin tocar una escena, con dos archivos de marca distintos.
 
@@ -266,21 +267,52 @@ La prueba de que la marca es realmente un parámetro: la misma pieza, sin tocar 
 
 | Paso | Lo hace | Cómo |
 | --- | --- | --- |
-| Crear la pieza | Productor | `npm run new -- lanzamiento-api --type launch --formats landscape,portrait` |
-| Brief, claims y guion | Claude redacta; productor, SME y director creativo aprueban | `/brief` y `/guion` en Claude Code |
-| Storyboard y styleframes | Claude arma `scenes.json`; el director aprueba los frames | `/storyboard`, `npm run frames -- <p>` |
-| Animatic y revisión | Claude renderiza y se autocritica; el equipo revisa | `npm run render -- <p> --quality draft`, `/revisar` |
-| Picture lock y mezcla | Director creativo y sonido (personas) | Aprobar la versión; pistas de audio en `scenes.json` |
-| Entrega | Claude corre la cadena; QA y Legal firman | `npm run deliver -- <p> --platform youtube,reels`, `/entregar` |
+| Arrancar la pieza | Productor | `/pieza nueva "Explainer de 60 s sobre la API de pagos" --marca <marca>` en Claude Code |
+| Brief, claims y guion | El orquestador delega en `productor`, `investigador` y `guionista`; productor, SME y director creativo aprueban | Checkpoints `brief` y `guion` |
+| Storyboard y styleframes | `storyboarder` arma `scenes.json`; se generan frames reales; el director aprueba | Checkpoint `storyboard` |
+| Animatic y revisión | Varios `motion-designer` en paralelo y `qa-director`; el equipo revisa | Checkpoints `animatic` y `revision` |
+| Lock y mezcla | Director creativo y sonido (personas) | Checkpoint `lock`; pistas de audio en `scenes.json` |
+| Entrega | El orquestador corre `npm run deliver`; QA y Legal firman | Checkpoint `entrega` |
+| Retomar otro día | Cualquiera del equipo | `/pieza continuar <proyecto>` o `/pieza estado` |
 | Publicar | Una persona, fuera del agente | — |
 
-**El ejemplo resuelto.** Un explainer de 46 s, "Qué es un servidor MCP", con brief, registro de claims con fuente, guion a dos columnas, storyboard y renders en 16:9 y 9:16. Muestra el loop de revisión: sobre v001 la dirección detectó frames vacíos entre escenas (salidas animadas antes de cada corte) y v002 lo corrigió cambiando una regla del sistema, no una escena; v003 ajustó la ventana de código para marcas claras; v004 se renderizó con el kit corregido. También muestra lo que no cubre: los holds largos que marca el QA se aceptaron como nota de dirección, no tiene voz, música, master ni captions, y **no es publicable**: dos claims están marcados como dudosos y ninguno tiene la firma del SME, por eso el build estricto lo frena. Todo quedó en `review/CHANGELOG.md`.
+**El ejemplo resuelto.** Un explainer de 46 s, "Qué es un servidor MCP", con brief, registro de claims con fuente, guion a dos columnas, storyboard y renders en 16:9 y 9:16. Muestra el loop de revisión: sobre v001 la dirección detectó frames vacíos entre escenas (salidas animadas antes de cada corte) y v002 lo corrigió cambiando una regla del sistema, no una escena; v003 ajustó la ventana de código para marcas claras; v004 se renderizó con el kit corregido y v005 con el look v1.2 de la marca. También muestra lo que no cubre: los holds largos que marca el QA se aceptaron como nota de dirección, no tiene voz, música, master ni captions, y **no es publicable**: dos claims están marcados como dudosos y ninguno tiene la firma del SME, por eso el build estricto lo frena. Todo quedó en `review/CHANGELOG.md`.
 
-![Frames clave del ejemplo resuelto v004, 16:9](img/ejemplo-mcp-16x9.jpg)
+![Frames clave del ejemplo resuelto v005, 16:9](img/ejemplo-mcp-16x9.jpg)
 
 **Lo que el kit controla y lo que no:** reduce el riesgo de salir fuera de marca (tokens, lint de valores sueltos, 27 pares de contraste) y frena lo detectable: placeholders, cifras sin claim firmado, errores de lint y check, specs y loudness fuera de plataforma. Los chequeos de contenido son heurísticos: buscan patrones, no entienden el texto. No garantiza buen gusto ni exactitud: eso lo siguen poniendo el director creativo y el experto técnico.
 
-**Qué se verificó (19-oct-2026).** `npm run doctor` sin bloqueantes; 27 de 27 pares de contraste en las dos marcas de ejemplo; lint y check sin errores en la galería (4 formatos) y en el ejemplo (64 de 64 chequeos de contraste de `hyperframes check`). Un proyecto nuevo con placeholders frena el build estricto con 7 problemas y, completado con un claim firmado, pasa. La entrega completa de ese proyecto para YouTube y Reels dejó entregables a −14,1 LUFS, masters ProRes 422 HQ con PCM de 24 bit y QA por plataforma en PASS. `npm run selftest` da 12 de 12, y cuatro pruebas negativas (azar sin semilla, placeholder en el render final, video con destellos, entregable mudo para YouTube) cortan con error. **No se verificó:** el render con `--docker`, que Claude Code acepte los comodines de algunas reglas de permisos y una pieza con voz y música reales.
+**Qué se verificó (19-oct-2026).** `npm run doctor` sin bloqueantes; contraste OK en las tres marcas de ejemplo (27 de 27, 27 de 27 y 31 de 31 pares); lint y check sin errores en la galería (43 de 43 chequeos de contraste por formato) y en el ejemplo (66 de 66 y 67 de 67). Un proyecto nuevo con placeholders frena el build estricto con 7 problemas y, completado con un claim firmado, pasa. La entrega completa de ese proyecto para YouTube y Reels dejó entregables a −14,1 LUFS, masters ProRes 422 HQ con PCM de 24 bit y QA por plataforma en PASS. `npm run selftest` da 12 de 12, y las pruebas negativas (azar sin semilla, placeholder en el render final, video con destellos, entregable mudo, bloque firma de otra marca, cambio de marca sin `--rebrand`) cortan con error. La misma pieza demo se renderizó en las tres marcas sin FAIL. El orquestador se negó a aprobar sin nombre, con el chequeo en falla o fuera de orden. **No se verificó:** el render con `--docker`, que Claude Code acepte los comodines de algunas reglas de permisos, una pieza con voz y música reales, y una sesión completa de `/pieza` conducida por personas reales.
+
+## Varias marcas y el orquestador `/pieza`
+
+El kit funciona como un estudio: varias marcas conviven en el mismo repo, cada pieza usa una sola y un orquestador dentro de Claude Code lleva la pieza de punta a punta, llamando al subagente de cada rol y frenando en cada aprobación humana. La versión corta de qué hacer está en `docs/EMPEZAR.md` del kit.
+
+**Cada marca, su propio estilo.** Si dos marcas solo cambian colores y fuentes, sus videos salen "hermanos": los mismos bloques con la misma composición. Por eso cada marca define además un *look* (fondo, alineación, cómo se marca el acento, cómo entra el texto, tarjetas y densidad), un `LOOK.md` con su dirección de arte en prosa y sus propios bloques firma, como su firma de logo o una escena exclusiva. Dentro de una marca todo es consistente porque sale de los mismos tokens; entre marcas, la misma escena cambia de composición y de comportamiento, no solo de color.
+
+![La misma galería de 13 bloques con tres marcas: TuMarca (oscura técnica), Northline (editorial clara) y Pulso (energética para social); el borde amarillo marca los bloques firma](img/compare-marcas.jpg)
+
+| Marca de ejemplo | Look | Bloques firma |
+| --- | --- | --- |
+| TuMarca (placeholder) | Oscura técnica: grilla de ingeniería, todo a la izquierda, titulares que suben por máscara, un acento ámbar por color | Firma de logo "Escaneo" |
+| Northline | Editorial clara: papel con filete, composición centrada, serif con acento en itálica, fundido lento | Firma de logo "Folio" y una escena folio exclusiva |
+| Pulso | Energética para social: gradiente rosa-violeta, titulares en mayúsculas, dato resaltado en lima, texto que sube | Firma de logo "Pop" y una escena de impacto exclusiva |
+
+Una marca nueva se crea con `/marca` (o `npm run brand:new -- <marca>`) y se compara contra las otras con `npm run brand:compare -- _galeria-bloques --brands <a>,<b>`. Cada pieza guarda la marca y la versión con las que se aprobó: si la marca cambia, el re-render se frena hasta pedir `--rebrand`. Las marcas propias pueden compartir repo; las de clientes con confidencialidad estricta van en un repo por cliente.
+
+**El orquestador.** En Claude Code un subagente no puede llamar a otro, así que el orquestador es la sesión principal ejecutando `/pieza`. Crea la pieza con su marca, sigue la receta de cada fase, delega en el subagente del rol (varios en paralelo cuando no se pisan archivos), corre los chequeos automáticos y en cada checkpoint le pregunta a una persona: aprobar, pedir cambios o pausar. Nunca se aprueba solo: cada decisión queda registrada con el nombre de quien la tomó en `projects/<p>/pipeline.json`, que también permite retomar la pieza otro día.
+
+| Checkpoint | Subagentes | Decide la persona |
+| --- | --- | --- |
+| Brief y claims (G0–G1) | `productor`, `investigador` | Mensaje, audiencia, CTA; el SME firma las cifras |
+| Guion (G2–G3) | `guionista` | El hook y el guion |
+| Storyboard (G4–G5) | `storyboarder`, `director-de-arte` | El look, sobre frames reales de cada formato |
+| Animatic (G6–G7) | `motion-designer` en paralelo, uno por escena; `qa-director` | Timing y ritmo |
+| Revisión (G8, repetible) | `qa-director`, `motion-designer` | Si está lista o qué cambiar |
+| Lock (G9) | — (corre el gate estricto) | Congelar la imagen |
+| Entrega (G10–G15) | `editor-sonido`, `qa-director` | Firmas de QA y Legal; publicar |
+
+Comandos: `/pieza nueva "<pedido>" --marca <marca>`, `/pieza continuar <proyecto>` y `/pieza estado`. El modo `express` reduce los checkpoints a 4 para piezas internas o sociales de bajo riesgo. Debajo, `npm run pipeline` lleva el estado (`status`, `check`, `approve`, `reject`, `pause`) y se niega a aprobar si el chequeo automático del checkpoint falla.
 
 ## HyperFrames vs Remotion: cómo elegir el motor
 
@@ -413,8 +445,11 @@ Para que todo el equipo hable el mismo idioma, incluidos quienes no programan.
 | Término | Qué significa |
 | --- | --- |
 | Harness | El andamiaje alrededor del agente: reglas (`CLAUDE.md`), sistema de marca, bloques, permisos, gates y QA. Convierte "un prompt" en un proceso repetible. |
+| Orquestador y checkpoint | `/pieza`: la sesión de Claude Code que encadena las fases y llama a los subagentes. Un checkpoint es cada punto donde frena para que una persona apruebe. |
 | Token de diseño | Un valor de marca con nombre (color, fuente, duración, curva) que el código usa en lugar del número suelto. No confundir con token de modelo. |
 | Token de modelo | La unidad con la que se mide y se cobra el texto que procesa Claude. |
+| Look | La parte de la marca que define composición y comportamiento: fondo, alineación, acento, entrada del texto, tarjetas y densidad. Es lo que hace que dos marcas no se vean iguales. |
+| Bloque firma | Una escena propia de una marca (por ejemplo, su firma de logo) que reemplaza o se suma a los bloques comunes. Otra marca no la puede usar. |
 | Gate (G0–G15) | Punto de aprobación humana entre fases: nada avanza sin la firma del rol indicado. |
 | Styleframe | Un frame fijo terminado que define el look antes de animar. |
 | Animatic | Borrador con el timing real y voz provisoria para aprobar el ritmo. |
@@ -434,7 +469,7 @@ Para que todo el equipo hable el mismo idioma, incluidos quienes no programan.
 | Alpha | Canal de transparencia, para overlays que se montan en el editor. |
 | Faststart, GOP, BT.709 | Ajustes del MP4: índice al inicio para reproducir en streaming, intervalo entre cuadros clave y espacio de color estándar HD. |
 | MCP | *Model Context Protocol*: el estándar con el que Claude se conecta a herramientas externas (Figma, Resolve, Frame.io). |
-| Skill y subagente | Instrucciones empaquetadas que Claude carga para una tarea; un Claude con un rol y permisos acotados. |
+| Skill y subagente | Instrucciones empaquetadas que Claude carga para una tarea; un Claude con un rol y permisos acotados. En Claude Code un subagente no puede llamar a otro: los coordina la sesión principal. |
 | RACI | Matriz de quién hace, quién aprueba, a quién se consulta y a quién se informa en cada gate. |
 | C2PA | Estándar de credenciales de contenido que firma el origen de un archivo. |
 | OSI | *Open Source Initiative*. "No OSI" = una licencia que no es open source estándar y tiene que leer Legal. |

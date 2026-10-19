@@ -12,6 +12,7 @@ Lo que muestran los tutoriales ("pedile a Opus un video y sale un MP4") es real,
 - **Gobernanza (mitigación, no blindaje):** versiones fijadas, telemetría apagada, comandos de nube/publicación/feedback denegados en Claude Code, ledger de procedencia, checklist legal y registro de horas. Los controles de organización que faltan están listados en [Gobernanza](#gobernanza-qué-cubre-el-kit-y-qué-tiene-que-sumar-la-organización).
 
 > La guía completa de uso (de conceptos básicos a operación enterprise) está en `docs/GUIA.md` y en la versión publicada que acompaña este kit.
+> **¿Por dónde empiezo?** `docs/EMPEZAR.md`: qué hacer vos, paso a paso (instalar, crear tus marcas con `/marca`, producir con `/pieza`).
 > Qué se probó, con qué resultado y qué quedó sin probar: `docs/VERIFICACION.md`.
 
 ---

@@ -1,0 +1,83 @@
+{
+  "file": "/home/user/motion-harness-kit/projects/_galeria-bloques/renders/galeria-bloques_portrait_v005.mp4",
+  "platform": "shorts",
+  "mode": "draft",
+  "verdict": "PASS con advertencias",
+  "rows": [
+    {
+      "status": "INFO",
+      "check": "Archivo",
+      "detail": "galeria-bloques_portrait_v005.mp4 · 1080×1920 · 30.00 fps · 78.50 s · 2.7 MB · h264 High/yuv420p · sin audio"
+    },
+    {
+      "status": "INFO",
+      "check": "Modo",
+      "detail": "DRAFT (audio y loudness solo avisan: se normaliza en npm run deliver)"
+    },
+    {
+      "status": "WARN",
+      "check": "Plataforma",
+      "detail": "YouTube Shorts — INFERIDA por aspecto/códec: pasá --platform (Reels, TikTok y Shorts tienen specs distintas)"
+    },
+    {
+      "status": "PASS",
+      "check": "Resolución",
+      "detail": "1080×1920 (esperado 1080×1920)"
+    },
+    {
+      "status": "PASS",
+      "check": "fps",
+      "detail": "30.00 (rango 24–60)"
+    },
+    {
+      "status": "PASS",
+      "check": "Códec de video",
+      "detail": "h264 (esperado h264)"
+    },
+    {
+      "status": "PASS",
+      "check": "Pixel format",
+      "detail": "yuv420p (esperado yuv420p)"
+    },
+    {
+      "status": "PASS",
+      "check": "Color",
+      "detail": "bt709 / bt709 (esperado BT.709)"
+    },
+    {
+      "status": "PASS",
+      "check": "Duración",
+      "detail": "78.5 s ≤ 180 s"
+    },
+    {
+      "status": "PASS",
+      "check": "Fast start (moov al inicio)",
+      "detail": "sí"
+    },
+    {
+      "status": "WARN",
+      "check": "Audio",
+      "detail": "sin pista de audio y YouTube Shorts la requiere (pieza muda a propósito: --allow-silent y registrarlo en el brief)"
+    },
+    {
+      "status": "WARN",
+      "check": "Negros a mitad de pieza",
+      "detail": "70.00–70.53 s"
+    },
+    {
+      "status": "WARN",
+      "check": "Congelados ≥ 4 s",
+      "detail": "4.1 s (5.2 s) — ¿hold intencional o escena muerta?; 21.6 s (4.2 s) — ¿hold intencional o escena muerta?; 33.1 s (5.7 s) — ¿hold intencional o escena muerta?; 50.6 s (7.1 s) — ¿hold intencional o escena muerta?; 59.5 s (5.5 s) — ¿hold intencional o escena muerta?; 65.6 s (4.4 s) — ¿hold intencional o escena muerta?"
+    },
+    {
+      "status": "PASS",
+      "check": "Fotosensibilidad (heurística WCAG 2.3.1)",
+      "detail": "máx 0 destellos/s — heurística de frame completo; para entregas sensibles correr EA IRIS o PEAT"
+    },
+    {
+      "status": "INFO",
+      "check": "Contact sheet",
+      "detail": "/home/user/motion-harness-kit/projects/_galeria-bloques/qa/galeria-bloques_portrait_v005_contact.jpg"
+    }
+  ]
+}

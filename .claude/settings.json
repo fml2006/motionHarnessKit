@@ -179,7 +179,9 @@
       "Bash(*hyperframes* upgrade*)",
       "Bash(*hyperframes* telemetry enable*)",
       "Bash(*hyperframes* skills*)",
-      "Bash(npx hyperframes@*)"
+      "Bash(npx hyperframes@*)",
+      "Edit(projects/*/pipeline.json)",
+      "Write(projects/*/pipeline.json)"
     ]
   },
   "hooks": {

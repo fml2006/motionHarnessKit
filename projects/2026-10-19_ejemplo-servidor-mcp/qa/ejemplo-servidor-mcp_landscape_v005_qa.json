@@ -1,0 +1,88 @@
+{
+  "file": "/home/user/motion-harness-kit/projects/2026-10-19_ejemplo-servidor-mcp/renders/ejemplo-servidor-mcp_landscape_v005.mp4",
+  "platform": "youtube",
+  "mode": "draft",
+  "verdict": "PASS con advertencias",
+  "rows": [
+    {
+      "status": "INFO",
+      "check": "Archivo",
+      "detail": "ejemplo-servidor-mcp_landscape_v005.mp4 · 1920×1080 · 30.00 fps · 46.00 s · 1.5 MB · h264 High/yuv420p · sin audio"
+    },
+    {
+      "status": "INFO",
+      "check": "Modo",
+      "detail": "DRAFT (audio y loudness solo avisan: se normaliza en npm run deliver)"
+    },
+    {
+      "status": "WARN",
+      "check": "Plataforma",
+      "detail": "YouTube (largo) — INFERIDA por aspecto/códec: pasá --platform (Reels, TikTok y Shorts tienen specs distintas)"
+    },
+    {
+      "status": "PASS",
+      "check": "Resolución",
+      "detail": "1920×1080 (esperado 1920×1080)"
+    },
+    {
+      "status": "PASS",
+      "check": "fps",
+      "detail": "30.00 (rango 24–60)"
+    },
+    {
+      "status": "PASS",
+      "check": "Códec de video",
+      "detail": "h264 (esperado h264)"
+    },
+    {
+      "status": "PASS",
+      "check": "Pixel format",
+      "detail": "yuv420p (esperado yuv420p)"
+    },
+    {
+      "status": "PASS",
+      "check": "Color",
+      "detail": "bt709 / bt709 (esperado BT.709)"
+    },
+    {
+      "status": "PASS",
+      "check": "Duración",
+      "detail": "46.0 s ≤ 900 s (hasta 43200 s solo con cuenta verificada)"
+    },
+    {
+      "status": "PASS",
+      "check": "Peso",
+      "detail": "1.5 MB ≤ 262144 MB"
+    },
+    {
+      "status": "PASS",
+      "check": "Fast start (moov al inicio)",
+      "detail": "sí"
+    },
+    {
+      "status": "WARN",
+      "check": "Audio",
+      "detail": "sin pista de audio y YouTube (largo) la requiere (pieza muda a propósito: --allow-silent y registrarlo en el brief)"
+    },
+    {
+      "status": "PASS",
+      "check": "Negros a mitad de pieza",
+      "detail": "ninguno"
+    },
+    {
+      "status": "WARN",
+      "check": "Congelados ≥ 4 s",
+      "detail": "5.5 s (5.0 s) — ¿hold intencional o escena muerta?; 12.7 s (5.8 s) — ¿hold intencional o escena muerta?; 31.3 s (4.7 s) — ¿hold intencional o escena muerta?"
+    },
+    {
+      "status": "PASS",
+      "check": "Fotosensibilidad (heurística WCAG 2.3.1)",
+      "detail": "máx 0 destellos/s — heurística de frame completo; para entregas sensibles correr EA IRIS o PEAT"
+    },
+    {
+      "status": "INFO",
+      "check": "Contact sheet",
+      "detail": "/home/user/motion-harness-kit/projects/2026-10-19_ejemplo-servidor-mcp/qa/ejemplo-servidor-mcp_landscape_v005_contact.jpg"
+    }
+  ]
+}

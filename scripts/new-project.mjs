@@ -179,4 +179,4 @@ if (existsSync(pipeline)) {
 }
 console.log(`\n✓ Proyecto creado: projects/${date}_${slug}/`);
 console.log(`  Marca: ${brand.meta.name} (${brandSlug}) · look: ${brand.look?.summary || "—"}`);
-console.log(existsSync(pipeline) ? `  Próximo paso en Claude Code: /pieza ${date}_${slug} (orquestador) o /brief para ir fase por fase` : "  Próximo paso en Claude Code: /brief (o completá 00_brief.md a mano)");
+console.log(existsSync(pipeline) ? `  Próximo paso en Claude Code: /pieza continuar ${date}_${slug} (orquestador) o /brief para ir fase por fase` : "  Próximo paso en Claude Code: /brief (o completá 00_brief.md a mano)");

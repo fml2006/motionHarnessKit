@@ -6,7 +6,7 @@ node_modules/
 projects/*/formats/
 # binarios de render y entrega: van a un DAM / bucket con versionado (o Git LFS), no al repo.
 # La trazabilidad queda en review/CHANGELOG.md, qa/*_qa.json y delivery/checksums.sha256.
-# (excepción: los renders de referencia v004 del ejemplo y la galería se versionan a mano con git add -f, como muestra)
+# (excepción: los renders de referencia más recientes del ejemplo y la galería se versionan a mano con git add -f, como muestra)
 projects/*/renders/
 projects/*/delivery/*.mov
 projects/*/delivery/*.mp4
