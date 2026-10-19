@@ -12,43 +12,39 @@ Esta página es la versión corta. La guía completa explica el porqué (`docs/G
 | **Orquestador** (`/pieza`) | El "productor" dentro de Claude Code. Crea la pieza, llama a cada subagente en orden, corre los chequeos y frena para que una persona apruebe | Lo usás para cada video |
 | **Subagentes** (`.claude/agents/`) | Los roles: productor, investigador, guionista, director de arte, storyboarder, motion designer, editor de sonido y QA | Los llama el orquestador; no hace falta llamarlos a mano |
 
-## Paso 0 · Llevar el kit a tu máquina (una vez)
+## Paso 0 · Instalar el kit (sesión 1, una vez por máquina)
 
-1. Bajá el zip desde la página del kit, o cloná el repo si lo subimos a GitHub (recomendado: así queda versionado).
-2. Instalá los prerrequisitos:
-   - Node 22 o superior.
-   - ffmpeg (`brew install ffmpeg` en Mac).
-   - git.
-   - Claude Code.
-   - Docker es opcional.
-3. En la carpeta del kit:
-   ```bash
-   git init && git add -A && git commit -m "kit inicial"   # solo si vino en zip
-   npm install
-   npm run setup      # apaga la telemetría de HyperFrames y baja el Chrome fijado
-   npm run doctor     # tiene que decir "Listo para producir"
-   npm run selftest   # prueba render → loudness → master → QA (unos minutos)
-   ```
+Copiá el **prompt de instalación** del `README.md` (Paso 1) y pegalo en una sesión de Claude Code abierta en la carpeta donde querés el kit. El prompt:
 
-## Paso 1 · Crear tus marcas (una vez por marca)
+- clona el repo;
+- revisa Node, ffmpeg y git, y pide permiso antes de instalar lo que falte;
+- corre `npm ci`, `npm run setup`, `npm run doctor` y `npm run selftest`;
+- te devuelve la ruta de la carpeta y una tabla con cada paso.
 
-Abrí Claude Code en la carpeta del kit (`claude`) y escribí `/marca`. Te va a entrevistar en dos tandas. Tené a mano, por marca:
+Si el kit vino en zip y no lo clonaste: descomprimilo, entrá a la carpeta y pedile a Claude que siga el mismo prompt desde el paso 2.
 
-- [ ] **Nombre y un slug corto** (`acme`, `acme-latam`).
-- [ ] **Logo en SVG**: el isotipo y el logo completo, en versión clara y oscura. Si querés animarlo por partes, marcá con `data-part="mark"` y `data-part="wordmark"`.
-- [ ] **Paleta en hex reales**: fondo, superficie, texto, primario, secundario, acento y colores de error y éxito.
-- [ ] **Fuentes con licencia para video**: display, texto y mono. Si son de Google Fonts, el kit las vendoriza.
-- [ ] **3 a 5 referencias de motion**: videos o frames que te gustan, y qué te gusta de cada uno.
-- [ ] **Tono, audiencia y lo que NO querés**: "nada de neón", "nada de rebote", "nunca mayúsculas"…
+## Paso 1 · Crear tus marcas con un brandkit (sesión 2, una vez por marca)
 
-`/marca` crea `brands/<marca>/` con todo esto:
+1. `npm run brandkit:new -- <slug> --name "Nombre"` crea `brandkit/<slug>/` con el formulario `BRANDKIT.md` y las carpetas `logo/`, `fonts/` y `references/`.
+2. Completá el formulario. Tené a mano, por marca:
+   - [ ] **Nombre y slug** (`acme`, `acme-latam`) y quién aprueba la marca.
+   - [ ] **Logo en SVG**: completo para fondo claro y para fondo oscuro, y el isotipo. Para animarlo por partes: `data-part="mark"` y `data-part="wordmark"`.
+   - [ ] **Paleta en hex reales**: fondo, texto, primario y acento como mínimo.
+   - [ ] **Fuentes con licencia para video** (Google Fonts o archivos propios con su licencia).
+   - [ ] **3 a 5 referencias de motion**, con qué tomar y qué no de cada una.
+   - [ ] **Tono, audiencia, plataformas y lo que NO querés.**
+   - [ ] **El look y el motion**, o `que decida el DA`.
+3. `npm run brandkit:check -- <slug>` hasta que no quede ningún ✗.
+4. Abrí una sesión **nueva** de Claude Code en la carpeta del kit y pegá `/marca desde brandkit/<slug>` (la versión larga del pedido está en el `README.md`, Paso 3).
+
+`/marca` crea `brands/<slug>/` con todo esto:
 
 - `brand.config.json`: los tokens.
-- `LOOK.md`: la dirección de arte en prosa, lo que hace distinta a la marca.
-- Los bloques firma, si los pide la marca.
+- `LOOK.md`: la dirección de arte en prosa.
+- Al menos un bloque firma.
 - El brand board y el reporte de contraste.
 
-Además corre `npm run brand:compare` para que veas la misma galería con tu marca al lado de las otras. **Lo aprueba el director de arte.**
+Además te muestra la galería con tu marca al lado de las otras. **Lo aprueba el director de arte.** El ejemplo completo está en `brandkit/_ejemplo-northline/`.
 
 Las marcas `northline` y `pulso` son ejemplos y `tumarca` es la marca placeholder. Cuando tengas las tuyas:
 

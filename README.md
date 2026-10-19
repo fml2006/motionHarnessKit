@@ -1,48 +1,136 @@
 # motion-harness-kit
 
-**Kit harness para producir motion graphics de tecnología con IA (Claude Code + HyperFrames), con tu marca y un pipeline de producción profesional.**
+**Un estudio de motion graphics dentro de Claude Code:** cargás tu marca una vez y cada video sale con el mismo estilo. Lo producen subagentes por rol, coordinados por un orquestador que frena para que una persona apruebe cada paso.
 
-Lo que muestran los tutoriales ("pedile a Opus un video y sale un MP4") es real, pero sin harness da resultados genéricos, irrepetibles y sin control de calidad. Este kit convierte esa capacidad en un proceso de equipo:
+## Qué es
 
-- **Estudio multimarca, marca como código:** cada marca vive en `brands/<marca>/` (un `brand.config.json` → tokens CSS/JS, `frame.md`, `MOTION.md`, theme de Remotion, brand board y contraste WCAG) con su **look** propio (fondo, alineación, caja, forma del acento, cómo entra el texto, kicker, tarjetas, densidad), su `LOOK.md` y sus **bloques firma**. Los mismos 13 bloques se ven distintos en cada marca; cada pieza usa UNA (`scenes.json → brand`).
-- **13 bloques de marca** parametrizables (títulos, datos, código, terminal, gráficos, pasos, comparaciones, citas, lower thirds, logo, cierre) que se adaptan solos a **16:9, 9:16, 1:1 y 4:5**.
-- **Pipeline con gates humanos** (brief → guion → storyboard → animatic → build → revisión → entrega) con plantillas, 7 skills propias (`/marca`, `/brief`, `/guion`, `/storyboard`, `/producir`, `/revisar`, `/entregar`), 8 subagentes por rol y las 12 skills oficiales de HyperFrames fijadas a un commit (los workflows end-to-end solo corren si un humano los invoca).
-- **Gates que frenan de verdad:** placeholders y cifras sin claim firmado bloquean el render final; lint/check por exit code; QA con FAIL corta el script; la marca de cada pieza queda bloqueada (`brandLock`).
-- **QA y entrega automáticos:** presupuesto de lectura por escena, specs por plataforma, loudness, negros/congelados, heurística de fotosensibilidad (WCAG 2.3.1), contact sheets, y una cadena de entrega sin pasos manuales (master sin pérdida → loudness → archivo + entregable → re-medición → QA).
-- **Gobernanza (mitigación, no blindaje):** versiones fijadas, telemetría apagada, comandos de nube/publicación/feedback denegados en Claude Code, ledger de procedencia, checklist legal y registro de horas. Los controles de organización que faltan están listados en [Gobernanza](#gobernanza-qué-cubre-el-kit-y-qué-tiene-que-sumar-la-organización).
+- **Motion graphics como código.** Claude escribe cada escena en HTML y GSAP, y HyperFrames la renderiza a MP4, cuadro por cuadro. El texto sale nítido, los colores son exactos y el mismo proyecto da siempre el mismo video. Funciona para explainers, datos, código, lanzamientos y piezas para redes.
+- **Estudio multimarca.** Cada marca vive en `brands/<marca>/`: colores, tipografía, motion, un *look* propio (fondo, alineación, acento, cómo entra el texto) y escenas firma. Con los mismos 13 bloques, dos marcas no se ven iguales; dentro de una marca, todas las piezas comparten estilo.
+- **Orquestador `/pieza`.** Lleva un video de punta a punta: brief → guion → storyboard → animatic → revisión → lock → entrega. En cada fase llama al subagente del rol (productor, investigador, guionista, director de arte, storyboarder, motion designer, sonido, QA) y frena en cada checkpoint para preguntar si aprobás, pedís cambios o pausás.
+- **Controles que frenan.**
+  - Ninguna cifra sale sin fuente firmada.
+  - Los valores fuera de marca se detectan.
+  - El QA técnico corre en cada render.
+  - La entrega arma un master ProRes y los MP4 por plataforma con el volumen normalizado.
+- **Lo que siempre decide una persona:** el mensaje, las cifras (las firma el experto), el look, cada aprobación y la publicación. Claude construye, no aprueba.
 
-> La guía completa de uso (de conceptos básicos a operación enterprise) está en `docs/GUIA.md` y en la versión publicada que acompaña este kit.
-> **¿Por dónde empiezo?** `docs/EMPEZAR.md`: qué hacer vos, paso a paso (instalar, crear tus marcas con `/marca`, producir con `/pieza`).
-> Qué se probó, con qué resultado y qué quedó sin probar: `docs/VERIFICACION.md`.
+La guía completa (conceptos, roles, pipeline, legal, costos) está en `docs/GUIA.md`. Lo que se probó y lo que no, en `docs/VERIFICACION.md`.
+
+## Cómo se usa: tres sesiones
+
+```
+Sesión 1 · una vez por máquina  → instala y verifica el kit                 → prompt de instalación (abajo)
+Sesión 2 · una vez por marca    → carga tu marca desde un brandkit          → /marca desde brandkit/<slug>
+Sesión 3+ · cada video          → produce con el orquestador                → /pieza nueva "<pedido>" --marca <slug>
+```
+
+### Antes de empezar
+
+- **Equipo:** Mac o Linux. En Windows, WSL2 (no está probado).
+- **Claude Code** instalado y con sesión iniciada. Para material de clientes, plan comercial: Team Premium, Enterprise o API.
+- **Acceso al repo.** Si es privado, `gh auth login` o una clave SSH configurada.
+- **Node 22, ffmpeg y git:** el prompt de instalación los revisa y te pide permiso antes de instalar lo que falte.
+
+### Paso 1 · Instalar el kit con un prompt (sesión 1)
+
+Abrí una terminal en la carpeta donde querés el kit (por ejemplo `~/Proyectos`), ejecutá `claude` y pegá este prompt. Si usás otro repo, cambiá la URL.
+
+```text
+Instalá y verificá el motion-harness-kit en esta máquina.
+Repo: https://github.com/fml2006/motionHarnessKit
+
+Trabajá en este orden. Si un paso falla, frená: mostrame la salida y proponé la solución antes de seguir.
+
+1. Cloná el repo en ./motionHarnessKit. Si la carpeta ya existe, no la borres: entrá y corré git pull.
+   Si git pide credenciales (repo privado), guiame con `gh auth login` o con una clave SSH. No guardes tokens en archivos.
+2. Verificá y reportá la versión de git, Node (tiene que ser 22 o más), npm, ffmpeg y ffprobe.
+   Si falta algo o la versión no alcanza, decime el comando para instalarlo en mi sistema (en Mac, con Homebrew)
+   y esperá mi OK antes de instalar nada.
+3. Dentro de ./motionHarnessKit: `npm ci` (versiones exactas del lockfile; no corras npm install ni npm update).
+4. `npm run setup`: apaga la telemetría de HyperFrames y descarga el Chrome que usa el render.
+5. `npm run doctor`: tiene que terminar en "Listo para producir". El aviso de marca placeholder es normal.
+6. `npm run selftest`: prueba render → loudness → master → QA en un proyecto temporal.
+   Tienen que dar OK todos los chequeos. Tarda unos minutos.
+7. `npm run brand:check` y `npm run brand:list`.
+
+No configures marcas, no crees piezas y no edites archivos del kit.
+No ejecutes `hyperframes publish`, `cloud`, `lambda`, `auth`, `feedback`, `upgrade` ni `skills update`.
+
+Al terminar, dame una tabla con paso, resultado y salida relevante, la ruta absoluta de la carpeta del kit
+y el próximo paso: abrir una sesión nueva de Claude Code en esa carpeta y cargar la marca con /marca desde brandkit/<slug>.
+```
+
+Tarda unos 10 a 15 minutos, la mayor parte por el selftest. Al final tenés la ruta de la carpeta y una tabla con cada paso en OK.
+
+### Paso 2 · Preparar tu brandkit
+
+Un brandkit es una carpeta con un formulario (`BRANDKIT.md`), tus logos, tus fuentes y referencias de motion. Lo podés completar vos, tu diseñador o el cliente.
+
+```bash
+cd motionHarnessKit
+npm run brandkit:new -- acme --name "Acme Cloud"   # crea brandkit/acme/ desde la plantilla
+# completá brandkit/acme/BRANDKIT.md y poné los archivos en logo/, fonts/ y references/
+npm run brandkit:check -- acme                     # ✗ bloquea, ⚠ queda pendiente o lo decide el director de arte
+```
+
+Qué va en cada parte y por qué está en `brandkit/README.md`. Un ejemplo completo, en `brandkit/_ejemplo-northline/BRANDKIT.md`.
+
+### Paso 3 · Cargar la marca (sesión 2, nueva, abierta en la carpeta del kit)
+
+```bash
+cd ~/Proyectos/motionHarnessKit && claude
+```
+
+Pegá:
+
+```text
+/marca desde brandkit/acme
+```
+
+O, si preferís el pedido completo en palabras:
+
+```text
+Cargá la marca desde brandkit/acme/ siguiendo la skill /marca, sección "Desde un brandkit".
+Corré npm run brandkit:check -- acme y, si hay ✗, frená y mostrame qué corregir.
+Preguntame en una sola tanda lo que falte. Creá brands/acme/ con su look, su LOOK.md y al menos un bloque firma.
+Corré npm run brand -- acme y la comparación de la galería contra las otras marcas.
+Mostrame el brand board, el reporte de contraste y las hojas de comparación para aprobar.
+No cambies ningún hex sin mi OK.
+```
+
+Al final te muestra:
+
+- **El brand board**, con logo, paleta, contraste, tipografía y curvas.
+- **La galería de 13 bloques con tu marca**, al lado de las otras.
+- **Lo que quedó PENDIENTE.**
+
+Lo aprueba el director de arte. Las marcas de ejemplo (`tumarca`, `northline`, `pulso`) se pueden borrar cuando tengas las tuyas; el paso a paso está en `docs/EMPEZAR.md`.
+
+### Paso 4 · Producir un video (sesión 3 en adelante, en la carpeta del kit)
+
+```text
+/pieza nueva "Explainer de 60 s sobre cómo funciona nuestra API de pagos, para LinkedIn y Reels" --marca acme
+```
+
+- **Cómo avanza:** pasa por brief y claims, guion, storyboard (con frames reales), animatic, revisión, lock y entrega. En cada checkpoint te muestra qué mirar y te pregunta si aprobás, pedís cambios o pausás.
+- **Pausar y retomar:** para seguir otro día, `/pieza continuar <proyecto>`. Para ver todas las piezas, `/pieza estado`.
+- **Modo express:** para piezas internas o de redes de bajo riesgo, `--modo express` reduce el recorrido a 4 checkpoints.
+
+### Problemas frecuentes
+
+| Síntoma | Qué hacer |
+|---|---|
+| `git clone` pide usuario y contraseña | El repo es privado: `gh auth login` (y `gh auth setup-git`) o configurá una clave SSH y cloná con la URL `git@github.com:…` |
+| Node más viejo que 22 | `brew install node@22` (Mac) o `nvm install 22` |
+| Falta ffmpeg | `brew install ffmpeg` (Mac) · `sudo apt install ffmpeg` (Debian/Ubuntu) |
+| `npm run setup` no puede descargar Chrome | Red con proxy o firewall: pedí acceso o indicá un Chrome existente con `MHK_BROWSER_PATH=/ruta/al/chrome` |
+| Claude Code pide permiso para editar `scripts/`, `.claude/` o `package.json` | Es a propósito: son archivos de gobernanza. Aprobá solo si sabés por qué los toca |
+| El build dice "La marca cambió desde que se bloqueó este proyecto" | Cambiaste la marca y la pieza está protegida. Si el DA aprueba usar la versión nueva: `npm run build:roots -- <proyecto> --rebrand` |
+| El selftest o un render falla | Pegale la salida a Claude en la misma sesión; `npm run doctor` dice qué falta |
 
 ---
 
-## Inicio rápido
-
-**Prerrequisitos**
-
-| Herramienta | Versión | Para qué |
-|---|---|---|
-| Node.js | ≥ 22 | Scripts del kit y CLI de HyperFrames |
-| ffmpeg + ffprobe | 6 o superior (la versión queda registrada en `doctor` y en cada QA) | Render, loudness, master, QA |
-| Claude Code | Plan comercial (Team Premium / Enterprise o API) para material de clientes | Agente, skills, subagentes, hooks |
-| git | cualquiera reciente | Versionado de proyectos, tags `rvw-`/`lock-`/`dlv-` |
-| Docker | opcional | `--docker`: render idéntico en todas las máquinas |
-
-Chrome headless lo descarga HyperFrames la primera vez (o usá `HYPERFRAMES_BROWSER_PATH`).
-
-```bash
-npm install                 # versiones exactas (hyperframes 0.8.174, gsap 3.14.2, fuentes OFL)
-npm run setup               # una vez por máquina: apaga la telemetría de HyperFrames también fuera de Claude Code
-npm run doctor              # verifica entorno, marca, skills y privacidad
-npm run selftest            # prueba de punta a punta: render → loudness → master → QA en un proyecto temporal
-npm run brand               # genera brands/<marca>/dist + índices para todas las marcas
-npm run brand:list          # las marcas del estudio, su look y sus bloques firma
-npm run frames -- _galeria-bloques            # ver los 13 bloques con tu marca (PNG + contact sheet)
-npm run new -- mi-primer-video --type explainer
-```
-
-Después, en Claude Code dentro de esta carpeta: `/marca` (una vez por marca), y por cada pieza `/brief` → `/guion` → `/storyboard` → `/producir` → `/revisar` → `/entregar`.
+# Referencia
 
 ## Flujo diario: quién hace qué
 
@@ -66,6 +154,7 @@ Después, en Claude Code dentro de esta carpeta: `/marca` (una vez por marca), y
 
 El kit es un **estudio multimarca**: `brands/<marca>/` por marca, y cada pieza elige una con `--brand`. Trae tres de ejemplo bien distintas para que se vea la diferencia: `tumarca` (oscura técnica, default), `northline` (editorial clara) y `pulso` (social energética). `npm run brand:compare -- _galeria-bloques --brands tumarca,northline,pulso` las pone lado a lado sobre la misma pieza (`projects/_galeria-bloques/review/compare/`).
 
+0. **Desde un brandkit (recomendado):** `npm run brandkit:new -- <slug>`, completás `brandkit/<slug>/BRANDKIT.md` + logos, fuentes y referencias, `npm run brandkit:check -- <slug>` y en Claude Code `/marca desde brandkit/<slug>`. Detalle en `brandkit/README.md`.
 1. **Marca nueva:** `npm run brand:new -- <slug> --from <la más parecida> --name "Nombre"` (carpeta, logo placeholder, LOOK.md plantilla, aplicada). `--default` la vuelve la marca de las piezas nuevas (`brands/brands.json`).
 2. **Con Claude:** `/marca <slug>` hace la entrevista (hex reales, fuentes con licencia, SVG del logo, 3-5 referencias y de qué marca del estudio se tiene que diferenciar), decide el `look`, escribe `LOOK.md`, propone los bloques firma y te muestra la comparación con las otras marcas.
 3. **A mano:** editá `brands/<slug>/brand.config.json` (`$schema` con autocompletado, incluido `look`) y corré `npm run brand -- <slug>`. Si el JSON tiene errores o contraste insuficiente (incluidos los pares que agrega el look: texto sobre el gradiente, texto sobre el resaltado), el comando lo dice.
@@ -88,6 +177,10 @@ brands/
     blocks/                ← bloques firma (override de un bloque del engine o exclusivos de la marca)
     logo/ fonts/ references/
     dist/                  ← GENERADO: tokens.css, tokens.js, frame.md, brand-rules.md, MOTION.md, brand.md, remotion-theme.ts, brand-board.html, contrast-report.md, fonts/, logo/, vendor/
+brandkit/
+  _plantilla/               ← formulario BRANDKIT.md + logo/ fonts/ references/ (se copia con npm run brandkit:new)
+  _ejemplo-northline/       ← el formulario completo, como ejemplo
+  <marca>/                  ← el brandkit de cada marca: lo que pidió la marca (fuente de /marca desde brandkit/<marca>)
 engine/
   blocks/*.html            ← 13 bloques comunes que leen tokens y look de la marca de la pieza + README (catálogo generado, con los bloques firma de cada marca)
   runtime/bm-motion.js     ← helpers de motion que leen los tokens (BM.revealLines, countUp, typeText…)
@@ -137,6 +230,8 @@ projects/2026-10-19_mi-video/
 | `npm run doctor` | Chequea Node, ffmpeg, Chrome, HyperFrames fijado, marca, skills y privacidad |
 | `npm run selftest` | Prueba de punta a punta de la cadena de render y entrega en un proyecto temporal |
 | `npm run brand [-- <marca>]` / `brand:check` | Genera / valida las marcas (contraste WCAG incluido el del look, easings, campos); sin marca: todas |
+| `npm run brandkit:new -- <slug> [--name …]` | Brandkit nuevo en `brandkit/<slug>/` desde la plantilla (formulario + carpetas de logo, fuentes y referencias) |
+| `npm run brandkit:check -- <slug> [--json]` | Revisa el brandkit antes de importarlo: obligatorios, hex, contraste temprano, fuentes, logos SVG, referencias (✗ bloquea · ⚠ pendiente) |
 | `npm run brand:new -- <slug> [--from <marca>] [--name …] [--default]` | Marca nueva en `brands/<slug>/` (logo placeholder, LOOK.md, aplicada) |
 | `npm run brand:list` | Marcas del estudio: look, bloques firma y piezas que usan cada una |
 | `npm run brand:compare -- <p> [--brands a,b,c] [--format portrait]` | La misma pieza con varias marcas, lado a lado (`review/compare/compare-<formato>.png`); no toca el proyecto |

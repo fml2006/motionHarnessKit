@@ -15,6 +15,7 @@ Reglas completas de cada marca: `brands/<marca>/dist/brand-rules.md` (leé la de
 | `brands/<marca>/brand.config.json` | Fuente única de verdad de ESA marca (incluye `look`) | Sí (con `/marca <marca>`), luego `npm run brand -- <marca>` |
 | `brands/<marca>/LOOK.md` | Dirección de arte en prosa: qué la hace distinta, movimientos firma, sí/no | Sí (con `/marca`) |
 | `brands/<marca>/blocks/*.html` | Bloques firma: mismo nombre que uno del engine = lo reemplaza solo para esa marca; nombre propio = exclusivo | Sí (director de arte) |
+| `brandkit/<marca>/` | Brandkit: lo que pidió la marca (formulario `BRANDKIT.md` + logos, fuentes, referencias). Fuente de `/marca desde brandkit/<marca>`; plantilla en `brandkit/_plantilla/` | Sí (la persona); vos no completás datos de marca |
 | `brands/brands.json` | Marca default de las piezas nuevas | Sí |
 | `brands/<marca>/references/` | Frames de referencia del motion de la marca (los usa `/marca`) | Sí |
 | `brands/<marca>/dist/**`, `brands/INDEX.md`, `MOTION.md`, `brand.md` (índices de la raíz) | Generados por `npm run brand` | **No** |
@@ -33,7 +34,7 @@ Reglas completas de cada marca: `brands/<marca>/dist/brand-rules.md` (leé la de
 
 | Gate | Fase | Skill | Artefacto | Aprueba (humano) |
 |---|---|---|---|---|
-| — | Setup de marca (una vez por marca) | `/marca` | `brands/<marca>/brand.config.json` + LOOK.md + bloques firma + board + `brand:compare` | Director de arte |
+| — | Setup de marca (una vez por marca) | `/marca` (o `/marca desde brandkit/<marca>`) | `brands/<marca>/brand.config.json` + LOOK.md + bloques firma + board + `brand:compare` | Director de arte |
 | G0-G1 | Brief + investigación | `/brief` | `00_brief.md` (incluye §11b confidencialidad), `research/claims.csv` | Productor (+ SME firma claims) |
 | G2-G3 | Treatment + guion | `/guion` | `01_guion.md` (dos columnas) | Director creativo |
 | G4-G5 | Styleframes + storyboard | `/storyboard` | `02_storyboard.md`, `scenes.json`, `review/frames-*` | Director creativo |
@@ -85,6 +86,8 @@ npm run doctor                                   # entorno OK (Node, ffmpeg, Chr
 npm run selftest                                 # prueba de punta a punta de la cadena render → loudness → master → QA
 npm run brand [-- <marca>]                       # brands/<marca>/brand.config.json → brands/<marca>/dist + índices (sin marca: todas)
 npm run brand:list                               # marcas del estudio, su look, bloques firma y piezas que las usan
+npm run brandkit:new -- <slug>                   # brandkit nuevo desde la plantilla (lo completa la persona)
+npm run brandkit:check -- <slug>                 # ¿listo para /marca desde brandkit/<slug>? (✗ bloquea · ⚠ pendiente)
 npm run brand:new -- <slug> --from <marca>       # marca nueva (después: /marca <slug>)
 npm run brand:compare -- <proyecto> --brands a,b [--format portrait]   # la misma pieza con varias marcas, lado a lado
 npm run new -- <slug> --brand <marca> --type explainer   # nueva pieza (explainer|launch|social|tutorial|data|overlay)

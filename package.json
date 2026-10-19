@@ -14,6 +14,8 @@
     "brand:list": "node scripts/brand-list.mjs",
     "brand:compare": "node scripts/brand-compare.mjs",
     "brand:logo": "node scripts/placeholder-logo.mjs",
+    "brandkit:new": "node scripts/brandkit-new.mjs",
+    "brandkit:check": "node scripts/brandkit-check.mjs",
     "new": "node scripts/new-project.mjs",
     "build:roots": "node scripts/build-roots.mjs",
     "frames": "node scripts/frames.mjs",

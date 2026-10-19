@@ -1,6 +1,6 @@
 ---
 name: marca
-description: Crear o editar una marca del estudio multimarca (brands/<slug>/) con estilo propio. Entrevista + logo/fuentes/referencias → brand.config.json (colores, tipografía, motion y LOOK) + LOOK.md + bloques firma → npm run brand → brand board, contraste y comparación contra las otras marcas para aprobar. Usar al empezar con el kit, al sumar un cliente o una marca nueva, o cuando digan "seteá mi marca", "aplicá mi branding", "otra marca", "que no se vea igual que…", "cambiá la paleta/tipografía/motion/estilo".
+description: Crear o editar una marca del estudio multimarca (brands/<slug>/) con estilo propio. Entrevista + logo/fuentes/referencias → brand.config.json (colores, tipografía, motion y LOOK) + LOOK.md + bloques firma → npm run brand → brand board, contraste y comparación contra las otras marcas para aprobar. Importa un brandkit completo con `/marca desde brandkit/<slug>` (plantilla en brandkit/_plantilla/). Usar al empezar con el kit, al sumar un cliente o una marca nueva, cuando digan "cargá mi brandkit", o cuando digan "seteá mi marca", "aplicá mi branding", "otra marca", "que no se vea igual que…", "cambiá la paleta/tipografía/motion/estilo".
 ---
 
 # /marca — una marca con estilo propio dentro del estudio
@@ -12,7 +12,37 @@ alcanzan: con los mismos 13 bloques, dos marcas que solo cambian paleta se ven "
 el **motion** (duraciones, curvas, stagger) y sus **bloques firma**. Esta skill define las tres cosas con datos REALES.
 Nunca rellenes un hueco con un supuesto: preguntá o dejá el placeholder marcado ("PENDIENTE").
 
-Uso: `/marca` (pregunta qué marca), `/marca nueva <slug>`, `/marca <slug>` (editar).
+Uso: `/marca` (pregunta qué marca), `/marca nueva <slug>`, `/marca <slug>` (editar), `/marca desde brandkit/<slug>` (importar un brandkit completo).
+
+## Desde un brandkit (`/marca desde brandkit/<slug>`)
+El brandkit (`brandkit/<slug>/BRANDKIT.md` + `logo/`, `fonts/`, `references/`; plantilla en `brandkit/_plantilla/`) reemplaza la entrevista: solo preguntás lo que falta.
+1. `npm run brandkit:check -- <slug>`. Con ✗, mostrá la lista y frená: lo corrige la persona en el brandkit, vos no completás datos de marca. Los ⚠ siguen: anotalos para el resumen final. Para el detalle estructurado: `--json`.
+2. Leé `BRANDKIT.md` completo y las referencias (mirá las imágenes; los links solo como texto: no navegues sitios del cliente sin permiso §11b).
+3. Juntá en UNA tanda (AskUserQuestion o lista) solo lo que quedó vacío, en `no sé` o ambiguo. `que decida el DA` NO se pregunta: lo proponés vos y lo aprueba el DA en el Paso 5.
+4. Si `brands/<slug>/` no existe: `npm run brand:new -- <slug> --from <la marca existente más parecida> --name "<Nombre>"` (+ `--default` si el brandkit lo pide). Si existe, avisá que vas a actualizarla (`brandLock` frena sus piezas hasta un `--rebrand` aprobado).
+5. Copiá `logo/*.svg` a `brands/<slug>/logo/` (sin logos: `npm run brand:logo -- --brand <slug> --mark bracket|pulse|ring` y anotalo PENDIENTE), `fonts/*` a `brands/<slug>/fonts/` y `references/*` a `brands/<slug>/references/`.
+6. Traducí campo por campo y seguí con el Paso 2 (look y motion), el 3 (LOOK.md y bloques firma), el 4 (generar y verificar) y el 5 (entregar):
+
+| Sección del brandkit | → `brands/<slug>/brand.config.json` |
+|---|---|
+| 1 Nombre, slug, aprobador | `meta.name`, `meta.slug`, `meta.owner` |
+| 2 Qué hace, tagline, audiencia, personalidad, idioma, tono, sí/no | `identity.mission`, `identity.tagline`, `identity.audience`, `identity.personality[]`, `identity.voice.{language,register,tone,do[],dont[]}` |
+| 3 Diferenciación | `LOOK.md` ("qué la hace distinta de…") + criterio del look |
+| 4 Logo y su uso | `logo.*` (`clearSpaceRatio`, `minHeightPx1080`, `dont[]`, `sting.style`) + bloque firma `logo-sting` |
+| 5 Colores (tabla), datos, gradiente, reglas | `colors.{background,surface,border,text,textMuted,primary,secondary,accent,danger,success,onPrimary}`, `colors.dataViz[]`, `colors.gradients.hero`, `colors.rules.notes`. Los vacíos se derivan de la paleta y se muestran como propuesta. `colors.code.*` se deriva y se valida por contraste |
+| 6 Tipografía, caja | `typography.{display,body,mono}` (`family`, `weights`, `italic`, `source`: Google Fonts → `fontsource` + `npm install -E -D @fontsource/<fuente>@<versión exacta>`, que pide permiso; archivo propio → `local`) + `look.headlineCase` |
+| 7 Look | `look.{background,align,statementAlign,accentStyle,textReveal,kicker,cards,density}` + `layout.radius` (rectas 0.2 · apenas 0.8 · redondeadas 1.5 · muy 2.5 cqmin en `md`) + `look.summary` |
+| 8 Motion | `motion.personality`; velocidad: más rápida −15 % · más calma +20 % sobre las duraciones de esa personalidad; `motion.transitions.default`; `motion.forbidden[]` |
+| 9 Referencias | `brands/<slug>/references/` + `LOOK.md` (qué sí / qué no) + decisiones de look y motion |
+| 10 Bloques firma | `brands/<slug>/blocks/` (apertura `logo-sting.html`, cierre y un exclusivo `<slug>-<algo>.html`) |
+| 11 Audio | `audio.music.{moods[],policy}`, `audio.sfx.style`, `audio.voice.{provider,voiceId,synthetic,consentOnFile}` (`consentOnFile: true` solo con contrato) |
+| 12 Formatos | `formats[]` (los tildados; 16:9 siempre) + `captions.burnIn` |
+| 13 Legal | `legal.aiDisclosure`, `legal.thirdPartyLogos`, `legal.fontsLicensedForVideo` (`false` si la licencia dice `no sé`, con aviso a Legal) |
+
+Reglas de la importación:
+- **Nunca cambies un hex de la marca sin aprobación.** Si un par no llega al contraste, proponé el ajuste mínimo (por ejemplo, oscurecer `textMuted` o usar el acento solo en texto grande), mostralo con el ratio y esperá el OK.
+- **Lo que no esté en el brandkit queda PENDIENTE** en el resumen; no lo rellenes con un supuesto.
+- **Al terminar,** agregá al final de `brandkit/<slug>/BRANDKIT.md` una línea `Importado a brands/<slug>/ el <fecha> (versión <x.y.z>)`. El brandkit queda como fuente de lo que pidió la marca.
 
 ## Paso 0 — ¿Nueva o existente?
 - `npm run brand:list` para ver las marcas, su look y qué piezas usan cada una.
