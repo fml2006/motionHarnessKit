@@ -1,18 +1,18 @@
 # Motion graphics con IA: guía de uso para el equipo de video
 
-> Versión Markdown de la guía publicada (documento editable con comentarios en Claude Docs). Generada el 2026-10-19.
+> Versión Markdown de la guía publicada (documento editable con comentarios en Claude Docs). Generada el 2026-10-19, después de la revisión adversarial (ver `docs/VERIFICACION.md`).
 
 Oct 19, 2026 · @Facundo Lemos
 
-Claude Code con Opus 5.5 ya produce motion graphics de calidad profesional escribiéndolos como código (HTML + GSAP renderizado a MP4 con HyperFrames). Rinde en explainers, datos, código y piezas para redes, pero solo con un harness: sistema de marca, gates humanos y QA automático. Esta guía explica el método de punta a punta y acompaña al kit `motion-harness-kit`, que lo implementa.
+Claude Code con Opus 5.5 ya produce motion graphics de calidad profesional escribiéndolos como código (HTML + GSAP renderizado a MP4 con HyperFrames). Rinde en explainers, datos, código y piezas para redes, pero solo con un harness: sistema de marca, gates humanos y QA automático. Esta guía explica el método de punta a punta y acompaña al kit `motion-harness-kit`, que lo implementa. Los términos técnicos se explican en el Glosario, al final.
 
 ## Veredicto en 60 segundos
 
 Adoptarlo, pero como cambio de método y no como reemplazo de talento: la IA abarata construir, no decidir ni aprobar.
 
-- **Funciona:** tipografía cinética, diagramas, data viz, código y terminal, lower thirds y variantes 16:9 / 9:16 / 1:1. El texto sale nítido y el render es determinista porque es código, no video generativo.
+- **Funciona:** tipografía cinética, diagramas, data viz, código y terminal, lower thirds y variantes 16:9 / 9:16 / 4:5 / 1:1. El texto sale nítido y el render es determinista porque es código, no video generativo.
 - **No funciona solo:** sin sistema de marca el resultado es genérico ("AI slop"); el modelo falla en jerarquía, composición y timing, y puede inventar cifras o código. El fabricante de HyperFrames lo admite en su propio benchmark.
-- **Dónde está el ahorro:** en variantes y volumen. Contra un motion designer interno con plantillas, el ahorro por minuto estimado es de 1,5× a 3×; contra una agencia, hasta un orden de magnitud. Los tokens son lo de menos (USD 0,4–1 por clip de 12 s): lo que cuesta son las horas de dirección, verificación y QA.
+- **Dónde está el ahorro:** en variantes y volumen. Contra un motion designer interno con plantillas, el ahorro por minuto estimado es de 1,5× a 3×; contra una agencia, hasta un orden de magnitud. Los tokens del modelo son lo de menos (USD 0,4–1 por clip de 12 s): lo que cuesta son las horas de dirección, verificación y QA.
 - **Riesgo número uno en videos tech:** la exactitud. Ningún número, comando ni cita sale del modelo: sale de un archivo con fuente que firma un experto.
 - **Qué cambia en el equipo:** el motion designer pasa a dirigir al agente y pulir el 10–20 % de escenas clave; aparece el rol de *technical director* (dueño del harness).
 - **Cómo arrancar:** con el kit incluido, un piloto de 3 piezas del canal propio y métricas de horas por minuto terminado, rondas y defectos escapados (sección *Plan de adopción*).
@@ -28,9 +28,9 @@ Adoptarlo, pero como cambio de método y no como reemplazo de talento: la IA aba
 
 ## Qué muestra el video (y qué no)
 
-"Como Fazer Motion Graphics INSANOS com Opus 5.5" (portugués, \~7-oct-2026) enseña a producir motion graphics con Claude Code + Opus 5.5 + skills, renderizando con HyperFrames. YouTube no fue accesible desde el entorno de investigación: el contenido se reconstruyó desde la descripción indexada, los repos que el tutorial instala y 6 tutoriales gemelos de la misma semana. El canal no se pudo identificar.
+"Como Fazer Motion Graphics INSANOS com Opus 5.5" (portugués, \~7-oct-2026) enseña a producir motion graphics con Claude Code + Opus 5.5 + skills, renderizando con HyperFrames. YouTube no fue accesible desde el entorno de investigación: el contenido se reconstruyó desde la descripción indexada, los repos que el tutorial instala y los títulos y descripciones de 6 tutoriales parecidos de la misma semana (tampoco se vieron). El canal no se pudo identificar.
 
-**El paso a paso que replica** (verificado en los repos que instala):
+**El paso a paso que replica** (reconstruido: confianza baja sobre lo que se ve en pantalla; los comandos y archivos sí se verificaron en los repos que instala):
 
 1. Probar "en frío" el prompt viral: *Make a dynamic 15-second motion graphics video that shows what an incredible motion designer you are. Go all out.*
 2. Elegir el modelo con `/model` → Opus 5.5 (los virales corrieron con effort `max`).
@@ -72,7 +72,7 @@ Tres reglas técnicas que el equipo tiene que conocer aunque no programe: **dete
 La IA ejecuta bien un gusto que alguien sabe articular con números; no lo inventa. Estas 12 reglas evitan la mayoría de los errores:
 
 1. **Una idea por pantalla.** Si la pantalla dice dos cosas, son dos escenas.
-2. **El texto queda quieto mientras se lee**, al menos `máx(1,5 s; 0,8 s + 0,35 s × palabras)`.
+2. **El texto queda quieto mientras se lee**, al menos `máx(1,5 s; 0,8 s + 0,35 s × palabras; caracteres ÷ 15)`.
 3. **Las entradas desaceleran y las salidas aceleran;** la salida dura 60–75 % de la entrada.
 4. **Curva por defecto suave y sin rebote** (`power3.out`). El rebote es un registro lúdico, no una forma de dar énfasis.
 5. **Lo más importante se mueve primero;** el grupo completo entra en ≤ 500 ms.
@@ -97,7 +97,7 @@ La IA ejecuta bien un gusto que alguien sabe articular con números; no lo inven
 | Microinteracción | 150 ms | entrada estándar | — |
 | Conteo de un número | 1,2–2,5 s | sin overshoot | `tabular-nums` |
 
-Stagger: palabras 70 ms, líneas 120 ms, ítems 100 ms. Primer movimiento a 150–300 ms de iniciada la escena, nunca en t = 0.
+Stagger: palabras 70 ms, líneas 120 ms, ítems 60 ms; el grupo completo entra en ≤ 500 ms (con N ítems, mín(60 ms; 500 ms ÷ N)). Primer movimiento a 150–300 ms de iniciada la escena, nunca en t = 0.
 
 **Cómo se ve el motion genérico de IA y cómo dirigirlo:**
 
@@ -144,15 +144,15 @@ Regla de costo: cada decisión se aprueba en el artefacto más barato que la pue
 
 | Fase (gates) | Artefacto | En el kit | Criterio de salida |
 | --- | --- | --- | --- |
-| Marca (una vez) | `brand.config.json`, brand board, reporte de contraste | `/marca`, `npm run brand` | 0 pares de contraste en falla; board aprobado |
-| Brief e investigación (G0–G1) | `00_brief.md`, `research/claims.csv` | `/brief`, `npm run new` | Mensaje único en una oración; cada cifra con fuente |
-| Treatment y guion (G2–G3) | `01_guion.md` a dos columnas | `/guion` | Entra en la duración; claims referenciados |
-| Styleframes y storyboard (G4–G5) | `02_storyboard.md`, `scenes.json`, frames clave | `/storyboard`, `npm run frames` | Look aprobado en frames reales 16:9 y 9:16 |
-| Animatic y build (G6–G7) | Renders `_v###` con reporte de QA | `/producir`, `npm run render -- <p> --quality draft` | `lint` y `check` en 0; QA sin FAIL; autocrítica hecha |
+| Marca (una vez) | `brand.config.json`, brand board, reporte de contraste | `/marca`, `npm run brand` | 27 de 27 pares de contraste OK; board aprobado |
+| Brief e investigación (G0–G1) | `00_brief.md`, `research/claims.csv` | `/brief`, `npm run new` | Mensaje único en una oración; cada cifra con fuente; confidencialidad y proveedores aprobados |
+| Treatment y guion (G2–G3) | Treatment de una página y `01_guion.md` a dos columnas | `/guion` | Hook elegido; entra en la duración (segundos × 2,2 palabras); claims referenciados |
+| Styleframes y storyboard (G4–G5) | `02_storyboard.md`, `scenes.json`, frames clave | `/storyboard`, `npm run frames` | Look aprobado en frames reales de cada formato |
+| Animatic y build (G6–G7) | Renders `_v###` con reporte de QA | `/producir`, `npm run render -- <p> --quality draft` | `lint` y `check` sin errores (si fallan, el render se frena); QA sin FAIL; autocrítica hecha |
 | Revisión (G8) | `review/R*.md`, `review/CHANGELOG.md` | `/revisar` | Notas cerradas dentro de las rondas del brief |
-| Lock a entrega (G9–G15) | `delivery/`, `qa/`, `PROVENANCE.md` | `/entregar`, `npm run loudnorm`, `npm run master`, `npm run qa` | 0 FAIL por plataforma; checklists firmados |
+| Lock a entrega (G9–G15) | `delivery/` (ARCHIVE y DELIVERY), `qa/`, `PROVENANCE.md` | `/entregar`, `npm run deliver -- <p> --platform youtube,reels` | Build estricto sin placeholders ni cifras sin claim firmado; 0 FAIL por plataforma; checklists firmados |
 
-Calendario de referencia (con aprobaciones del cliente en 24–48 h): una pieza de 60–90 s lleva unos 12–17 días hábiles y un explainer de 3–5 min unos 25–35, frente a 4–6 y 6–10 semanas en el flujo tradicional. Las horas humanas bajan entre 35 y 55 %, pero el calendario solo entre 25 y 40 %, porque la latencia de aprobación del cliente no se acelera con IA (estimaciones a calibrar en el piloto).
+Calendario de referencia (con aprobaciones del cliente en 24–48 h): una pieza de 60–90 s lleva unos 12–17 días hábiles y un explainer de 3–5 min unos 25–35, frente a 4–6 y 6–10 semanas en el flujo tradicional. Las horas humanas de una pieza bajan entre 35 y 55 % (todo el pipeline, incluidas dirección, rondas y entrega), pero el calendario solo entre 25 y 40 %, porque la latencia de aprobación del cliente no se acelera con IA. Son estimaciones a calibrar en el piloto.
 
 ## Guion, preproducción y storyboard
 
@@ -170,7 +170,7 @@ En motion graphics el guion es el plano de construcción: si la columna VIDEO di
 
 **Hook en 3–5 s:** resultado primero ("Este deploy tarda 4 segundos; el mes pasado, 11 minutos"), creencia equivocada, número con fuente, pregunta concreta. Movimiento desde el primer frame (en feeds mudos es la miniatura) y texto que se entienda sin sonido. Prohibido "hola, bienvenidos" y logos de 5 s.
 
-**Presupuesto de palabras:** narración a \~150 palabras por minuto (130–140 si es técnica densa). 30 s ≈ 60–65 palabras netas; 60 s ≈ 120–130; 90 s ≈ 185–200. En pantalla: máximo 7 palabras por línea y una idea; el texto refuerza (dato, palabra clave), no transcribe la voz. En vertical, la mitad de densidad.
+**Presupuesto de palabras:** una sola fórmula en todo el kit: palabras netas de narración = segundos × 2,2 (≈ 130 por minuto, el ritmo de una VO técnica o de una TTS con aire; se configura en audio.voice.wordsPerSecond de la marca). 30 s ≈ 65 palabras; 60 s ≈ 130; 90 s ≈ 200. En pantalla: máximo 7 palabras por línea y una idea; el texto refuerza (dato, palabra clave), no transcribe la voz. En vertical, la mitad de densidad.
 
 **Guion a dos columnas (AUDIO | VIDEO).** Cada fila es un beat de 3–8 s con: VO literal, texto en pantalla literal, bloque visual, movimiento, transición e ID de claim. Así se escribe una instrucción que el agente puede ejecutar:
 
@@ -184,9 +184,12 @@ En motion graphics el guion es el plano de construcción: si la columna VIDEO di
 ```json
 { "id": "s04-dato", "block": "stat-hit", "duration": 5,
   "vars": { "value": 62, "suffix": "%", "label": "menos latencia", "source": "Fuente: benchmark Q3 (C-004)" },
+  "claims": ["C-004"],
   "formats": { "portrait": { "vars": { "label": "menos latencia" } } },
   "notes": "VO: '…62 por ciento menos…' · aceptación: el número es el único acento" }
 ```
+
+El campo `claims` es obligatorio en los bloques con cifras: si la claim no está en `research/claims.csv` con estado `ok` y la firma del SME, el render final no sale.
 
 El **animatic** (render draft con voz scratch) es el gate de timing: después de aprobarlo, cambiar guion u orden es un change order.
 
@@ -198,33 +201,35 @@ El motion se vende con el sonido y se pierde en la entrega: estas son las especi
 
 - Cortes en el beat o 1–2 frames antes; hits en el frame en que el elemento aterriza; whoosh con el pico en la velocidad máxima.
 - La voz manda: música 12–20 dB por debajo durante el habla (ducking). SFX funcionales, no más de un acento cada 1–2 s.
-- Mezcla para web: **−14 LUFS integrados, true peak ≤ −1 dBTP** (el kit lo hace con `npm run loudnorm`). Eventos e intranet: −16 a −18 LUFS. Broadcast UE: −23 LUFS (EBU R128).
+- Mezcla para web: **−14 LUFS integrados, true peak ≤ −1 dBTP**. El kit normaliza una sola vez, al masterizar con `npm run deliver`, con el objetivo de cada plataforma. Eventos e intranet: −16 LUFS (plataforma `evento`). Broadcast UE: −23 LUFS (EBU R128, plataforma `broadcast-ebu`).
 - Escuchar siempre en el parlante de un teléfono. "Claude no oye": la mezcla la aprueba una persona.
 
 **Captions**
 
 - Transcribir desde la voz final (`npx hyperframes transcribe`) y revisar a mano contra el glosario: los modelos de transcripción alucinan palabras sobre silencios.
-- 32–42 caracteres por línea, máximo 2 líneas, ≤ 17 caracteres por segundo, cues de 1–7 s.
-- Vertical: captions quemados dentro de la safe zone + SRT donde la plataforma lo acepte. 16:9: closed captions.
+- Reglas de la marca: hasta 38 caracteres por línea, máximo 2 líneas, ≤ 17 caracteres por segundo, cues de 1–7 s.
+- Vertical y 4:5: el kit quema los captions desde `captions.srt` dentro de la safe zone y avisa si un cue rompe esas reglas; además, SRT aparte donde la plataforma lo acepte. 16:9: closed captions con el SRT.
 
 **Specs de entrega (oct-2026; confirmar contra la ayuda oficial antes de cada campaña)**
 
 | Plataforma | Formato | Duración máx. | Notas |
 | --- | --- | --- | --- |
-| YouTube | 16:9, 1920×1080 o 4K, H.264 High, AAC 48 kHz, BT.709, faststart | 12 h (verificada) | \~8 Mbps a 1080p30; GOP = fps/2 |
+| YouTube | 16:9, 1920×1080 o 4K, H.264 High, AAC 48 kHz, BT.709, faststart | 12 h con cuenta verificada (15 min sin verificar) | \~8 Mbps a 1080p30; GOP = fps/2 |
 | YouTube Shorts | 9:16, 1080×1920 | 3 min | Más ancho que cuadrado no clasifica como Short |
-| Instagram / Facebook Reels | 9:16, 1080×1920 | 3 min | Safe zone: 14 % arriba, 35 % abajo, 6 % lados; portada visible en 3:4 |
+| Instagram / Facebook Reels | 9:16, 1080×1920 | 3 min | Safe zone: 14 % arriba, 35 % abajo, 6 % lados; portada visible en 3:4; duración máxima sin verificar |
 | TikTok | 9:16, 1080×1920 | 10 min (sin verificar) | \~287 MB desde móvil; columna de botones a la derecha |
 | LinkedIn | 16:9, 1:1, 4:5 o 9:16 | 15 min (sin verificar) | En feed, 1:1 y 4:5 ocupan más pantalla; acepta SRT |
 | X | 16:9, 1:1 o 9:16, H.264 (H.265 rechazado) | 2:20 en cuentas gratis | 512 MB en cuentas gratis |
 
-**Master vs entregables.** Master de archivo en ProRes 422 HQ (10 bit) con audio PCM 48 kHz / 24 bit; overlays con transparencia en ProRes 4444 (`render --format mov`) o WebM con alpha; entregables en H.264. Nunca se re-exporta desde un archivo comprimido. Y la fuente de verdad más valiosa del pipeline con IA no es el MP4: es el proyecto (escenas, tokens de marca, lockfile) con tag de versión, porque permite re-renderizar en cualquier formato o idioma. El kit genera master y entregable con `npm run master`.
+**Master vs entregables.** `npm run deliver` arma la cadena completa y corta ante cualquier FAIL: build estricto, render del intermedio sin pérdida (ProRes 4444), mezcla PCM de 24 bit desde las pistas del proyecto, normalización de loudness una sola vez, master de archivo en ProRes 422 HQ con PCM 48 kHz / 24 bit, entregable H.264 BT.709 con faststart, re-medición del loudness sobre los archivos de salida y QA por plataforma. Nunca se re-exporta desde un archivo comprimido: el script de master rechaza intermedios con pérdida. Los overlays con transparencia salen en ProRes 4444 con `npm run render -- <p> --alpha`. La fuente de verdad más valiosa no es el MP4: es el proyecto (escenas, marca fijada, lockfile) con tag de versión, porque permite re-renderizar en cualquier formato.
 
 ## El kit harness: qué trae y cómo se usa
 
-`motion-harness-kit` convierte el método del video en un proceso de equipo: marca como código, 13 bloques de marca que se adaptan solos a 16:9, 9:16 y 1:1, el pipeline con 7 skills y 8 subagentes por rol, y QA automático. Está probado de punta a punta: `lint` y `check` sin errores, 64 de 64 chequeos de contraste WCAG AA y renders reales con reporte de QA.
+`motion-harness-kit` convierte el método del video en un proceso de equipo: marca como código, 13 bloques de marca que se adaptan solos a 16:9, 9:16, 4:5 y 1:1, el pipeline con 7 skills propias y 8 subagentes por rol, gates automáticos que frenan el render cuando algo falla (contenido sin fuente, lint, check, QA) y una cadena de entrega con master de archivo y loudness por plataforma. Qué se verificó y qué no figura al final de esta sección.
 
-![Los 13 bloques de marca del kit en 16:9](img/galeria-bloques-16x9.jpg)
+Los videos del kit y la descarga del zip están en su página: [Motion Harness Kit](https://claude.ai/artifact/VcYVRMMxVjBTFVnXXzKmAv).
+
+![Los 13 bloques de marca del kit en 16:9, con los datos de demostración rotulados como ficticios](img/galeria-bloques-16x9.jpg)
 
 ![Los mismos bloques adaptados automáticamente a 9:16, dentro de la safe zone de Reels, TikTok y Shorts](img/galeria-bloques-9x16.jpg)
 
@@ -232,52 +237,54 @@ El motion se vende con el sonido y se pierde en la entrega: estas son las especi
 
 | Pieza | Qué hace | Dónde |
 | --- | --- | --- |
-| Sistema de marca | Un JSON genera tokens CSS/JS, `frame.md` para HyperFrames, `MOTION.md` y `brand.md` compatibles con el pack del video, theme de Remotion, brand board y reporte de contraste | `brand/brand.config.json` → `npm run brand` |
-| 13 bloques de marca | Título, afirmación cinética, dato con conteo, código, terminal, barras, pasos, comparación, cita, lower third, capítulo, logo y cierre; parametrizables y con reglas de uso | `engine/blocks/` (catálogo generado) |
-| Proyecto por pieza | Preproducción numerada, `scenes.json`, composición maestra y variantes por formato | `npm run new -- <slug> --type explainer` |
-| Skills de workflow | `/marca`, `/brief`, `/guion`, `/storyboard`, `/producir`, `/revisar`, `/entregar` | `.claude/skills/` |
+| Sistema de marca | Un JSON genera tokens CSS/JS, `frame.md` para HyperFrames, `MOTION.md` y `brand.md` compatibles con el pack del video, theme de Remotion, brand board y reporte de contraste (27 pares) | `brand/brand.config.json` → `npm run brand` |
+| 13 bloques de marca | Título, afirmación cinética, dato con conteo, código, terminal, barras, pasos, comparación, cita, lower third, capítulo, logo y cierre. Parametrizables, en 4 formatos, con placeholders visibles (⟦COMPLETAR⟧) en vez de datos de ejemplo creíbles | `engine/blocks/` (catálogo generado) |
+| Proyecto por pieza | Preproducción numerada, registro de claims, horas por rol y gate, `scenes.json` con la marca fijada (brandLock), composición maestra y variantes por formato | `npm run new -- <slug> --type explainer` |
+| Gates automáticos | Build estricto (placeholders, cifras sin claim firmado, valores fuera de marca), lint y check por código de salida, QA que corta el render si da FAIL | `build:roots --strict`, `render`, `deliver` |
+| Skills | `/marca`, `/brief`, `/guion`, `/storyboard`, `/producir`, `/revisar`, `/entregar`, más 12 skills de HyperFrames fijadas a un commit (las 5 de workflow propio solo corren si una persona las pide) | `.claude/skills/` |
 | Subagentes por rol | Productor, investigador, guionista, director de arte, storyboarder, motion designer, editor y sonido, QA | `.claude/agents/` |
-| Reglas y permisos | `CLAUDE.md` de la casa, hook que valida cada edición, comandos de nube y telemetría bloqueados, skills de HyperFrames fijadas a un commit | `CLAUDE.md`, `.claude/settings.json` |
-| QA y entrega | Presupuesto de lectura por escena, specs por plataforma, loudness, negros, congelados, fotosensibilidad, contact sheets, masters | `npm run qa`, `loudnorm`, `master` |
-| Plantillas | Brief, guion a dos columnas, storyboard ejecutable, review, anti-slop, QA, legal, entrega, naming, RACI, procedencia | `templates/` |
-| Ejemplo resuelto | Un explainer de 46 s de punta a punta, con 3 versiones y su changelog | `projects/2026-10-19_ejemplo-servidor-mcp/` |
+| Reglas y permisos | `CLAUDE.md` de la casa, hook que valida cada edición, comandos de nube, publicación y telemetría denegados en sus distintas formas de invocación (una mitigación: el control fuerte son las managed settings y el egress) | `CLAUDE.md`, `.claude/settings.json` |
+| Entrega y QA | Master ProRes 422 HQ y entregable H.264, loudness normalizado y re-medido, specs por plataforma (incluye 4:5, eventos y broadcast), negros, congelados, fotosensibilidad, contact sheets y un autotest de la cadena | `npm run deliver`, `qa`, `selftest`, `doctor` |
+| Plantillas | Brief con confidencialidad, treatment y guion a dos columnas, storyboard ejecutable, review, anti-slop, QA, legal, entrega, naming, RACI, procedencia, claims y horas | `templates/` |
+| Ejemplo resuelto | Un explainer de 46 s con brief, claims, guion, storyboard, 4 versiones y su changelog. No publicable a propósito: sus claims no tienen la firma del SME y el build estricto lo frena | `projects/2026-10-19_ejemplo-servidor-mcp/` |
 
 **Setear tu marca en 5 pasos**
 
-1. `npm install` y `npm run doctor` (verifica Node 22, ffmpeg, versiones fijadas, marca y privacidad).
-2. En Claude Code, `/marca`: una entrevista en dos tandas que pide hex reales, fuentes con licencia para video, el logo en SVG (con `data-part="mark"` y `data-part="wordmark"` si se quiere animar por partes) y 3–5 referencias. También se puede editar `brand/brand.config.json` a mano, con autocompletado.
-3. `npm run brand`: valida, genera todo y reporta contraste. Si un par de colores no llega a WCAG, lo dice.
-4. `npm run frames -- _galeria-bloques`: los 13 bloques con tu marca, en PNG y contact sheet.
-5. En proyectos existentes, `npm run build:roots -- <proyecto>` re-sincroniza la marca sin tocar las escenas.
+1. Prerrequisitos: Node 22 o superior, ffmpeg, git y Claude Code. Docker es opcional (`--docker` da renders idénticos entre máquinas).
+2. `npm install`, `npm run setup` (apaga la telemetría de HyperFrames y descarga el Chrome fijado), `npm run doctor` y `npm run selftest` (prueba la cadena de audio y master de punta a punta).
+3. En Claude Code, `/marca`: una entrevista en dos tandas que pide hex reales, fuentes con licencia para video, el logo en SVG (con `data-part="mark"` y `data-part="wordmark"` si se quiere animar por partes) y 3–5 referencias en `brand/references/`. También se puede editar `brand/brand.config.json` a mano, con autocompletado.
+4. `npm run brand`: valida, genera todo y reporta contraste. Después, `npm run frames -- _galeria-bloques` (y `--format portrait` o `--format feed`) muestra los 13 bloques con tu marca.
+5. Los proyectos existentes quedan protegidos: cada `scenes.json` guarda la marca con la que se hizo (brandLock) y el build se frena si cambió. Para pasar una pieza a la marca nueva, `npm run build:roots -- <proyecto> --rebrand` (queda en su changelog). Para clientes con marcas distintas, un repo o una rama por marca.
 
 La prueba de que la marca es realmente un parámetro: la misma pieza, sin tocar una escena, con dos archivos de marca distintos.
 
 ![La misma pieza renderizada con dos marcas: solo cambia el JSON](img/rebrand-misma-pieza.jpg)
 
-![Brand board generado desde brand.config.json: logo, paleta, contraste WCAG, tipografía, curvas de easing y principios de motion](img/brand-board.png)
+![Brand board generado desde brand.config.json v1.1: logo, paleta, 27 pares de contraste WCAG, tipografía, curvas de easing, duraciones y principios de motion](img/brand-board.png)
 
 **El flujo diario de una pieza**
 
-```bash
-npm run new -- lanzamiento-api --type launch --formats landscape,portrait
-# en Claude Code: /brief → /guion → /storyboard
-npm run frames -- lanzamiento-api                     # styleframes reales para aprobar
-npm run render -- lanzamiento-api --quality draft     # animatic / revisión, con QA
-# /revisar con el feedback consolidado → nueva versión _v002
-npm run render -- lanzamiento-api --quality high      # final, tras el picture lock
-npm run loudnorm -- projects/<p>/renders/<archivo>.mp4
-npm run master -- projects/<p>/renders/<archivo>.mp4 projects/<p>/delivery youtube
-```
+| Paso | Lo hace | Cómo |
+| --- | --- | --- |
+| Crear la pieza | Productor | `npm run new -- lanzamiento-api --type launch --formats landscape,portrait` |
+| Brief, claims y guion | Claude redacta; productor, SME y director creativo aprueban | `/brief` y `/guion` en Claude Code |
+| Storyboard y styleframes | Claude arma `scenes.json`; el director aprueba los frames | `/storyboard`, `npm run frames -- <p>` |
+| Animatic y revisión | Claude renderiza y se autocritica; el equipo revisa | `npm run render -- <p> --quality draft`, `/revisar` |
+| Picture lock y mezcla | Director creativo y sonido (personas) | Aprobar la versión; pistas de audio en `scenes.json` |
+| Entrega | Claude corre la cadena; QA y Legal firman | `npm run deliver -- <p> --platform youtube,reels`, `/entregar` |
+| Publicar | Una persona, fuera del agente | — |
 
-**El ejemplo resuelto.** Un explainer de 46 s, "Qué es un servidor MCP", con brief, registro de claims con fuente, guion a dos columnas, storyboard y renders en 16:9 y 9:16. Sus tres versiones muestran el loop funcionando: el QA de v001 marcó holds muertos de 4–5 s y frames vacíos entre escenas (síntoma "salidas animadas antes de cada corte"); v002 los corrigió cambiando una regla del sistema, no una escena; v003 ajustó la ventana de código para marcas claras. Cada cambio quedó en `review/CHANGELOG.md`.
+**El ejemplo resuelto.** Un explainer de 46 s, "Qué es un servidor MCP", con brief, registro de claims con fuente, guion a dos columnas, storyboard y renders en 16:9 y 9:16. Muestra el loop de revisión: sobre v001 la dirección detectó frames vacíos entre escenas (salidas animadas antes de cada corte) y v002 lo corrigió cambiando una regla del sistema, no una escena; v003 ajustó la ventana de código para marcas claras; v004 se renderizó con el kit corregido. También muestra lo que no cubre: los holds largos que marca el QA se aceptaron como nota de dirección, no tiene voz, música, master ni captions, y **no es publicable**: dos claims están marcados como dudosos y ninguno tiene la firma del SME, por eso el build estricto lo frena. Todo quedó en `review/CHANGELOG.md`.
 
-![Frames clave del ejemplo resuelto, 16:9](img/ejemplo-mcp-16x9.jpg)
+![Frames clave del ejemplo resuelto v004, 16:9](img/ejemplo-mcp-16x9.jpg)
 
-**Lo que el kit garantiza y lo que no:** garantiza que nada sale fuera de marca ni con errores técnicos detectables, y avisa cuando una escena no deja leer su texto. No garantiza buen gusto ni exactitud: eso lo siguen poniendo el director creativo y el experto técnico.
+**Lo que el kit controla y lo que no:** reduce el riesgo de salir fuera de marca (tokens, lint de valores sueltos, 27 pares de contraste) y frena lo detectable: placeholders, cifras sin claim firmado, errores de lint y check, specs y loudness fuera de plataforma. Los chequeos de contenido son heurísticos: buscan patrones, no entienden el texto. No garantiza buen gusto ni exactitud: eso lo siguen poniendo el director creativo y el experto técnico.
+
+**Qué se verificó (19-oct-2026).** `npm run doctor` sin bloqueantes; 27 de 27 pares de contraste en las dos marcas de ejemplo; lint y check sin errores en la galería (4 formatos) y en el ejemplo (64 de 64 chequeos de contraste de `hyperframes check`). Un proyecto nuevo con placeholders frena el build estricto con 7 problemas y, completado con un claim firmado, pasa. La entrega completa de ese proyecto para YouTube y Reels dejó entregables a −14,1 LUFS, masters ProRes 422 HQ con PCM de 24 bit y QA por plataforma en PASS. `npm run selftest` da 12 de 12, y cuatro pruebas negativas (azar sin semilla, placeholder en el render final, video con destellos, entregable mudo para YouTube) cortan con error. **No se verificó:** el render con `--docker`, que Claude Code acepte los comodines de algunas reglas de permisos y una pieza con voz y música reales.
 
 ## HyperFrames vs Remotion: cómo elegir el motor
 
-El kit usa HyperFrames porque es lo que usa el flujo del video, no cobra licencia y está pensado para agentes; Remotion es la alternativa más madura para equipos React. La investigación no dio un ganador único: depende del perfil del equipo.
+El kit usa HyperFrames porque es el motor del flujo del video, no cobra licencia y está pensado para agentes. Conviene saber que el informe de investigación sobre motores recomendó lo contrario para un equipo de contenido tech: **Remotion como motor primario** (madurez desde 2021, render distribuido probado, el idioma React del equipo) y HyperFrames como secundario. Además, migrar es de una sola vía: existe un conversor de Remotion a HyperFrames, no al revés. El kit eligió HyperFrames para replicar el método del video sin costo de licencia y con las mitigaciones de abajo; la elección definitiva es del equipo y figura entre las preguntas abiertas.
 
 | Criterio | HyperFrames (HeyGen) | Remotion |
 | --- | --- | --- |
@@ -291,15 +298,15 @@ El kit usa HyperFrames porque es lo que usa el flujo del video, no cobra licenci
 
 **Regla de decisión:**
 
-- **HyperFrames** si el equipo es de diseño o contenido con base web, el presupuesto de licencias importa, ya hay material GSAP o HTML para reutilizar, o se quiere el flujo exacto del video. Mitigaciones obligatorias (el kit las trae): versión exacta fijada, skills fijadas a un commit, telemetría apagada, GSAP y fuentes vendorizados, comandos de nube y feedback bloqueados.
-- **Remotion** si el equipo es React-first, necesita render distribuido a gran escala o un Player embebido en producto, o compras exige un proveedor con contrato. Presupuesto de licencia: USD 100–600/mes para la mayoría de los equipos.
-- **Nunca dos motores primarios:** duplica componentes de marca. El sistema de marca del kit es agnóstico: genera también `remotion-theme.ts` para quien elija Remotion.
+- **HyperFrames** si el equipo es de diseño o contenido con base web, el presupuesto de licencias importa, ya hay material GSAP o HTML para reutilizar, o se quiere el flujo exacto del video. Mitigaciones obligatorias (el kit las trae): versión exacta fijada, skills fijadas a un commit, telemetría apagada, GSAP y fuentes vendorizados, y comandos de nube y feedback denegados en los permisos del agente (una mitigación, no un bloqueo: ver *Legal, seguridad y gobernanza*).
+- **Remotion** si el equipo es React-first, necesita render distribuido a gran escala o un Player embebido en producto, o compras exige un proveedor con contrato. Es lo que recomendó el informe de motores para un equipo tech. Presupuesto de licencia: USD 100–600/mes para la mayoría de los equipos.
+- **Nunca dos motores primarios:** duplica componentes de marca. Del kit, solo la capa de marca es agnóstica (genera también `remotion-theme.ts`), y siguen sirviendo las plantillas, los gates, el registro de claims y el QA de archivos (`npm run qa`). Los 13 bloques, `build:roots`, `frames`, `render` y el lint son de HyperFrames: con Remotion hay que reescribirlos como componentes React.
 
 **Complementos, no motores:** After Effects (con Lottie o Rive) para piezas héroe de diseñadores; un editor (Premiere o DaVinci Resolve) para talking heads y screen recordings; video generativo (Veo, Kling, Runway) **solo para b-roll y texturas**, nunca para texto, UI, código, datos ni logos.
 
 ## Herramientas que elevan el resultado
 
-Principio rector: todo lo que tenga texto, UI, datos, logos o timing exacto se hace **como código**; la IA generativa queda para textura y mundo (atmósferas, b-roll, fondos). Los packs comunitarios de skills cambian el look y el tiempo, no la corrección: en un benchmark del 11-oct, 16 packs y Claude Code sin skill pasaron los mismos 4 chequeos.
+Principio rector: todo lo que tenga texto, UI, datos, logos o timing exacto se hace **como código**; la IA generativa queda para textura y mundo (atmósferas, b-roll, fondos). Los packs comunitarios de skills cambian el look y el tiempo, no la corrección: en un benchmark del 11-oct, 16 skills de terceros y Claude Code sin skill pasaron los mismos 4 chequeos.
 
 **Las que más suben la calidad, por etapa:**
 
@@ -310,7 +317,7 @@ Principio rector: todo lo que tenga texto, UI, datos, logos o timing exacto se h
 | Voz | ElevenLabs (TTS, clonación con consentimiento, timestamps por palabra) | VO final y timing de escenas | MCP / API |
 | Música y SFX | Epidemic Sound o Artlist (licencia comercial), ElevenLabs Music | Score con licencia y Content ID resuelto | Descarga + ledger |
 | Captions | WhisperX o whisper.cpp local, `hyperframes transcribe` | Timestamps por palabra; revisión humana obligatoria | CLI |
-| B-roll IA | Veo, Kling, Runway; Higgsfield como agregador para idear | Texturas y mundo, nunca texto ni UI | API / MCP |
+| B-roll IA | Veo, Kling, Runway; Higgsfield como agregador para idear | Texturas y mundo, nunca texto ni UI. Veo 3.1 preview en la Gemini API se apaga el 22-oct-2026: usar Vertex AI | API / MCP |
 | Finishing | DaVinci Resolve Studio (MCP nativo desde 21.1) | Color, ensamble, entrega | MCP |
 | Revisión | Frame.io (MCP en beta pública) | Comentarios con timecode que el agente puede leer | MCP |
 | QA de fotosensibilidad | EA IRIS (BSD) o PEAT | La brecha que ningún pack cubre | CLI en CI |
@@ -320,7 +327,7 @@ Principio rector: todo lo que tenga texto, UI, datos, logos o timing exacto se h
 | Nivel | Para quién | Composición | Costo mensual aprox. |
 | --- | --- | --- | --- |
 | Starter | Piloto o un creativo | HyperFrames + kit, Playwright MCP, ElevenLabs Starter/Creator, SFX CC0, DaVinci Resolve Free, Frame.io Free, render local | USD 10–35 |
-| Pro | Equipo de 3–6 | + Figma con MCP, ElevenLabs Pro, Epidemic o Artlist, Veo/Kling por API, Screen Studio, Resolve Studio, Frame.io Team, render en Lambda propia | USD 400–1.200 |
+| Pro | Equipo de 3–6 | + Figma con MCP, ElevenLabs Pro, Epidemic o Artlist, Veo (vía Vertex AI) o Kling por API, Screen Studio, Resolve Studio, Frame.io Team, render en Lambda propia (el kit lo deniega por defecto; lo habilita el technical director con un cambio documentado en los permisos) | USD 400–1.200 |
 | Enterprise | Estudio con clientes corporativos | + marketplace interno de skills revisadas, managed settings con allowlist, ElevenLabs Business con releases de talento, música Enterprise, Vertex AI bajo el contrato del cliente, Frame.io Enterprise, QA formal (IRIS, loudness por destino), C2PA | USD 3.000–15.000+ |
 
 **Evitar:**
@@ -339,24 +346,25 @@ El riesgo no está en el motion graphic abstracto sino en los insumos: música, 
 
 | Tema | Regla de la casa |
 | --- | --- |
-| Divulgación de IA | Depende del realismo, no del uso de IA. Motion estilizado: en general no requiere etiqueta. Voz clonada, avatares, personas, productos o lugares fotorrealistas generados: etiqueta en YouTube, Meta, TikTok y LinkedIn, y en la UE por el Art. 50 del AI Act (vigente desde el 2-ago-2026; multas de hasta EUR 15 M o 3 % de la facturación). |
-| Voz y semejanza | Consentimiento escrito antes de clonar una voz o usar un avatar. En Argentina, el Art. 53 del Código Civil y Comercial exige consentimiento para reproducir imagen o voz. |
+| Divulgación de IA | Las plataformas la exigen según el realismo: voz clonada, avatares, personas, productos o lugares fotorrealistas generados se etiquetan en YouTube, Meta, TikTok y LinkedIn, y en la UE por el Art. 50 del AI Act (vigente desde el 2-ago-2026; multas de hasta EUR 15 M o 3 % de la facturación). **Política de la casa, más estricta:** toda pieza con voz sintética (TTS genérica o clon) lleva disclosure. El motion estilizado sin esos elementos, en general, no la necesita. |
+| Voz y semejanza | Consentimiento escrito antes de clonar una voz o usar un avatar. En Argentina, el Art. 53 del Código Civil y Comercial exige consentimiento para reproducir imagen o voz (dato de conocimiento previo, no reverificado en esta investigación: confirmar con Legal). |
 | Copyright del output | En EE. UU. lo 100 % generado no es registrable: documentar el aporte humano (guion, storyboard, selección, edición) y ajustar contratos ("cedemos los derechos que existan"). |
-| Plan de Claude | Para clientes, solo planes comerciales (Team, Enterprise, API): asignan el output al cliente e incluyen indemnidad por IP de terceros. Nunca Pro/Max para trabajos de clientes (términos de consumo, sin indemnidad). |
+| Plan de Claude | Para clientes, solo planes comerciales: Team Premium, Enterprise o API (hay información contradictoria sobre si Team Standard incluye Claude Code). Las Commercial Terms asignan el output a quien contrata el plan, es decir al estudio y no a su cliente (la cesión al cliente final va en el contrato propio), e incluyen una indemnidad por IP de terceros que, según análisis secundarios, **excluye marcas, modificaciones, combinaciones con otras tecnologías y los inputs del cliente**. Validar las Commercial Terms vigentes con Legal. Nunca Pro/Max para trabajos de clientes (términos de consumo, sin indemnidad). |
 | Música | Solo librerías con licencia comercial registrada en el ledger; música IA solo con aprobación legal; whitelist de Content ID. |
 | Fuentes | Licencia que cubra video. Cuidado: HyperFrames embebe automáticamente fuentes instaladas en la máquina; el kit vendoriza solo fuentes declaradas. |
-| Logos y UI de terceros | Uso nominativo (sin sugerir patrocinio); permiso escrito en campañas con mucho uso; capturas con cuentas demo y datos difuminados. |
-| Datos y código en pantalla | Solo desde archivos con fuente (`research/claims.csv`), firmados por el SME; el código mostrado compila o está marcado como pseudocódigo. |
-| Confidencialidad | `hyperframes publish` y `cloud render` suben el proyecto a HeyGen: bloqueados en el kit. Renders de clientes, local o en nube propia. |
-| Supply chain | Snyk encontró 76 skills maliciosas sobre 3.984 auditadas y hubo campañas contra Claude Code en 2026. Allowlist de orígenes, fork interno, pin a commit, revisión de scripts, lockfile, espera de 7–14 días antes de adoptar versiones nuevas de npm. |
-| Telemetría | HyperFrames la trae activa y su skill sugiere enviar feedback a un canal público después de cada render: apagada y bloqueada en el kit. |
-| Procedencia | HyperFrames no firma C2PA: si hay elementos realistas generados, firmar los masters con un paso aparte. |
+| Software | GSAP tiene licencia propia "no charge" (no OSI) que prohíbe usarlo en herramientas que compitan con el builder visual de Webflow, y Webflow puede terminarla a su discreción: revisar con Legal, sobre todo si el kit se vuelve un producto. HyperFrames es Apache-2.0. |
+| Logos y UI de terceros | Uso nominativo (sin sugerir patrocinio); la indemnidad de Anthropic no cubre marcas; permiso escrito en campañas con mucho uso; capturas con cuentas demo y datos difuminados. |
+| Datos y código en pantalla | Solo desde archivos con fuente (`research/claims.csv`), firmados por el SME: el build estricto frena cifras sin claim firmado. El código mostrado compila o está marcado como pseudocódigo. |
+| Confidencialidad | Todo lo que el agente lee (guiones, datos, UI no lanzada) viaja a Anthropic: plan comercial, DPA o ZDR según el cliente, y consentimiento registrado en el brief. Los proveedores de voz y música y la búsqueda web del investigador también reciben texto: cada uno se aprueba en el brief. `hyperframes publish` y `cloud render` suben el proyecto a HeyGen: denegados en el kit. Renders de clientes, local o en nube propia. |
+| Supply chain | Snyk auditó 3.984 skills públicas y encontró 76 con payload malicioso (otro informe cita 1.467 payloads sobre el mismo estudio: las cifras no coinciden entre fuentes), y hubo campañas contra Claude Code en 2026. Allowlist de orígenes, fork interno, pin a commit, revisión de scripts, lockfile, espera de 7–14 días antes de adoptar versiones nuevas de npm. |
+| Telemetría | HyperFrames la trae activa y su skill pide enviar feedback a un canal público después de cada render. En el kit: `npm run setup` la apaga en la máquina, los scripts fijan `HYPERFRAMES_NO_TELEMETRY=1`, `npm run doctor` la verifica y el pedido de feedback está neutralizado en las skills. Para garantizarlo, bloquear el egress a los hosts de HeyGen y PostHog. |
+| Procedencia | HyperFrames no firma C2PA: si hay elementos realistas generados, firmar los entregables (`_DELIVERY.mp4`) con un paso aparte; el re-encode borra cualquier manifiesto previo. |
 
-**Cómo lo opera el kit:** `PROVENANCE.md` por pieza (cada asset con origen, licencia, restricciones y consentimiento), `qa/legal-checklist.md` con firmas por nivel de riesgo (N1 interno, N2 público, N3 cliente o personas reales), permisos de Claude Code que bloquean `publish`, `cloud`, `lambda`, `auth`, `feedback`, `telemetry` y `upgrade`, versiones exactas y skills fijadas a un commit. Lo que se archiva no es el prompt: es el proyecto, el lockfile y el master.
+**Cómo lo opera el kit:** `PROVENANCE.md` por pieza (cada asset con origen, licencia, restricciones y consentimiento), `qa/legal-checklist.md` con firmas por nivel de riesgo (N1 interno, N2 público, N3 cliente o personas reales), permisos de Claude Code que deniegan `publish`, `cloud`, `lambda`, `auth`, `feedback`, `telemetry enable` y `upgrade` en todas sus formas de invocación, versiones exactas y skills fijadas a un commit. Los permisos son una mitigación, no un bloqueo: una persona o un script fuera de Claude Code pueden ejecutar esos comandos. En una organización, el control fuerte son las managed settings de Claude Code y el bloqueo de egress (los hosts están en el README del kit). Lo que se archiva no es el prompt: es el proyecto, el lockfile y el master. *Ninguna regla de esta sección es asesoramiento legal: validarlas con Legal antes de aplicarlas a un cliente.*
 
 ## Costos reales y métricas
 
-Un minuto terminado con IA y dirección humana cuesta, estimado, USD 250–1.400, frente a USD 1.500–18.000 de una agencia; el costo dominante son 5–14 horas humanas, no los tokens. Son supuestos de modelado (confianza baja): el piloto tiene que reemplazarlos con datos propios.
+Un minuto terminado con IA y dirección humana cuesta, estimado, USD 250–1.400, frente a USD 1.500–18.000 de una agencia; el costo dominante son 5–14 horas humanas, no los tokens. Son supuestos de modelado (confianza baja): el piloto tiene que reemplazarlos con datos propios. La tabla sale de otro informe y compara solo horas de producción por minuto en régimen, por eso implica una baja mayor (≈ 65 %) que el 35–55 % por pieza de la sección del pipeline, que incluye gestión y rondas. La meta del piloto (−40 %) usa la estimación conservadora.
 
 | Escenario (por minuto terminado) | Horas humanas | Herramientas y modelo | Total estimado | Calidad esperable |
 | --- | --- | --- | --- | --- |
@@ -380,7 +388,7 @@ Supuestos: costo horario interno de USD 40–90 (en Argentina puede ser menor), 
 | Retención a 30 s y CTR | YouTube Studio | Mejor que el promedio del canal |
 | Finalización, guardados y compartidos | Shorts, Reels, TikTok | Mejor que el promedio del canal |
 
-Para medir horas sin fricción, el kit versiona cada render (`_v001`, `_v002`…) y deja un `review/CHANGELOG.md` por pieza con qué se cambió y qué ronda lo pidió.
+Para medir horas, cada pieza trae `review/HORAS.csv` (persona, rol, gate y horas), además del versionado de renders (`_v001`, `_v002`…) y el `review/CHANGELOG.md` con qué se cambió y qué ronda lo pidió.
 
 ## Plan de adopción 30-60-90 y formación
 
@@ -398,6 +406,39 @@ La formación inicial son 4 sesiones de 2 horas: specs ejecutables y guion a dos
 
 El atajo para todos los niveles: pedir cambios con tokens y números ("salida a 325 ms con `exit`", "hold de 2 s después del conteo") en lugar de adjetivos ("más lindo", "más dinámico").
 
+## Glosario
+
+Para que todo el equipo hable el mismo idioma, incluidos quienes no programan.
+
+| Término | Qué significa |
+| --- | --- |
+| Harness | El andamiaje alrededor del agente: reglas (`CLAUDE.md`), sistema de marca, bloques, permisos, gates y QA. Convierte "un prompt" en un proceso repetible. |
+| Token de diseño | Un valor de marca con nombre (color, fuente, duración, curva) que el código usa en lugar del número suelto. No confundir con token de modelo. |
+| Token de modelo | La unidad con la que se mide y se cobra el texto que procesa Claude. |
+| Gate (G0–G15) | Punto de aprobación humana entre fases: nada avanza sin la firma del rol indicado. |
+| Styleframe | Un frame fijo terminado que define el look antes de animar. |
+| Animatic | Borrador con el timing real y voz provisoria para aprobar el ritmo. |
+| Picture lock | Versión con la imagen congelada; desde ahí solo cambian sonido y captions. |
+| Claim | Cada afirmación verificable en pantalla o en la voz. Vive en `research/claims.csv` con su fuente y la firma del SME. |
+| SME | Experto en la materia (*subject-matter expert*) que firma la exactitud técnica. |
+| brandLock | Huella de la marca guardada en cada proyecto: si la marca cambió, el re-render se frena hasta confirmar el cambio con `--rebrand`. |
+| Hold | Tiempo que un elemento queda quieto para poder leerse. |
+| Easing o curva | Cómo acelera o frena un movimiento; se escribe como `cubic-bezier`. |
+| Stagger | Desfase entre elementos de un grupo que entran uno tras otro. |
+| Safe zone | El área que no tapa la interfaz de la plataforma (botones, descripción). |
+| cqmin | Unidad de tamaño relativa al lado menor del cuadro: permite que una escena funcione en 16:9, 9:16, 1:1 y 4:5. |
+| Determinismo | Mismo proyecto, mismo video, cuadro por cuadro. |
+| Lockfile | Archivo que fija versiones exactas de dependencias o skills. |
+| LUFS y dBTP | Volumen percibido promedio y pico real del audio. Las plataformas web normalizan cerca de −14 LUFS. |
+| ProRes y H.264 | Códec de master (casi sin pérdida, pesado) y códec de entrega (comprimido, liviano). |
+| Alpha | Canal de transparencia, para overlays que se montan en el editor. |
+| Faststart, GOP, BT.709 | Ajustes del MP4: índice al inicio para reproducir en streaming, intervalo entre cuadros clave y espacio de color estándar HD. |
+| MCP | *Model Context Protocol*: el estándar con el que Claude se conecta a herramientas externas (Figma, Resolve, Frame.io). |
+| Skill y subagente | Instrucciones empaquetadas que Claude carga para una tarea; un Claude con un rol y permisos acotados. |
+| RACI | Matriz de quién hace, quién aprueba, a quién se consulta y a quién se informa en cada gate. |
+| C2PA | Estándar de credenciales de contenido que firma el origen de un archivo. |
+| OSI | *Open Source Initiative*. "No OSI" = una licencia que no es open source estándar y tiene que leer Legal. |
+
 ## Limitaciones de esta guía y preguntas abiertas
 
 Esta guía se armó con 7 frentes de investigación en paralelo, lectura directa de los repositorios que el video instala y pruebas reales del kit (renders, lint, check y QA). Estos son sus límites:
@@ -407,12 +448,15 @@ Esta guía se armó con 7 frentes de investigación en paralelo, lectura directa
 - **El cupo de búsquedas web se agotó a mitad de la investigación.** Precios de planes, specs de TikTok, Reels, LinkedIn y X, y el estado de leyes de España, Dinamarca y Argentina quedaron con verificación secundaria.
 - **Costos y horas por minuto son modelos, no mediciones:** el piloto los reemplaza.
 - **El QA de fotosensibilidad del kit es una heurística de frame completo;** para entregas sensibles hace falta EA IRIS o PEAT.
+- **Una revisión adversarial interna encontró 25 problemas** en la primera versión de esta guía y del kit: afirmaciones que decían más de lo que el kit hacía, una cadena de audio y master rota, gates que no frenaban y datos de ejemplo creíbles en los bloques. Se corrigieron todos; lo que quedó sin probar está en *Qué se verificó*.
+- **Los gates de contenido son heurísticos:** detectan placeholders, cifras sin claim en los bloques de datos y valores fuera de marca, pero una cifra escrita dentro de un texto libre depende de la revisión humana.
 
 **Preguntas abiertas para el equipo:**
 
-- [ ] ¿Motor primario: HyperFrames (el del kit) o Remotion? Decidir con la matriz de la sección anterior.
-- [ ] ¿Qué plan de Claude se usa para trabajo de clientes (Team, Enterprise o API)?
-- [ ] ¿Quién ocupa el rol de *technical director*?
+- [ ] ¿Motor primario: HyperFrames (el del kit) o Remotion (el que recomendó el informe de motores)? Decidir con la matriz de la sección de motores.
+- [ ] ¿Qué plan de Claude se usa para trabajo de clientes (Team Premium, Enterprise o API) y con qué DPA?
+- [ ] ¿Quién ocupa el rol de *technical director* y quién administra las managed settings y el bloqueo de egress?
+- [ ] ¿Un repo por cliente o por marca, o un repo único con la marca fijada por proyecto?
 - [ ] ¿Qué librería de música y qué proveedor de voz con licencia comercial?
 - [ ] ¿Cuáles son las 3 piezas del piloto y cuál se produce también en flujo tradicional para comparar?
 

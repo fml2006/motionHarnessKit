@@ -12,6 +12,7 @@ Lo que muestran los tutoriales ("pedile a Opus un video y sale un MP4") es real,
 - **Gobernanza (mitigación, no blindaje):** versiones fijadas, telemetría apagada, comandos de nube/publicación/feedback denegados en Claude Code, ledger de procedencia, checklist legal y registro de horas. Los controles de organización que faltan están listados en [Gobernanza](#gobernanza-qué-cubre-el-kit-y-qué-tiene-que-sumar-la-organización).
 
 > La guía completa de uso (de conceptos básicos a operación enterprise) está en `docs/GUIA.md` y en la versión publicada que acompaña este kit.
+> Qué se probó, con qué resultado y qué quedó sin probar: `docs/VERIFICACION.md`.
 
 ---
 
@@ -157,7 +158,7 @@ Lo que **tiene que sumar la organización** para un uso enterprise:
 ## Decisiones de diseño (y por qué)
 
 - **HyperFrames como motor del kit, aunque el research recomendó Remotion.** El informe comparativo (`docs/research/03-remotion-y-comparativa.md`) recomendó **Remotion como motor primario** para un equipo de contenido tech (maduro desde 2021, Lambda distribuido probado, plantillas tipadas, skills oficiales para Claude Code; el costo de licencia es marginal para una empresa) y HyperFrames como secundario (pre-1.0, roadmap controlado por HeyGen, telemetría activada por defecto, y "sin camino de vuelta" hacia Remotion). El kit eligió HyperFrames igual, como decisión explícita y revisable, porque es el flujo exacto del video que replica, es Apache-2.0 sin costo por seat (Remotion exige Company License desde 4 personas), es HTML/CSS (lo dominan diseñadores web) y trae tooling pensado para agentes (lint, check, snapshot, skills). **Contras asumidos:** pre-1.0 con releases diarios (versión exacta fijada), telemetría por defecto (apagada y mitigada), depende de GSAP (licencia propia, no OSI). **Si tu equipo elige Remotion, del kit se lleva** la marca como código (`brand/brand.config.json` → `brand/dist/remotion-theme.ts`), las plantillas, skills de preproducción, subagentes, `qa.mjs`, `loudnorm`/`master` y `delivery/specs.json`; **se pierden** los 13 bloques, `build:roots`, `frames`, `render`, `deliver` (la parte de render) y los gates de lint/check, que son específicos de HyperFrames.
-- **Tamaños en `cqmin` + container queries:** una escena escrita una vez funciona en 16:9, 9:16 y 1:1; el vertical escala la tipografía ×1,22 y respeta la safe zone universal de Reels/TikTok/Shorts.
+- **Tamaños en `cqmin` + container queries:** una escena escrita una vez funciona en 16:9, 9:16, 4:5 y 1:1; el vertical escala la tipografía ×1,22 (×1,1 en 4:5) y respeta la safe zone universal de Reels/TikTok/Shorts.
 - **Bloques que se copian, no librería opaca:** la escena arranca desde un bloque probado y después es editable por el agente o el motion designer.
 - **Determinismo y offline:** GSAP, fuentes y logo se vendorizan en cada proyecto; nada se baja en el render.
 - **Gates humanos:** la IA abarata construir, no aprobar. Mensaje, claims, gusto final y publicación son humanos.
@@ -165,7 +166,7 @@ Lo que **tiene que sumar la organización** para un uso enterprise:
 ## Limitaciones conocidas (honestas)
 
 - El QA de fotosensibilidad es una **heurística de frame completo**; para piezas sensibles corré EA IRIS o PEAT.
-- Las specs de TikTok, Reels, LinkedIn y X cambian seguido y no todas están documentadas oficialmente (`verified: false` en `delivery/specs.json`).
+- Las specs de TikTok, Reels, LinkedIn y X cambian seguido y no todas están documentadas oficialmente (`specsVerified: false` en `delivery/specs.json`; el QA lo avisa).
 - El kit no incluye música ni voz: integrá proveedores con licencia comercial (ver guía) y registralos en `PROVENANCE.md`.
 - Transiciones entre escenas implementadas: `cut`, `crossfade`, `push`, `mask-wipe`. `zoom-through` y `match-cut` se hacen en el NLE.
 - Captions quemados: a partir de un `captions.srt`/`.vtt` que hay que preparar (p. ej. con `npx hyperframes transcribe` sobre la VO final) y revisar a mano; no hay estilos de captions animados por palabra.
