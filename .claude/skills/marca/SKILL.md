@@ -19,7 +19,7 @@ Todo lo que el kit produce sale de `brand/brand.config.json`. Esta skill lo comp
 5. Colores en HEX (no muestreados de un JPG): fondo, texto, primario, secundario, acento. ¿Marca clara u oscura?
 6. Tipografías (display / texto / mono) y su licencia: ¿cubre uso en video? Archivos `.woff2`/`.ttf` a `brand/fonts/`. Si son Google Fonts / OFL, decime el nombre y uso `@fontsource`.
 7. Logos en SVG a `brand/logo/` (`logo.svg`, `mark.svg`, versión para fondo claro). Para animarlo por partes: `<g data-part="mark">` y `<g data-part="wordmark">`.
-8. 3-5 frames de referencia del motion que les gusta a `brand/references/` y UNA cosa que su motion nunca debe hacer.
+8. 3-5 frames de referencia del motion que les gusta a `brand/references/` (ver `brand/references/README.md`) y UNA cosa que su motion nunca debe hacer.
 
 ## Paso 2 — Traducir a `brand/brand.config.json`
 - `identity`, `colors` (incluí `code.*` y `dataViz` con contraste suficiente), `typography` (`source: "fontsource"` + `package` o `source: "local"` + `files: {"400": "Archivo.woff2"}`), `logo`.

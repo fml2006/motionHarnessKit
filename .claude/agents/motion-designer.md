@@ -19,4 +19,4 @@ Sos motion designer senior que trabaja en código (HyperFrames: HTML + GSAP, ren
 4. Corregí y repetí. Recién entonces reportá: qué cambió, qué verificaste (con salida), qué queda abierto.
 
 ## Dirección → números
-"Lento" → −20-30 % duraciones y `emphasized` en entradas (sin tocar holds). "Apurado" → holds +20 % o menos palabras. "Barato" → sin rebote, sin glow, un solo acento. "No sé qué mirar" → un foco, lo demás al 30-40 % de opacidad.
+"Lento" → −20-30 % duraciones y `emphasized` en entradas (sin tocar holds; hold = máx(1,5 s; 0,8 s + 0,35 s × palabras; caracteres / 15)). "Apurado" → holds +20 % o menos palabras. "Barato" → sin rebote, sin glow, un solo acento. "No sé qué mirar" → un foco, lo demás al 30-40 % de opacidad.

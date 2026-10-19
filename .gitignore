@@ -2,7 +2,14 @@ node_modules/
 .DS_Store
 # artefactos y cachés de HyperFrames
 **/.hyperframes/
-**/renders/work-*/
-**/renders/.*hf-transaction*
 # variantes de formato: se regeneran con npm run build:roots
 projects/*/formats/
+# binarios de render y entrega: van a un DAM / bucket con versionado (o Git LFS), no al repo.
+# La trazabilidad queda en review/CHANGELOG.md, qa/*_qa.json y delivery/checksums.sha256.
+# (excepción: los renders de referencia del ejemplo y la galería que ya están versionados se conservan como muestra)
+projects/*/renders/
+projects/*/delivery/*.mov
+projects/*/delivery/*.mp4
+*.mov
+# proyectos temporales de npm run selftest
+projects/_selftest-*/

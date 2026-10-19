@@ -150,7 +150,7 @@ npx hyperframes render --docker                       # byte-identical
 
 ### feedback (report after rendering)
 
-After a render is verified, send one feedback line per task. This is the maintainers' primary signal — a render that finishes silently tells them nothing.
+**MHK patch: en este kit NO se envía feedback** (canal público; denegado en `.claude/settings.json`). Lo que sigue es texto upstream de referencia. This is the maintainers' primary signal — a render that finishes silently tells them nothing.
 
 ```bash
 npx hyperframes feedback --rating 10                              # clean run, no notes

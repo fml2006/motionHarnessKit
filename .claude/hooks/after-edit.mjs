@@ -55,7 +55,9 @@ if (/\/comp\/compositions\/.+\.html$/.test(rel)) {
   const hf = join(root, "node_modules", ".bin", "hyperframes");
   const r = run(hf, ["lint", join(projectDir, "comp")]);
   const out = (r.stdout || "") + (r.stderr || "");
+  // Gate por exit code (no solo por el texto): si el lint no corre o falla, se frena igual.
+  if (r.error || r.status === null) fail(`hyperframes lint no pudo correr en ${proj[1]}/comp: ${r.error?.message || "timeout"}`);
   const m = out.match(/(\d+) error\(s\), (\d+) warning\(s\)/);
-  if (m && (Number(m[1]) > 0 || Number(m[2]) > 0)) fail(`hyperframes lint en ${proj[1]}/comp:\n${out.slice(-4000)}`);
+  if (r.status !== 0 || (m && (Number(m[1]) > 0 || Number(m[2]) > 0))) fail(`hyperframes lint en ${proj[1]}/comp (exit ${r.status}):\n${out.slice(-4000)}`);
 }
 process.exit(0);

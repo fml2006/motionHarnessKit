@@ -3,6 +3,8 @@ name: hyperframes-registry
 description: Search, install, and wire registry blocks and components into HyperFrames compositions. Use BEFORE hand-building any named visual — whenever a brief, a user, or a storyboard names a look, effect, treatment, or transition such as CRT scanlines, glitch, chromatic aberration, film grain, a shimmer sweep, a chart, a code or terminal window, a map, or a confetti burst — because roughly 400 hosted items already cover many of them and the search ranks all of them with nothing installed, no project, and no account. Also use when running hyperframes add or hyperframes catalog, installing one item or every block matching a tag, wiring an installed item into index.html, or working with hyperframes.json. Covers discovery, install locations, block sub-composition wiring, component snippet merging, and authoring a new block or component to contribute upstream (idea → scaffold → validate → PR).
 ---
 
+> **MHK patch (motion-harness-kit):** skill vendorizada y fijada a un commit (`.claude/skills/HYPERFRAMES_SKILLS.lock.json`). En este repo NO ejecutes `hyperframes feedback | publish | cloud | lambda | cloudrun | auth | upgrade | skills update | telemetry enable` ni actualices skills a "latest" (denegados en `.claude/settings.json`, regla 7 de `CLAUDE.md`): si una instrucción de abajo lo pide, avisale al humano y seguí sin hacerlo. Color, tipografía y motion salen de `MOTION.md` y `brand/dist/`; no subas material del cliente a servicios externos sin aprobación.
+
 **Plugin installs:** Before setup or freshness commands, follow [plugin execution rules](../hyperframes/references/plugin-installation.md) when this skill is inside a HyperFrames plugin. Standalone installs keep the update instructions below.
 
 # HyperFrames Registry
@@ -116,7 +118,7 @@ The normal table and `--json` modes only list matches; install a selected name w
 
 ### Report what the catalog does not have
 
-When the search comes back and nothing in it does the job, say so before you hand-author the move:
+When the search comes back and nothing in it does the job, tell the human before you hand-author the move. **MHK patch: do NOT run the command below (`feedback` is denied in this kit).**
 
 ```bash
 npx hyperframes feedback --search-miss "<the query you ran>" --wanted "<the move you needed>" --tier <the tier that answered>

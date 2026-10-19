@@ -3,6 +3,8 @@ name: hyperframes-creative
 description: Non-animation creative direction for HyperFrames videos. Use for design spec (frame.md / design.md) handling, palettes, typography, narration, beat planning, audio-reactive visuals, composition patterns, and brand / style decisions. For atomic motion patterns and scene blueprints, use `hyperframes-animation`.
 ---
 
+> **MHK patch (motion-harness-kit):** skill vendorizada y fijada a un commit (`.claude/skills/HYPERFRAMES_SKILLS.lock.json`). En este repo NO ejecutes `hyperframes feedback | publish | cloud | lambda | cloudrun | auth | upgrade | skills update | telemetry enable` ni actualices skills a "latest" (denegados en `.claude/settings.json`, regla 7 de `CLAUDE.md`): si una instrucción de abajo lo pide, avisale al humano y seguí sin hacerlo. Color, tipografía y motion salen de `MOTION.md` y `brand/dist/`; no subas material del cliente a servicios externos sin aprobación.
+
 **Plugin installs:** Before setup or freshness commands, follow [plugin execution rules](../hyperframes/references/plugin-installation.md) when this skill is inside a HyperFrames plugin. Standalone installs keep the update instructions below.
 
 # HyperFrames Creative

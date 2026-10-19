@@ -1,7 +1,7 @@
 # PLAN DE REVISIÓN Y LOG DE FEEDBACK — [CLIENTE] · [PIEZA]
 
 > Gates **G8** (rondas) → **G9** (picture lock). Dueño: Productor (consolida) · Motion director (traduce al agente) · Aprueba: Cliente (aprobador único).
-> Archivos: `reviews/plan.md`, `reviews/R1.md`, `reviews/R2.md`. Cada versión enviada = tag git `rvw-vNN`.
+> Archivos: `review/R1.md`, `review/R2.md` (el plan de §1 va en `review/R1.md` o en el brief) y `review/CHANGELOG.md`. Cada versión enviada = tag git `rvw-vNN`; la equivalencia con la versión interna `_v###` se anota en el CHANGELOG (ver `templates/naming-convention.md` §1.1).
 
 ---
 
@@ -63,12 +63,12 @@ Nota humana (literal): "…"
 Diagnóstico (motion director): <causa concreta: duración, easing, jerarquía, contraste, densidad, sync con VO>
 Instrucción al agente:
   CAMBIAR: <elemento> · <propiedad> de <valor actual> a <valor nuevo> · <duración/easing/token> · <disparador (palabra VO o TC)>
-  MANTENER: layout aprobado (boards/stills/S__.png), textos, tokens, duración total de la escena (__ s)
+  MANTENER: layout aprobado (review/frames-<fmt>/NN_<id>.png), textos, tokens, duración total de la escena (__ s)
   NO TOCAR: <lista de escenas / elementos con lock>, audio, otras escenas
   DATOS: <archivo> (no inventar valores)
 Criterio de aceptación: <qué debe ser verdad en snapshot @ TC>; `npx hyperframes check` sin errores; duración de la escena sin cambios
 Verificación: snapshot --at <t1,t2,t3> · compare v__ vs v__ · reproducción completa 1x por el motion director
-Registro: history begin --who claude --label "R1 FB-___" … history end
+Registro: entrada en review/CHANGELOG.md bajo la versión nueva (FB-ID resueltos); opcional: npx hyperframes history begin --who claude --label "R1 FB-___" … history end
 ```
 
 ### Ejemplo resuelto
@@ -78,11 +78,11 @@ Nota humana: "El gráfico se siente lento y no se entiende qué es lo importante
 Diagnóstico: barras entran en 1,2 s con ease lineal; el dato clave (p95 −38 %) aparece al final y con el mismo peso visual que el resto.
 Instrucción al agente:
   CAMBIAR: entrada de barras 1,2 s linear → 0,6 s power3.out, stagger 0,08 s
-  CAMBIAR: barra "v2" a token --accent; label "−38 % p95" (type.display) aparece en la palabra VO "treinta y ocho", scale 0,9→1, 0,25 s
-  CAMBIAR: resto de barras a --neutral-500
-  MANTENER: layout de boards/stills/S08.png, textos, duración de S08 = 3,0 s
+  CAMBIAR: barra "v2" a token var(--c-accent); label "−38 % p95" (.bm-hero) aparece en la palabra VO "treinta y ocho", scale 0,9→1, 0,25 s
+  CAMBIAR: resto de barras a var(--c-text-muted)
+  MANTENER: layout de review/frames-landscape/08_s08-<id>.png, textos, duración de S08 = 3,0 s
   NO TOCAR: S07, S09 (lock: true), audio
-  DATOS: data/latency-p95.json
+  DATOS: research/data/latency-p95.json (claim C-0__)
 Criterio de aceptación: en snapshot @ 43.0 s "−38 % p95" es el elemento de mayor contraste; cifras = JSON; check sin errores; S08 sigue durando 3,0 s
 Verificación: snapshot --at 41.5,42.5,43.5 ; compare rvw-v01 vs v02 @ 43.0 ; reproducción 1x
 ```

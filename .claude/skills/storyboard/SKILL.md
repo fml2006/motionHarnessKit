@@ -8,7 +8,7 @@ description: Gates G4-G5. Convierte el guion aprobado en storyboard ejecutable (
 Prerrequisito: `01_guion.md` aprobado.
 
 ## 1. Escenas
-Delegá al subagente `storyboarder`. Para cada beat: id estable, bloque de `engine/blocks/README.md`, duración (≥ hold de lectura + entrada + salida), variables con texto literal, transición, notas (VO, acceptance, do_not). Vertical: densidad a la mitad vía `formats.portrait.vars`.
+Delegá al subagente `storyboarder`. Para cada beat: id estable, bloque de `engine/blocks/README.md`, duración (≥ hold de lectura + entrada + salida; con VO, el fragmento de VO a 2,2 palabras/s + 0,3-0,5 s), variables con texto literal, `claims` (IDs de `research/claims.csv` para toda cifra o afirmación técnica en pantalla), transición, notas (VO, acceptance, do_not). Vertical: densidad a la mitad vía `formats.portrait.vars`.
 
 ## 2. Archivos
 - `02_storyboard.md` (plantilla `templates/storyboard.md`: ficha A + bloque B compatible con el parser de HyperFrames).
@@ -19,7 +19,7 @@ Delegá al subagente `storyboarder`. Para cada beat: id estable, bloque de `engi
 npm run frames -- <proyecto>
 npm run frames -- <proyecto> --format portrait
 ```
-Abrí cada PNG en `review/frames-*`. Antes de mostrar, autocrítica con el subagente `director-de-arte` (jerarquía, un acento, safe areas, tamaños, anti-slop sección E). Corregí vars/duraciones/escenas y regenerá.
+Abrí cada PNG en `review/frames-*`. Antes de mostrar, autocrítica con el subagente `director-de-arte` (jerarquía, un acento, safe areas, tamaños; `templates/anti-slop-review.md` sección 1 y bloque E "Look" del checklist de la sección 3). Corregí vars/duraciones/escenas y regenerá.
 
 ## 4. Salida
 Contact sheets de 16:9 y 9:16 + tabla de escenas (id · bloque · duración · texto) + duración total vs objetivo (±5 %). Pedí aprobación de look (G4) y de storyboard (G5). Lo aprobado se marca con `"lock": true` en notas o en el storyboard.

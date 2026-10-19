@@ -15,5 +15,24 @@
     "motion-graphics": "67bd36b53df3b7e0",
     "general-video": "f288a7bc7eb1a1cf",
     "faceless-explainer": "47a0783444abc45a"
+  },
+  "localPatches": {
+    "script": "scripts/patch-hf-skills.mjs",
+    "disableModelInvocation": [
+      "hyperframes",
+      "faceless-explainer",
+      "general-video",
+      "motion-graphics",
+      "media-use"
+    ],
+    "governanceNotice": "todas las skills vendorizadas (bloque '> **MHK patch (motion-harness-kit)**' al inicio del SKILL.md)",
+    "feedbackNeutralized": [
+      "hyperframes-cli/SKILL.md",
+      "hyperframes-cli/references/preview-render.md",
+      "hyperframes-registry/SKILL.md",
+      "motion-graphics/agents/builder.md",
+      "motion-graphics/catalog-map.md"
+    ],
+    "nota": "Los hashes de 'skills' son los de upstream (skills-manifest.json) ANTES del parche. Al subir HF_SHA, revisar los avisos de anclas no encontradas."
   }
 }

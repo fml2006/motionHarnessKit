@@ -4,6 +4,8 @@
 #   bash scripts/install-hf-skills.sh                # core + workflows usados por el kit
 #   HF_SHA=<sha> bash scripts/install-hf-skills.sh   # otro commit (debe coincidir con la versión de la CLI fijada)
 #   HF_REPO=/ruta/clon-local bash scripts/install-hf-skills.sh   # sin red, desde un clon local revisado
+# Después de copiar aplica los parches locales de scripts/patch-hf-skills.mjs (los workflows end-to-end quedan
+# con disable-model-invocation: true y se neutraliza el envío de `hyperframes feedback`).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 HF_SHA="${HF_SHA:-cea0bad7931122bd93680006978c0d9007daa3d4}"   # main al 2026-10-19 = CLI hyperframes 0.8.174
@@ -43,6 +45,19 @@ for s in "${SKILLS[@]}"; do
   n=$((n+1))
   echo "  ✓ $s (${h:-sin hash})"
 done
-printf '\n  }\n}\n' >> "$LOCK"
+printf '\n  },\n' >> "$LOCK"
+# Parches locales (MHK patch): workflows solo por invocación explícita, aviso de gobernanza y feedback neutralizado.
+echo "▶ Aplicando parches locales (scripts/patch-hf-skills.mjs)"
+node "$ROOT/scripts/patch-hf-skills.mjs"
+cat >> "$LOCK" <<'JSON'
+  "localPatches": {
+    "script": "scripts/patch-hf-skills.mjs",
+    "disableModelInvocation": ["hyperframes", "faceless-explainer", "general-video", "motion-graphics", "media-use"],
+    "governanceNotice": "todas las skills vendorizadas (bloque '> **MHK patch (motion-harness-kit)**' al inicio del SKILL.md)",
+    "feedbackNeutralized": ["hyperframes-cli/SKILL.md", "hyperframes-cli/references/preview-render.md", "hyperframes-registry/SKILL.md", "motion-graphics/agents/builder.md", "motion-graphics/catalog-map.md"],
+    "nota": "Los hashes de 'skills' son los de upstream (skills-manifest.json) ANTES del parche. Al subir HF_SHA, revisar los avisos de anclas no encontradas."
+  }
+}
+JSON
 echo "✓ ${n} skills de HyperFrames fijadas en .claude/skills/ (lock: .claude/skills/HYPERFRAMES_SKILLS.lock.json)"
 echo "  Revisá los scripts que traen (supply chain) antes de usarlas en proyectos de clientes."

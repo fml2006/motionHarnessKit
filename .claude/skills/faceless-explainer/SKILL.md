@@ -1,7 +1,11 @@
 ---
 name: faceless-explainer
+disable-model-invocation: true
 description: "Turn arbitrary text — an article, notes, a topic, a brief — into a faceless explainer video: there is no site or footage to capture, so the visuals are invented per scene (typography, abstract graphics, diagrams, data-viz). Use for topic explainers, concept breakdowns, how-tos, listicles. Not a video built from a website (/product-launch-video — promo or tour). Unclear → /hyperframes."
 ---
+
+> **MHK patch (motion-harness-kit):** skill vendorizada y fijada a un commit (`.claude/skills/HYPERFRAMES_SKILLS.lock.json`). En este repo NO ejecutes `hyperframes feedback | publish | cloud | lambda | cloudrun | auth | upgrade | skills update | telemetry enable` ni actualices skills a "latest" (denegados en `.claude/settings.json`, regla 7 de `CLAUDE.md`): si una instrucción de abajo lo pide, avisale al humano y seguí sin hacerlo. Color, tipografía y motion salen de `MOTION.md` y `brand/dist/`; no subas material del cliente a servicios externos sin aprobación.
+> **MHK patch:** workflow end-to-end de HyperFrames. En este kit solo corre si el humano lo pide explícitamente (`/faceless-explainer`); el pipeline por defecto es `/brief → /guion → /storyboard → /producir → /revisar → /entregar`, con sus gates humanos.
 
 **Plugin installs:** Before setup or freshness commands, follow [plugin execution rules](../hyperframes/references/plugin-installation.md) when this skill is inside a HyperFrames plugin. Standalone installs keep the update instructions below.
 

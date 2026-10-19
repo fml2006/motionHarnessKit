@@ -1,0 +1,6 @@
+fecha,persona,rol,gate,fase,horas,version,nota
+# Una fila por bloque de trabajo (≥ 0,25 h). Roles: productor|guionista|investigador|sme|director-creativo|director-de-arte|motion-designer|editor-sonido|qa|legal|cliente
+# Gates: G0..G15 (ver README del proyecto). Fase: preproduccion|produccion|revision|post|entrega. version = _v### interna o vNN al cliente si aplica.
+# Ejemplos (borrar al usar):
+# 2026-10-20,Ana Pérez,guionista,G3,preproduccion,2.5,,guion v1 + 3 hooks
+# 2026-10-22,Leo Díaz,motion-designer,G8,revision,1.75,v004,R1 FB-003..FB-007

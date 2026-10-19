@@ -1,5 +1,6 @@
 ---
 name: general-video
+disable-model-invocation: true
 description: >
   Author or edit a custom HyperFrames composition when no specialized workflow fits, or when
   BRIEF.md sets flow: companion. Use for longer or multi-scene pieces, brand and sizzle reels,
@@ -7,6 +8,9 @@ description: >
   motion-graphics instead for a short unnarrated motion-first unit, including an animated title.
   Route fresh creation through hyperframes before using this skill.
 ---
+
+> **MHK patch (motion-harness-kit):** skill vendorizada y fijada a un commit (`.claude/skills/HYPERFRAMES_SKILLS.lock.json`). En este repo NO ejecutes `hyperframes feedback | publish | cloud | lambda | cloudrun | auth | upgrade | skills update | telemetry enable` ni actualices skills a "latest" (denegados en `.claude/settings.json`, regla 7 de `CLAUDE.md`): si una instrucción de abajo lo pide, avisale al humano y seguí sin hacerlo. Color, tipografía y motion salen de `MOTION.md` y `brand/dist/`; no subas material del cliente a servicios externos sin aprobación.
+> **MHK patch:** workflow end-to-end de HyperFrames. En este kit solo corre si el humano lo pide explícitamente (`/general-video`); el pipeline por defecto es `/brief → /guion → /storyboard → /producir → /revisar → /entregar`, con sus gates humanos.
 
 **Plugin installs:** Before setup or freshness commands, follow [plugin execution rules](../hyperframes/references/plugin-installation.md) when this skill is inside a HyperFrames plugin. Standalone installs keep the update instructions below.
 

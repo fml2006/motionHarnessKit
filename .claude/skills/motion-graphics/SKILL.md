@@ -1,5 +1,6 @@
 ---
 name: motion-graphics
+disable-model-invocation: true
 description: >
   Use when creating a short, design-led motion graphic where motion is the message — kinetic
   typography, stat count-up, chart/data-viz hit, logo sting / brand lockup,
@@ -10,6 +11,9 @@ description: >
   narration or live-action subject; renders to MP4 or transparent overlay.
   Longer / narrated / multi-scene → /general-video. Unclear → /hyperframes.
 ---
+
+> **MHK patch (motion-harness-kit):** skill vendorizada y fijada a un commit (`.claude/skills/HYPERFRAMES_SKILLS.lock.json`). En este repo NO ejecutes `hyperframes feedback | publish | cloud | lambda | cloudrun | auth | upgrade | skills update | telemetry enable` ni actualices skills a "latest" (denegados en `.claude/settings.json`, regla 7 de `CLAUDE.md`): si una instrucción de abajo lo pide, avisale al humano y seguí sin hacerlo. Color, tipografía y motion salen de `MOTION.md` y `brand/dist/`; no subas material del cliente a servicios externos sin aprobación.
+> **MHK patch:** workflow end-to-end de HyperFrames. En este kit solo corre si el humano lo pide explícitamente (`/motion-graphics`); el pipeline por defecto es `/brief → /guion → /storyboard → /producir → /revisar → /entregar`, con sus gates humanos.
 
 **Plugin installs:** Before setup or freshness commands, follow [plugin execution rules](../hyperframes/references/plugin-installation.md) when this skill is inside a HyperFrames plugin. Standalone installs keep the update instructions below.
 

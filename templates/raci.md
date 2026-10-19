@@ -26,8 +26,8 @@
 | G1 Investigación + registro de claims | A | R | I | I | I | – | – | I | C (firma claims) | R\* (síntesis) | Si hay claims sensibles |
 | G2 Concepto / treatment | C | R | **A** | C | C | I | I | – | I | R\* (variantes) | **Sí** |
 | G3 Guion a dos columnas | C | R | **A** | C | I | C | I | C | C (veto exactitud) | R\* (compresión/timing) | **Sí** |
-| G4 Moodboard / styleframes / `frame.md` | I | I | **A** | R | C | I | – | C | – | R\* (exploración en código) | **Sí** |
-| G5 Storyboard (`STORYBOARD.md`) + shot list | C | C | **A** | R | C | C | I | I | C | R\* (sketches) | Opcional |
+| G4 Moodboard / styleframes / `brand.config.json` → `MOTION.md` | I | I | **A** | R | C | I | – | C | – | R\* (exploración en código) | **Sí** |
+| G5 Storyboard (`02_storyboard.md` + `scenes.json`) + shot list | C | C | **A** | R | C | C | I | I | C | R\* (sketches) | Opcional |
 | G6 Animatic con VO scratch | C | C | **A** | R | C | R | C | I | C | R\* (TTS + sketch pass) | **Sí** |
 | G6b VO final (locutor / TTS) | **A** | C | C | I | I | I | R | I | C (pronunciación) | R\* (si TTS) | Si voz de marca |
 | Captura (screen recordings, footage) | A | I | C | C | C | R | I | C (PII) | C | – | No |

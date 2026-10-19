@@ -27,6 +27,16 @@
 4. Internas: `v02.1`, `v02.2`… al enviarse al cliente, la última interna se renombra a `v03`.
 5. Todo archivo enviado al cliente tiene un **tag de git** equivalente (§5).
 
+### 1.1 Versión interna de render vs versión al cliente
+| | Versión **interna** de render | Versión **al cliente** |
+|---|---|---|
+| Formato | `_v###` (3 dígitos): `mcp-explainer_landscape_v004.mp4` | `vNN` (2 dígitos) en el nombre del §1: `…_RVW_v02_…mp4` |
+| Quién la pone | `npm run render` / `npm run deliver` (autoincremental por proyecto y formato) | El productor, al enviar |
+| Cuándo sube | En cada render (draft o high) | Solo cuando algo sale de la productora |
+| Trazabilidad | `review/CHANGELOG.md` (una entrada por render) | Tag de git `rvw-vNN` / `lock-vNN` / `dlv-vNN` + tabla de equivalencias abajo |
+
+En `review/CHANGELOG.md`, cada entrada se anota bajo la versión **nueva** que la contiene (qué notas de `R<n>.md` resuelve) y, cuando se envía, se agrega la equivalencia: `v007 (interna) = RVW v02 (cliente) · tag rvw-v02 · commit abc1234`.
+
 ## 2. Códigos de fase
 | Código | Fase | Ejemplo |
 |---|---|---|
@@ -47,33 +57,32 @@
 | `THB` | Miniatura / portada | `…_THB_v01_16x9-720p_ES-419_A_….jpg` |
 | `ARC` | Paquete de archivo | `ACME_LAUNCH26_ARC_20261110.zip` |
 
-## 3. Estructura de carpetas del proyecto (repo + almacenamiento)
+## 3. Estructura de carpetas del proyecto (la crea `npm run new`)
 ```
-ACME_LAUNCH26/
-├── BRIEF.md
-├── research/            digest.md · claims.csv · glosario.md · referencias/
-├── GUION.md             (dos columnas) 
-├── SCRIPT.md            (narración bloqueada → TTS / locutor)
-├── frame.md             (design spec: tokens de marca y movimiento)
-├── STORYBOARD.md        (spec ejecutable por escena)
-├── boards/              storyboard.html · stills/S01.png …
-├── compositions/        index.html · frames/S01-hook.html · S01-hook.motion.json …
-├── data/                *.json / *.csv (datos verificados para gráficos)
-├── assets/              logos/ · fonts/ · icons/ · images/
-├── capture/             screen recordings (originales, NO en git si son pesados → LFS / storage)
-├── footage/             entrevistas / b-roll
-├── audio/               vo/ · mx/ · sfx/ · mix/
-├── reviews/             plan.md · R1.md · R2.md · qa-defects.md · lock.md
-├── renders/             (ignorado en git) WIP / RVW
-├── delivery/            DLV + CAP + THB + metadata.md + DELIVERY_NOTE.md + checksums.sha256
-└── archive/             licenses/ · masters/ · stems/ · decision-log.md
+projects/<AAAA-MM-DD>_<slug>/
+├── README.md            estado de gates (G0–G15) + comandos
+├── 00_brief.md · 01_guion.md (incluye "VO limpia") · 02_storyboard.md · 03_shot-list.csv
+├── research/            digest.md · claims.csv · glosario.md · data/ (datos verificados para gráficos)
+├── scenes.json          plan de escenas ejecutable (bloque + vars + duración + claims + brandLock)
+├── comp/                proyecto HyperFrames maestro (compositions/<id>.html editables; index.html GENERADO)
+│   └── assets/          audio/ · images/ · video/ (y captions.srt opcional)
+├── formats/             variantes GENERADAS por build:roots (portrait, square, feed) — fuera de git
+├── renders/             <slug>_<fmt>_v###.mp4 (versión interna) — fuera de git
+├── review/              R1.md · R2.md · CHANGELOG.md · HORAS.csv · direccion-checklist.md · frames-<fmt>/
+├── qa/                  <render>_qa.md/.json · qa-checklist.md · legal-checklist.md · defects.md
+├── delivery/            *_ARCHIVE.mov · *_DELIVERY.mp4 · captions · metadata.md · DELIVERY_NOTE.md · checksums.sha256
+├── licenses/            certificados de música, stock, fuentes, contratos de voz
+├── sources/             material original del cliente (capturas, footage) — pesado → LFS / DAM
+└── PROVENANCE.md        ledger de procedencia (YAML)
 ```
+
+**Dónde viven los binarios.** `renders/`, `formats/`, `*.mov` y `delivery/*.mov` están en `.gitignore`. Los masters y entregables firmados se archivan en un DAM o bucket con versionado (o Git LFS si el equipo ya lo usa), con el `checksums.sha256` y el tag de git del lock como referencia cruzada.
 
 ## 4. Escenas, claims, feedback
 | Objeto | Formato | Regla |
 |---|---|---|
-| Escena | `S01`, `S02`… inserción: `S03b` | Nunca renumerar (rompe referencias de feedback y del agente) |
-| Archivo de escena | `S03-antes-ahora.html` | ID + slug |
+| Escena | `s01-hook`, `s02-…`; inserción: `s03b-…` | Nunca renumerar (rompe referencias de feedback, frames y del agente) |
+| Archivo de escena | `comp/compositions/s03-antes-ahora.html` | Mismo `id` que en `scenes.json` (minúsculas, `sNN-slug`) |
 | Claim | `C-001` | Único por proyecto, no se reutiliza |
 | Feedback | `FB-012` | Correlativo por proyecto (no por ronda) |
 | Defecto QA | `QA-004` | Correlativo |

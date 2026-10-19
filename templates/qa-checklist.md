@@ -46,7 +46,7 @@
 ## C. Marca
 | # | Chequeo | Criterio | Estado |
 |---|---|---|---|
-| C1 | Logo: versión, tamaño, área de respeto, fondo | Según `frame.md` / guía | |
+| C1 | Logo: versión, tamaño, área de respeto, fondo | Según `MOTION.md` / `brand.config logo` / guía | |
 | C2 | Paleta y tipografías | Solo tokens; **sin fuentes fallback** (verificar en snapshots) | |
 | C3 | Marcas registradas (®/™) y nombres de terceros | Según guía y legal | |
 | C4 | End card / legales | Texto literal, tiempo mínimo en pantalla cumplido | |
@@ -55,7 +55,7 @@
 ## D. Legal y derechos
 | # | Chequeo | Criterio | Estado |
 |---|---|---|---|
-| D1 | Música | Licencia del tier correcto (cubre cliente/publicidad), certificado en `archive/licenses/`, cue sheet | |
+| D1 | Música | Licencia del tier correcto (cubre cliente/publicidad), certificado en `licenses/` y registrado en `PROVENANCE.md`, cue sheet | |
 | D2 | Música IA | No usada en entrega a cliente, o con OK legal escrito | |
 | D3 | VO | Contrato locutor (medios/territorio/plazo) o licencia comercial TTS; **voz clonada solo con consentimiento escrito por proyecto** | |
 | D4 | Imagen de personas | Releases firmados (entrevistados, footage) | |
@@ -93,7 +93,7 @@
 | G2 | Layout | Sin overflow, clipping, solapamientos no intencionales | `check` (layout audit) | |
 | G3 | Escenas con `lock: true` | Sin cambios desde su aprobación | `git diff lock-vNN -- compositions/frames/<locked>` | |
 | G4 | Determinismo | Sin `Date.now()`, random sin semilla, fetch en render | lint + revisión de código | |
-| G5 | Datos de gráficos | Ligados a archivo verificado; ningún valor hardcodeado "de ejemplo" | grep de números en HTML vs `data/` | |
+| G5 | Datos de gráficos | Ligados a archivo verificado; ningún valor hardcodeado "de ejemplo" | `npm run build:roots -- <p> --strict` (placeholders y claims) + revisión de cifras en escenas de texto/custom vs `research/claims.csv` | |
 | G6 | Contenido sintético realista | ¿Hay voces clonadas, personas/lugares/eventos realistas generados? → decisión de disclosure documentada (YouTube "altered or synthetic"; EU AI Act art. 50 si aplica) | | |
 | G7 | Herramientas externas | No se enviaron frames/proyecto del cliente a servicios no aprobados (p. ej. `snapshot --describe`, `feedback --file-issue`) | Revisión de logs | |
 | G8 | Versiones fijadas | Skills/dependencias con versión registrada en el archivo | `package.json` / lockfile / `skills` | |
@@ -115,6 +115,6 @@
 | Cantidad | | | |
 
 - [ ] **APROBADO PARA ENTREGA** — Firma QA: ____________ Fecha: ______
-- [ ] RECHAZADO — defectos abiertos en `reviews/qa-defects.md`
+- [ ] RECHAZADO — defectos abiertos en `qa/defects.md`
 
 > Severidad: **Crítico** = error de dato/claim, legal, marca, PII, spec que impide publicar → bloquea. **Mayor** = visible para el espectador (typo, sync, safe zone) → bloquea. **Menor** = detalle → se corrige si no afecta calendario o se documenta.

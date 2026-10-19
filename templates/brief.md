@@ -1,7 +1,7 @@
 # BRIEF — [CLIENTE] · [PROYECTO] · [PIEZA]
 
 > Gate **G0**. Sin brief firmado no arranca la producción. Dueño: Productor. Sign-off: Cliente (aprobador final con nombre).
-> Archivo en el repo del proyecto: `BRIEF.md`. Versión: `BRF_v01` · Fecha: AAAA-MM-DD
+> Archivo en el repo del proyecto: `00_brief.md` (lo copia `npm run new`). Versión: `BRF_v01` · Fecha: AAAA-MM-DD
 
 ---
 
@@ -78,7 +78,7 @@
 - Referencias **no** (link + por qué): …
 
 ## 9. Mandatorios de marca
-- Design spec: `frame.md` / guía de marca (link + versión)
+- Design spec: `brand/brand.config.json` (versión `meta.version`) → `MOTION.md` / `brand/dist/frame.md` + guía de marca del cliente (link + versión)
 - Logo: versión, área de respeto, tamaño mínimo, fondos permitidos
 - Paleta y tipografías (con licencia para render a video)
 - End card / sting / música de marca (si existe)
@@ -101,9 +101,22 @@
 | Qué hará el agente de IA | Construcción de motion graphics como código (HyperFrames / Remotion), borradores de guion, transcripción, versionado |
 | Qué NO hará | Aprobar claims, generar datos, generar personas o voces realistas sin consentimiento, publicar |
 | Herramientas / proveedores | Claude Code (cuenta enterprise), TTS: ____, música: ____ |
-| Datos del cliente que se cargan al agente | (docs públicos / docs bajo NDA / ninguno) — política de retención |
-| Contenido sintético realista | No / Sí (detallar) → requiere disclosure (YouTube "altered or synthetic", EU AI Act art. 50 si aplica) |
+| Datos del cliente que se cargan al agente | (docs públicos / docs bajo NDA / ninguno) — ver §11b |
+| Contenido sintético | Voz sintética (TTS): Sí / No → **la marca siempre lo divulga** (`brand.config legal.aiDisclosure`). Personas, lugares o productos realistas generados: Sí / No → disclosure en plataforma (YouTube "altered or synthetic", Meta, TikTok) y EU AI Act art. 50 si aplica |
 | Titularidad | Cesión de derechos sobre la obra final; registro de autoría humana (guion, diseño, storyboard, selección) |
+
+## 11b. Confidencialidad y procesamiento por IA y proveedores
+> Se completa y firma ANTES de cargar material del cliente al agente. **No es asesoramiento legal:** validar con Legal el plan contratado y los términos vigentes.
+
+| Tema | Decisión |
+|---|---|
+| Clasificación del material de la pieza | Pública / interna / confidencial / bajo NDA / datos personales (prohibido en pantalla) |
+| Procesamiento por LLM | Todo lo que se abre en Claude Code (brief, docs, guion, capturas, código) **viaja a Anthropic** para ser procesado. Requiere plan comercial (Team Premium / Enterprise o API con Commercial Terms), DPA firmado y, si aplica, Zero Data Retention. ☐ Plan: ______ ☐ DPA: ______ ☐ ZDR: Sí / No |
+| Consentimiento del cliente | ☐ El cliente autoriza por escrito procesar su material con IA (fecha, quién, alcance) |
+| Proveedores que recibirían texto o assets del cliente | TTS / voz: ______ · Música IA: ______ · Imagen/video IA: ______ · Transcripción: local (`hyperframes transcribe`) / externa: ______ · Render en nube: **No** (local por defecto) |
+| Búsqueda web del investigador | ☐ Permitida con términos públicos · ☐ **Sin búsqueda web con términos del cliente** (nombres de producto no anunciado, clientes, cifras internas): solo fuentes que entrega el cliente |
+| Embargos | Nada no anunciado sale a servicios externos (TTS, música, publicación, feedback) antes del AAAA-MM-DD |
+| Retención | Dónde quedan las copias (repo, renders, DAM) y por cuánto tiempo; borrado al cierre según NDA |
 
 ## 12. Contenido técnico
 - SME asignado (nombre, disponibilidad, SLA): …
@@ -156,6 +169,7 @@
 - [ ] Aprobador final con nombre + SLA
 - [ ] Mandatorios y restricciones legales listados
 - [ ] Declaración de uso de IA aceptada
+- [ ] Confidencialidad y procesamiento (§11b) completos y autorizados por el cliente
 - [ ] Presupuesto, rondas y calendario firmados
 
 ## 18. Firmas

@@ -6,21 +6,24 @@
 ## 1. Pre-requisitos
 - [ ] Reporte de QA firmado (G14), sin defectos críticos ni mayores abiertos
 - [ ] Acta de picture lock (G9) con tag/commit
-- [ ] Nombres de archivo según `naming-convention.md`
+- [ ] `npm run deliver -- <proyecto> --platform <lista de la matriz del brief>` terminó sin FAIL (reporte `delivery/<slug>_v###_ENTREGA.md` y QA por plataforma en `qa/`)
+- [ ] Nombres de archivo según `templates/naming-convention.md` (versión interna `_v###` ↔ versión al cliente `vNN` anotada en `review/CHANGELOG.md`)
 
 ## 2. Contenido del paquete de entrega (cliente)
 | Ítem | Archivo(s) | ✔ |
 |---|---|---|
-| Entregables por plataforma (según matriz del brief) | `DLV_v__` por formato/idioma | ☐ |
+| Entregables por plataforma (según matriz del brief) | `*_DELIVERY.mp4` de `npm run deliver` → renombrados a `DLV_v__` por formato/idioma | ☐ |
+| Firma C2PA (N2/N3 con elementos sintéticos) | Sobre cada `*_DELIVERY.mp4` que se publica (el re-encode desde el master borra el manifiesto) | ☐ |
+| Disclosure de IA | Texto `brand.config legal.aiDisclosure` en descripción / end card si hay voz sintética o contenido realista generado | ☐ |
 | Captions closed por idioma | `.srt` (plataformas) · `.vtt` (web) — tags BCP-47 (`es-419`, `en-US`) | ☐ |
 | Versión con captions quemados (vertical) | `…_9x16-1080p30_ES-419_BURN_…mp4` | ☐ |
 | Miniaturas / portadas | YouTube 1280×720 ≤2 MB (2–3 variantes A/B) · portadas 9:16 | ☐ |
 | Transcript | `.txt` / `.docx` | ☐ |
-| Metadata por plataforma | `metadata.md` (ver §4) | ☐ |
+| Metadata por plataforma | `delivery/metadata.md` (ver §4) | ☐ |
 | Licencias | Certificados de música, stock, fuentes; contrato/consentimiento de VO | ☐ |
-| Delivery note | `DELIVERY_NOTE.md` (ver §5) | ☐ |
+| Delivery note | `delivery/DELIVERY_NOTE.md` (ver §5) | ☐ |
 | Checksums | `checksums.sha256` | ☐ |
-| (Si contratado) Master de archivo | ProRes 422 HQ / DNxHR HQX + PCM 48k/24 | ☐ |
+| (Si contratado) Master de archivo | `*_ARCHIVE.mov` de `npm run deliver` (ProRes 422 HQ + PCM 48k/24, generado desde el intermedio sin pérdida) | ☐ |
 | (Si contratado) Textless | Master sin textos ni captions | ☐ |
 | (Si contratado) Stems + M&E | VO, MX, SFX, M&E — WAV 48k/24 | ☐ |
 | (Si contratado) Proyecto fuente | Repo (tag) + assets + fuentes con licencia transferible + README de render | ☐ |
@@ -72,10 +75,10 @@ Contacto para soporte post-entrega:
 - [ ] Cliente confirma recepción y apertura correcta de archivos (fecha, nombre)
 - [ ] Cliente confirma publicación (link) — para iniciar medición de KPIs
 
-## 7. Archivo interno (`archive/`)
+## 7. Archivo interno (DAM o bucket con versionado; el repo guarda código, planes y reportes, no binarios)
 | Ítem | ✔ |
 |---|---|
-| Repo del proyecto con tag `lock-vNN` y `dlv-vNN` (código de composiciones, `STORYBOARD.md`, `SCRIPT.md`, `frame.md`, `BRIEF.md`, reviews) | ☐ |
+| Repo del proyecto con tag `lock-vNN` y `dlv-vNN` (composiciones, `scenes.json`, `00_brief.md`, `01_guion.md`, `02_storyboard.md`, `comp/frame.md`, `review/`) | ☐ |
 | Lockfile y versiones de skills/framework/render (reproducibilidad) | ☐ |
 | Assets originales (capturas, footage, logos, datos) + manifest de procedencia | ☐ |
 | Fuentes tipográficas + licencias | ☐ |
