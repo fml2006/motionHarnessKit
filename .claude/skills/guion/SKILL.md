@@ -26,3 +26,6 @@ Delegá al subagente `guionista` y verificá:
 
 ## 4. Salida
 Mostrá treatment + hooks + guion. Próximo gate: aprobación del guion (G3) → `/storyboard`. Cambios de guion después del animatic = change order (avisalo).
+
+## Como fase de `/pieza`
+Si te llamó el orquestador, este archivo es la receta del checkpoint `guion` (modo express: `brief-guion`). Al terminar corré `npm run pipeline -- check <p> <checkpoint>` y devolvé el resultado. El gate lo registra el orquestador con la respuesta de una persona (`npm run pipeline -- approve|reject <p> <checkpoint> --by "<nombre>"`), que además tilda los gates en el README del proyecto y deja la línea en `review/CHANGELOG.md`. Si usás esta skill suelta, registrá igual la decisión humana con esos comandos, así `/pieza continuar` sabe dónde está la pieza.

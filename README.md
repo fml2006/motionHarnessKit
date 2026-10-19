@@ -179,3 +179,22 @@ Lo que **tiene que sumar la organización** para un uso enterprise:
 ## Licencias de terceros
 
 HyperFrames (Apache-2.0) · GSAP 3.14 (GSAP Standard "No Charge" License, no OSI, con cláusula que excluye productos que compiten con Webflow — revisala con Legal) · Inter, Space Grotesk, JetBrains Mono, Newsreader, IBM Plex (SIL OFL 1.1 vía @fontsource). Formato `frame.md` y contrato de theme: HyperFrames. Convención `MOTION.md`/`brand.md`: compatible con `charlie947/motion-graphics-skills` (MIT).
+
+## Orquestador `/pieza`
+
+Para producir una pieza de punta a punta sin llamar cada fase a mano, en Claude Code:
+
+```text
+/pieza nueva "Explainer de 60 s: qué es un servidor MCP, para devs" --marca tumarca
+/pieza continuar que-es-un-servidor-mcp
+/pieza estado
+```
+
+El orquestador crea la pieza y recorre los checkpoints del modo elegido. En cada uno delega en el subagente del rol (varios `motion-designer` en paralelo en el animatic), corre los chequeos automáticos y la autocrítica de `qa-director`, y te muestra qué mirar. Después te pregunta **Aprobar / Pedir cambios / Pausar**. Nunca aprueba solo: cada decisión queda registrada con el nombre de quien la tomó en `projects/<p>/pipeline.json`, en el README de la pieza (gates tildados) y en `review/CHANGELOG.md`.
+
+| Modo | Checkpoints humanos |
+|---|---|
+| `completo` (default) | brief G0–G1 · guion G2–G3 · storyboard G4–G5 · animatic G6–G7 · revisión G8 (una ronda por pedido de cambios) · lock G7b·G9 · entrega G10–G15 |
+| `express` | brief + guion · styleframes · animatic + lock · entrega |
+
+El estado también se puede consultar y registrar desde la terminal: `npm run pipeline -- status <p>`, `npm run pipeline -- check <p> [<checkpoint>]` y `npm run pipeline -- approve <p> <checkpoint> --by "Nombre"`. Cómo funciona, una sesión de ejemplo y los límites están en [`docs/ORQUESTADOR.md`](docs/ORQUESTADOR.md).

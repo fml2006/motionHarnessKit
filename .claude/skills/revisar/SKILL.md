@@ -24,3 +24,6 @@ Anotá en `review/CHANGELOG.md` **bajo la versión nueva** (`_v###` que acaba de
 
 ## 5. Salida
 Versión nueva + tabla nota→estado + reporte de QA. Al llegar al límite de rondas del brief, avisá al productor.
+
+## Como fase de `/pieza`
+Si te llamó el orquestador, este archivo es la receta del checkpoint `revision` (modo express: `animatic-express`). Al terminar corré `npm run pipeline -- check <p> <checkpoint>` y devolvé el resultado. El gate lo registra el orquestador con la respuesta de una persona (`npm run pipeline -- approve|reject <p> <checkpoint> --by "<nombre>"`), que además tilda los gates en el README del proyecto y deja la línea en `review/CHANGELOG.md`. Si usás esta skill suelta, registrá igual la decisión humana con esos comandos, así `/pieza continuar` sabe dónde está la pieza.

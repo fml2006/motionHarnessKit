@@ -39,3 +39,6 @@ Overlays con transparencia para el editor: `npm run render -- <p> --alpha --form
 
 ## 5. Entrega y archivo (G15)
 `delivery/`: ARCHIVE, DELIVERY por plataforma, captions, miniatura, reporte de entrega, specs medidas. Archivo reproducible: el proyecto completo (scenes.json con brandLock, compositions, brand sincronizado, package-lock.json, PROVENANCE.md) con tag de versión. Completá `delivery/delivery-checklist.md`. **No publiques vos:** publicar es una acción humana.
+
+## Como fase de `/pieza`
+Si te llamó el orquestador, este archivo es la receta del checkpoint `lock` y `entrega` (modo express: `entrega-express`). Al terminar corré `npm run pipeline -- check <p> <checkpoint>` y devolvé el resultado. El gate lo registra el orquestador con la respuesta de una persona (`npm run pipeline -- approve|reject <p> <checkpoint> --by "<nombre>"`), que además tilda los gates en el README del proyecto y deja la línea en `review/CHANGELOG.md`. Si usás esta skill suelta, registrá igual la decisión humana con esos comandos, así `/pieza continuar` sabe dónde está la pieza.

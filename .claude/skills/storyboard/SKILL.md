@@ -23,3 +23,6 @@ Abrí cada PNG en `review/frames-*`. Antes de mostrar, autocrítica con el subag
 
 ## 4. Salida
 Contact sheets de 16:9 y 9:16 + tabla de escenas (id · bloque · duración · texto) + duración total vs objetivo (±5 %). Pedí aprobación de look (G4) y de storyboard (G5). Lo aprobado se marca con `"lock": true` en notas o en el storyboard.
+
+## Como fase de `/pieza`
+Si te llamó el orquestador, este archivo es la receta del checkpoint `storyboard` (modo express: `styleframes`). Al terminar corré `npm run pipeline -- check <p> <checkpoint>` y devolvé el resultado. El gate lo registra el orquestador con la respuesta de una persona (`npm run pipeline -- approve|reject <p> <checkpoint> --by "<nombre>"`), que además tilda los gates en el README del proyecto y deja la línea en `review/CHANGELOG.md`. Si usás esta skill suelta, registrá igual la decisión humana con esos comandos, así `/pieza continuar` sabe dónde está la pieza.

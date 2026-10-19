@@ -13,6 +13,7 @@ Prerrequisito: storyboard aprobado (G5). Leé `MOTION.md`, `scenes.json` y las n
 
 ## 2. Build (G7)
 Delegá al subagente `motion-designer` escena por escena:
+- Con varias escenas (siempre desde `/pieza`): un `motion-designer` por escena o grupo, **en paralelo**, cada uno dueño exclusivo de sus `comp/compositions/<id>.html`. No tocan `scenes.json` (te devuelven los cambios de `vars`/`duration`/`transition` y los aplicás vos en una sola edición) ni corren `build:roots`, `frames` o `render`: eso lo corrés vos una vez, cuando vuelven todos (paso 3).
 - Bloque estándar: ajustar `vars`/`duration` en `scenes.json`.
 - Escena a medida: `"block": "custom"` + `comp/compositions/<id>.html` siguiendo el contrato de CLAUDE.md (copiá la estructura de un bloque). Si el look se va a reutilizar, proponé convertirlo en bloque de `engine/blocks/`.
 - Bloques del catálogo oficial de HyperFrames (`npx hyperframes catalog --query "<idea>"`) heredan la marca por el contrato de theme; instalar con `npx hyperframes add` requiere aprobación (está en `ask`).
@@ -30,3 +31,6 @@ Notas:
 - `--quality high` NO es para revisiones: activa el build `--strict` y `check --strict` (warnings también frenan). Se usa recién con la versión aprobada, y en la práctica lo dispara `npm run deliver` (ver `/entregar`).
 - Los drafts no se normalizan: el QA de draft avisa (WARN) si el loudness está fuera de objetivo. La normalización se hace una sola vez, en la entrega.
 - Si la marca cambió desde que se aprobó el proyecto, el build se frena (brandLock). Solo con aprobación explícita: `--rebrand`.
+
+## Como fase de `/pieza`
+Si te llamó el orquestador, este archivo es la receta del checkpoint `animatic` (modo express: `animatic-express`). Al terminar corré `npm run pipeline -- check <p> <checkpoint>` y devolvé el resultado. El gate lo registra el orquestador con la respuesta de una persona (`npm run pipeline -- approve|reject <p> <checkpoint> --by "<nombre>"`), que además tilda los gates en el README del proyecto y deja la línea en `review/CHANGELOG.md`. Si usás esta skill suelta, registrá igual la decisión humana con esos comandos, así `/pieza continuar` sabe dónde está la pieza.

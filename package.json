@@ -21,7 +21,8 @@
     "master": "bash scripts/master.sh",
     "doctor": "node scripts/doctor.mjs",
     "setup": "node scripts/doctor.mjs --fix",
-    "selftest": "node scripts/selftest.mjs"
+    "selftest": "node scripts/selftest.mjs",
+    "pipeline": "node scripts/pipeline.mjs"
   },
   "devDependencies": {
     "@fontsource/ibm-plex-mono": "5.3.0",

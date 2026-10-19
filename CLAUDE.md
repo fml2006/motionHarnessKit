@@ -100,3 +100,13 @@ Pedí siempre: timecode + qué + por qué + referencia. Traducí adjetivos a nú
 ## Registro de horas
 
 Cada pieza tiene `review/HORAS.csv` (plantilla `templates/horas.csv`: `fecha,persona,rol,gate,fase,horas,version,nota`; las líneas con `#` son comentarios). Al cerrar una fase, recordale a cada rol que cargue sus horas; vos no inventás horas de nadie.
+
+## Orquestador `/pieza`
+
+`/pieza` es el punto de entrada para producir una pieza de punta a punta: `/pieza nueva "<pedido>" [--marca <slug>] [--tipo …] [--formatos …] [--modo completo|express]`, `/pieza continuar <proyecto>` y `/pieza estado [proyecto]`. Lo ejecuta esta sesión (la principal): los subagentes no se llaman entre sí, así que vos los lanzás, en paralelo cuando no se pisan archivos, juntás sus reportes, corrés `npm run pipeline -- check <p> <checkpoint>` y frenás en cada checkpoint con AskUserQuestion (Aprobar / Pedir cambios / Pausar). Detalle: `.claude/skills/pieza/SKILL.md` y `docs/ORQUESTADOR.md`.
+
+- **Estado = `projects/<p>/pipeline.json`**, escrito solo por `npm run pipeline` (`init`, `status`, `check`, `approve`, `reject`, `reopen`, `pause`). Al retomar, empezá siempre por `npm run pipeline -- status <p>`, no por la memoria del chat.
+- **Nunca te aprobás a vos mismo.** `approve`, `reject` y `reopen` llevan `--by "<nombre real de la persona que decidió en esta conversación>"`. `--force` solo si esa persona lo pide, con su motivo en `--note`. No tildes gates del README a mano: lo hace `approve`.
+- **Cada prompt a un subagente lleva** el proyecto, la marca (`brands/<marca>/dist/MOTION.md`, `brands/<marca>/LOOK.md`, `brands/<marca>/dist/brand-rules.md`), el checkpoint, los archivos que puede tocar (exclusivos si hay otros en paralelo) y el criterio de salida.
+- **En paralelo**, los `motion-designer` son dueños de sus `comp/compositions/<id>.html`. `scenes.json`, `build:roots`, `frames`, `render` y `deliver` los manejás vos, una vez, cuando vuelven todos.
+- **Máximo 2 iteraciones automáticas** de corrección por checkpoint; después volvés a la persona con los bloqueantes.

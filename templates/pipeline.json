@@ -1,0 +1,281 @@
+{
+  "$comment": "Definición de checkpoints humanos del orquestador /pieza. Cada checkpoint agrupa gates del pipeline, dice qué skill de fase y qué subagentes lo producen, qué artefactos deja, qué chequeos automáticos corre `npm run pipeline -- check` y qué rol aprueba. El estado de cada pieza vive en projects/<p>/pipeline.json (lo escribe scripts/pipeline.mjs; no se edita a mano).",
+  "version": 1,
+  "defaultMode": "completo",
+  "checkpoints": {
+    "brief": {
+      "label": "Brief y claims",
+      "gates": [
+        "G0",
+        "G1"
+      ],
+      "skill": "/brief",
+      "subagents": [
+        "productor",
+        "investigador"
+      ],
+      "artifacts": [
+        "00_brief.md",
+        "research/claims.csv",
+        "research/digest.md"
+      ],
+      "checks": [
+        "brief",
+        "claims"
+      ],
+      "approver": "Productor + SME (firma de claims) + aprobador del cliente"
+    },
+    "guion": {
+      "label": "Treatment y guion",
+      "gates": [
+        "G2",
+        "G3"
+      ],
+      "skill": "/guion",
+      "subagents": [
+        "guionista"
+      ],
+      "artifacts": [
+        "01_guion.md"
+      ],
+      "checks": [
+        "guion"
+      ],
+      "approver": "Director creativo"
+    },
+    "storyboard": {
+      "label": "Storyboard y styleframes",
+      "gates": [
+        "G4",
+        "G5"
+      ],
+      "skill": "/storyboard",
+      "subagents": [
+        "storyboarder",
+        "director-de-arte"
+      ],
+      "artifacts": [
+        "02_storyboard.md",
+        "scenes.json",
+        "review/frames-<formato>/contact-sheet*.jpg"
+      ],
+      "checks": [
+        "storyboard"
+      ],
+      "approver": "Director creativo"
+    },
+    "animatic": {
+      "label": "Animatic y build",
+      "gates": [
+        "G6",
+        "G7"
+      ],
+      "skill": "/producir",
+      "subagents": [
+        "motion-designer (en paralelo, una escena o grupo por agente)",
+        "qa-director"
+      ],
+      "artifacts": [
+        "comp/compositions/*.html",
+        "renders/<slug>_<formato>_v###.mp4",
+        "qa/*_qa.md"
+      ],
+      "checks": [
+        "animatic"
+      ],
+      "approver": "Director creativo"
+    },
+    "revision": {
+      "label": "Revisión",
+      "gates": [
+        "G8"
+      ],
+      "repeatable": true,
+      "skill": "/revisar",
+      "subagents": [
+        "qa-director",
+        "motion-designer"
+      ],
+      "artifacts": [
+        "review/R<n>.md",
+        "review/CHANGELOG.md",
+        "renders/<slug>_<formato>_v###.mp4"
+      ],
+      "checks": [
+        "revision"
+      ],
+      "approver": "Productor + cliente (cada rechazo abre una ronda nueva)"
+    },
+    "lock": {
+      "label": "Picture lock",
+      "gates": [
+        "G7b",
+        "G9"
+      ],
+      "skill": "/entregar (paso 1)",
+      "subagents": [
+        "qa-director"
+      ],
+      "artifacts": [
+        "build:roots --strict sin errores",
+        "versión bloqueada"
+      ],
+      "checks": [
+        "lock"
+      ],
+      "approver": "Director creativo + productor"
+    },
+    "entrega": {
+      "label": "Mezcla, master, captions, QA final y entrega",
+      "gates": [
+        "G10",
+        "G11",
+        "G12",
+        "G13",
+        "G14",
+        "G15"
+      ],
+      "skill": "/entregar",
+      "subagents": [
+        "editor-sonido",
+        "qa-director"
+      ],
+      "artifacts": [
+        "delivery/<slug>_v###_ENTREGA.md",
+        "delivery/*_ARCHIVE.mov",
+        "delivery/*_DELIVERY.mp4",
+        "captions.srt",
+        "qa/legal-checklist.md",
+        "PROVENANCE.md"
+      ],
+      "checks": [
+        "delivery",
+        "captions",
+        "legal"
+      ],
+      "approver": "Productor + QA + Legal"
+    },
+    "brief-guion": {
+      "label": "Brief, claims y guion (express)",
+      "gates": [
+        "G0",
+        "G1",
+        "G2",
+        "G3"
+      ],
+      "skill": "/brief → /guion",
+      "subagents": [
+        "productor",
+        "investigador",
+        "guionista"
+      ],
+      "artifacts": [
+        "00_brief.md",
+        "research/claims.csv",
+        "01_guion.md"
+      ],
+      "checks": [
+        "brief",
+        "claims",
+        "guion"
+      ],
+      "approver": "Productor (+ SME si hay cifras)"
+    },
+    "styleframes": {
+      "label": "Storyboard y styleframes (express)",
+      "gates": [
+        "G4",
+        "G5"
+      ],
+      "skill": "/storyboard",
+      "subagents": [
+        "storyboarder",
+        "director-de-arte"
+      ],
+      "artifacts": [
+        "02_storyboard.md",
+        "scenes.json",
+        "review/frames-<formato>/contact-sheet*.jpg"
+      ],
+      "checks": [
+        "storyboard"
+      ],
+      "approver": "Director creativo"
+    },
+    "animatic-express": {
+      "label": "Animatic, revisión y lock (express)",
+      "gates": [
+        "G6",
+        "G7",
+        "G7b",
+        "G8",
+        "G9"
+      ],
+      "skill": "/producir → /revisar",
+      "subagents": [
+        "motion-designer (en paralelo)",
+        "qa-director"
+      ],
+      "artifacts": [
+        "renders/<slug>_<formato>_v###.mp4",
+        "qa/*_qa.md"
+      ],
+      "checks": [
+        "animatic",
+        "lock"
+      ],
+      "approver": "Director creativo (aprobar = picture lock)",
+      "repeatable": true
+    },
+    "entrega-express": {
+      "label": "Entrega (express)",
+      "gates": [
+        "G10",
+        "G11",
+        "G12",
+        "G13",
+        "G14",
+        "G15"
+      ],
+      "skill": "/entregar",
+      "subagents": [
+        "editor-sonido",
+        "qa-director"
+      ],
+      "artifacts": [
+        "delivery/<slug>_v###_ENTREGA.md",
+        "delivery/*_DELIVERY.mp4",
+        "qa/legal-checklist.md"
+      ],
+      "checks": [
+        "delivery",
+        "captions",
+        "legal"
+      ],
+      "approver": "Productor + QA"
+    }
+  },
+  "modes": {
+    "completo": {
+      "label": "Completo: un checkpoint humano por fase (piezas de cliente, públicas o con cifras)",
+      "checkpoints": [
+        "brief",
+        "guion",
+        "storyboard",
+        "animatic",
+        "revision",
+        "lock",
+        "entrega"
+      ]
+    },
+    "express": {
+      "label": "Express: 4 checkpoints (piezas internas o sociales de bajo riesgo)",
+      "checkpoints": [
+        "brief-guion",
+        "styleframes",
+        "animatic-express",
+        "entrega-express"
+      ]
+    }
+  }
+}

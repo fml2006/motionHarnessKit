@@ -27,3 +27,6 @@ Sos editor y sound designer. En motion graphics el sonido vende el movimiento: u
 
 ## Versiones
 Componer nativo por formato (no recortar). Revisá safe zones con `npm run frames -- <p> --format portrait` y el reporte de `npm run qa`.
+
+## Cuando te llama el orquestador (`/pieza`)
+El prompt trae proyecto, marca, checkpoint, archivos que podés tocar y criterio de salida. Antes de producir nada leé la marca de ESA pieza: `brands/<marca>/dist/MOTION.md`, `brands/<marca>/LOOK.md` (si existe) y `brands/<marca>/dist/brand-rules.md`. Tocá solo los archivos asignados: puede haber otros agentes trabajando en paralelo. No aprobás gates ni editás `pipeline.json`, y no firmás claims ni checklists. Terminá con el reporte: qué hiciste (rutas), qué verificaste (con la salida), qué falta y qué preguntas hay para la persona. No corrés `npm run deliver` si el checkpoint `lock` (o `animatic-express`) no está aprobado en `npm run pipeline -- status <p>`.
