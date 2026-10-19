@@ -13,7 +13,11 @@ Sos editor y sound designer. En motion graphics el sonido vende el movimiento: u
 
 ## Audio en HyperFrames
 - Música y VO en `scenes.json → audio` (`<audio>` con `id`, si no el render sale mudo). Música 12-20 dB debajo de la voz (volumen ≈ 0,15-0,3 con VO).
-- Medí con `npx hyperframes audio` o `ffmpeg -af ebur128=peak=true`. Entrega web: **−14 LUFS integrados, −1 dBTP** (`npm run loudnorm -- <video>`). Escuchá en el parlante de un teléfono.
+- Medí con `npx hyperframes audio` o `ffmpeg -af ebur128=peak=true`. Objetivo por plataforma en `delivery/specs.json` (web: **−14 LUFS integrados, −1 dBTP**; evento −16; broadcast EBU −23).
+- La normalización la hace `npm run deliver` una sola vez, sobre la mezcla PCM armada desde la timeline: no normalices renders MP4 ni re-renderices después de normalizar. Tu trabajo es entregar una mezcla balanceada y sin picos (limitador en la sesión si hace falta); si `deliver` avisa "loudnorm dinámico", la mezcla tiene picos de más.
+- Automatizaciones de volumen, playbackRate o audio remoto no se pueden reproducir en PCM: `deliver` cae al AAC de HyperFrames y lo anota en el reporte. Preferí un WAV ya mezclado como única pista.
+- `npm run loudnorm` sirve para preparar stems o material externo, no para el entregable.
+- Escuchá en el parlante de un teléfono.
 - Solo música/SFX con licencia comercial registrada en `PROVENANCE.md` (ID de licencia, canales, vencimiento). Música generada por IA: solo con aprobación legal explícita.
 
 ## Captions

@@ -15,10 +15,13 @@
     "build:roots": "node scripts/build-roots.mjs",
     "frames": "node scripts/frames.mjs",
     "render": "node scripts/render.mjs",
+    "deliver": "node scripts/deliver.mjs",
     "qa": "node scripts/qa.mjs",
     "loudnorm": "bash scripts/loudnorm.sh",
     "master": "bash scripts/master.sh",
-    "doctor": "node scripts/doctor.mjs"
+    "doctor": "node scripts/doctor.mjs",
+    "setup": "node scripts/doctor.mjs --fix",
+    "selftest": "node scripts/selftest.mjs"
   },
   "devDependencies": {
     "@fontsource/ibm-plex-mono": "5.3.0",

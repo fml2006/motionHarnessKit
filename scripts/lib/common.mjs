@@ -7,12 +7,29 @@ import { spawnSync } from "node:child_process";
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 // Entorno para la CLI de HyperFrames: sin telemetría, sin auto-updates (versiones fijadas = renders reproducibles).
+// Navegador: por defecto el chrome-headless-shell que HyperFrames fija y descarga (`npx hyperframes browser ensure`),
+// que es el mismo en todas las máquinas con esta versión. Solo se usa otro si se pide explícitamente con
+// MHK_BROWSER_PATH (o HYPERFRAMES_BROWSER_PATH ya seteado): eso cambia el render entre máquinas y queda registrado.
+// Para reproducibilidad exacta entre máquinas: render/deliver con --docker.
 export function hfEnv() {
   const env = { ...process.env, HYPERFRAMES_NO_TELEMETRY: "1", HYPERFRAMES_NO_UPDATE_CHECK: "1", HYPERFRAMES_SKIP_SKILLS: "1", DO_NOT_TRACK: "1" };
-  if (!env.HYPERFRAMES_BROWSER_PATH) {
-    for (const p of ["/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell"]) if (existsSync(p)) env.HYPERFRAMES_BROWSER_PATH = p;
-  }
+  if (env.MHK_BROWSER_PATH && !env.HYPERFRAMES_BROWSER_PATH) env.HYPERFRAMES_BROWSER_PATH = env.MHK_BROWSER_PATH;
   return env;
+}
+
+// Qué navegador va a usar el render (para doctor, CHANGELOG y PROVENANCE).
+export function browserInfo() {
+  const env = hfEnv();
+  if (env.HYPERFRAMES_BROWSER_PATH) return { source: "override", path: env.HYPERFRAMES_BROWSER_PATH };
+  const r = runHf(["browser", "path"], { capture: true });
+  const path = (r.stdout || "").trim().split("\n").pop();
+  return r.status === 0 && path ? { source: "hyperframes", path } : { source: "missing", path: null };
+}
+
+// Versión de ffmpeg (encodea los entregables: va al registro de cada entrega).
+export function ffmpegVersion() {
+  const r = spawnSync("ffmpeg", ["-hide_banner", "-version"], { encoding: "utf8" });
+  return r.status === 0 ? (r.stdout.split("\n")[0].match(/ffmpeg version (\S+)/) || [])[1] || "desconocida" : null;
 }
 
 export function hfBin() {

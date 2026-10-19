@@ -18,10 +18,15 @@ Delegá al subagente `motion-designer` escena por escena:
 - Bloques del catálogo oficial de HyperFrames (`npx hyperframes catalog --query "<idea>"`) heredan la marca por el contrato de theme; instalar con `npx hyperframes add` requiere aprobación (está en `ask`).
 
 ## 3. Loop de calidad (obligatorio en cada iteración)
-1. `npx hyperframes lint projects/<p>/comp` y `npx hyperframes check projects/<p>/comp` → 0 errores.
+1. `npm run build:roots -- <p>` → leé los avisos del gate de contenido (placeholders, cifras sin claim, valores fuera de tokens): en draft avisan, en high frenan.
 2. `npm run frames -- <p>` (+ `--format portrait`) → mirar los PNG.
 3. Subagente `qa-director` → corregir bloqueantes.
-4. Recién ahí: `npm run render -- <p> --quality draft` (versiona `_v###` y corre QA técnico).
+4. Recién ahí: `npm run render -- <p> --quality draft`. El script gatea solo, por código de salida: lint (`--json`) y `hyperframes check` con 0 errores, después render versionado `_v###` y QA técnico en modo draft. Si cualquier gate o el QA da FAIL, sale con código 1 y no declara la versión lista: no la mandes a revisión.
 
 ## 4. Salida
 Render(s) versionados, reporte de QA, contact sheet, y lista honesta de lo verificado vs pendiente (p. ej. "no escuché la mezcla en teléfono"). Próximo gate: `/revisar`.
+
+Notas:
+- `--quality high` NO es para revisiones: activa el build `--strict` y `check --strict` (warnings también frenan). Se usa recién con la versión aprobada, y en la práctica lo dispara `npm run deliver` (ver `/entregar`).
+- Los drafts no se normalizan: el QA de draft avisa (WARN) si el loudness está fuera de objetivo. La normalización se hace una sola vez, en la entrega.
+- Si la marca cambió desde que se aprobó el proyecto, el build se frena (brandLock). Solo con aprobación explícita: `--rebrand`.

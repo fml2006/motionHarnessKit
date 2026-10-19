@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# loudnorm: normaliza el audio de un video (o un WAV) a -14 LUFS integrados / -1 dBTP en dos pasadas (EBU R128 / BS.1770).
-#   bash scripts/loudnorm.sh entrada.mp4 [salida.mp4] [I=-14] [TP=-1]
-# El video se copia sin recomprimir; solo se re-codifica el audio (AAC 384k 48 kHz).
+# loudnorm: normaliza el audio de un archivo EXTERNO (un WAV de VO o música, o un video que llegó de afuera)
+# a -14 LUFS integrados / -1 dBTP en dos pasadas (EBU R128 / BS.1770).
+#   bash scripts/loudnorm.sh entrada.(wav|mp4|mov) [salida] [I=-14] [TP=-1]
+# NO es parte de la entrega de un proyecto: `npm run deliver` normaliza la mezcla PCM dentro del master
+# (una sola codificación con pérdida). Usalo para preparar stems o revisar material de terceros.
+# WAV → WAV PCM 24 bit. Video → el video se copia sin recomprimir y el audio se re-codifica a AAC 384k 48 kHz
+# (si la entrada ya era AAC, eso es una segunda codificación con pérdida: evitalo en entregables).
 set -euo pipefail
 IN="${1:?Uso: bash scripts/loudnorm.sh entrada.mp4 [salida.mp4] [I] [TP]}"
 OUT="${2:-${IN%.*}_norm.${IN##*.}}"

@@ -1,7 +1,14 @@
 #!/usr/bin/env node
 // qa: control técnico automático de un render (o de los renders más nuevos de un proyecto).
-//   node scripts/qa.mjs <video.mp4 | proyecto> [--platform youtube|shorts|reels|tiktok|linkedin|x] [--out dir]
-// Chequea: specs de plataforma (resolución, fps, codec, duración, peso, faststart), loudness (BS.1770),
+//   node scripts/qa.mjs <video | proyecto> [--platform <id>] [--delivery | --draft] [--lufs -16] [--allow-silent] [--out dir]
+// Plataformas: las de delivery/specs.json (youtube, shorts, reels, tiktok, linkedin, linkedin-feed, instagram-feed, x,
+// evento, broadcast-ebu, archive, overlay).
+// Modos:
+//   --delivery  entregable: --platform obligatorio; loudness fuera de objetivo y audio faltante (si la plataforma
+//               lo requiere) son FAIL. Es el modo que usa `npm run deliver`.
+//   --draft     render de trabajo (lo usa `npm run render`): loudness y audio son WARN (se resuelven en deliver).
+//   (sin flag)  igual que --delivery si pasás --platform; si no, infiere la plataforma por aspecto con WARN.
+// Chequea: specs de plataforma (resolución, fps, códecs, perfil, duración, peso, faststart), loudness (BS.1770),
 // negros, congelados, heurística de fotosensibilidad (WCAG 2.3.1) y arma un contact sheet.
 // Sale con código 1 si hay algún FAIL. No reemplaza la revisión humana ni un análisis formal (EA IRIS / PEAT).
 import { spawnSync } from "node:child_process";
@@ -10,13 +17,23 @@ import { basename, dirname, join, resolve } from "node:path";
 import { ROOT, readJson } from "./lib/common.mjs";
 
 const args = process.argv.slice(2);
-const target = args.find((a, i) => !a.startsWith("--") && !["--platform", "--out"].includes(args[i - 1]));
-const platformArg = args.includes("--platform") ? args[args.indexOf("--platform") + 1] : null;
+const VALUE_FLAGS = ["--platform", "--out", "--lufs"];
+const target = args.find((a, i) => !a.startsWith("--") && !VALUE_FLAGS.includes(args[i - 1]));
+const val = (n) => (args.includes(n) ? args[args.indexOf(n) + 1] : null);
+const platformArg = val("--platform");
+const lufsArg = val("--lufs") !== null ? Number(val("--lufs")) : null;
+const draft = args.includes("--draft");
+const delivery = args.includes("--delivery") || (!draft && !!platformArg);
+const allowSilent = args.includes("--allow-silent");
+const specs = readJson(join(ROOT, "delivery", "specs.json"));
 if (!target) {
-  console.error("Uso: node scripts/qa.mjs <video.mp4 | proyecto> [--platform youtube|shorts|reels|tiktok|linkedin|x]");
+  console.error(`Uso: node scripts/qa.mjs <video | proyecto> [--platform ${Object.keys(specs.platforms).join("|")}] [--delivery|--draft] [--lufs n]`);
   process.exit(1);
 }
-const specs = readJson(join(ROOT, "delivery", "specs.json"));
+if (platformArg && !specs.platforms[platformArg]) {
+  console.error(`✗ Plataforma desconocida "${platformArg}". Opciones: ${Object.keys(specs.platforms).join(", ")}`);
+  process.exit(1);
+}
 
 function videosFor(t) {
   const abs = resolve(t);
@@ -24,7 +41,8 @@ function videosFor(t) {
   const proj = existsSync(join(abs, "scenes.json")) ? abs : join(ROOT, "projects", t);
   const dir = join(proj, "renders");
   if (!existsSync(dir)) return [];
-  const files = readdirSync(dir).filter((f) => /\.(mp4|mov|webm)$/i.test(f)).map((f) => join(dir, f));
+  // los intermedios de deliver (_master.mov) no son renders de revisión: se controlan sus salidas en delivery/
+  const files = readdirSync(dir).filter((f) => /\.(mp4|mov|webm)$/i.test(f) && !/_master\.mov$/i.test(f)).map((f) => join(dir, f));
   // el render más nuevo por formato
   const latest = {};
   for (const f of files) {
@@ -38,7 +56,7 @@ const ff = (a) => spawnSync("ffmpeg", ["-hide_banner", "-nostats", ...a], { enco
 const fp = (a) => spawnSync("ffprobe", ["-v", "error", ...a], { encoding: "utf8", maxBuffer: 1 << 26 });
 
 function probe(file) {
-  const r = fp(["-show_entries", "format=duration,size,bit_rate:stream=codec_type,codec_name,profile,width,height,r_frame_rate,pix_fmt,sample_rate,channels,color_primaries", "-of", "json", file]);
+  const r = fp(["-show_entries", "format=duration,size,bit_rate:stream=codec_type,codec_name,profile,width,height,r_frame_rate,pix_fmt,sample_rate,channels,color_primaries,color_space", "-of", "json", file]);
   return JSON.parse(r.stdout || "{}");
 }
 
@@ -119,11 +137,14 @@ function contactSheet(file, outDir, dur) {
   return existsSync(out) ? out : null;
 }
 
-function pickPlatform(w, h) {
-  if (platformArg) return platformArg;
-  const r = w / h;
+// Fallback cuando no se pasa --platform (solo renders de trabajo): por códec y aspecto.
+// Reels/TikTok/Shorts comparten 9:16 pero no specs: la inferencia elige Shorts y avisa.
+function inferPlatform(v) {
+  if (v.codec_name === "prores") return /^yuva/.test(v.pix_fmt || "") ? "overlay" : "archive";
+  const r = v.width / v.height;
   if (r > 1.5) return "youtube";
   if (r < 0.7) return "shorts";
+  if (r < 0.9) return "linkedin-feed";
   return "linkedin";
 }
 
@@ -143,30 +164,55 @@ for (const file of files) {
   const sizeMB = Number(info.format?.size || 0) / 1048576;
   const [fn, fd] = String(v.r_frame_rate || "30/1").split("/").map(Number);
   const fps = fd ? fn / fd : fn;
-  const pid = pickPlatform(v.width, v.height);
+  const isMov = /\.(mov|webm)$/i.test(file);
+  const pid = platformArg || inferPlatform(v);
   const P = specs.platforms[pid];
-  add("INFO", "Archivo", `${basename(file)} · ${v.width}×${v.height} · ${fps.toFixed(2)} fps · ${dur.toFixed(2)} s · ${sizeMB.toFixed(1)} MB · ${v.codec_name}/${v.pix_fmt}${a ? ` · audio ${a.codec_name} ${a.sample_rate} Hz ${a.channels}ch` : " · sin audio"}`);
+  // en modo entrega los problemas de audio/loudness frenan; en un draft se resuelven después en deliver
+  const hard = (cond) => (cond ? "PASS" : delivery ? "FAIL" : "WARN");
+  add("INFO", "Archivo", `${basename(file)} · ${v.width}×${v.height} · ${fps.toFixed(2)} fps · ${dur.toFixed(2)} s · ${sizeMB.toFixed(1)} MB · ${v.codec_name}${v.profile ? " " + v.profile : ""}/${v.pix_fmt}${a ? ` · audio ${a.codec_name} ${a.sample_rate} Hz ${a.channels}ch` : " · sin audio"}`);
+  add("INFO", "Modo", delivery ? "ENTREGA (audio y loudness bloquean)" : "DRAFT (audio y loudness solo avisan: se normaliza en npm run deliver)");
+  if (delivery && !platformArg) add("FAIL", "Plataforma", "en modo entrega --platform es obligatorio (la matriz de entregables sale del brief)");
   if (P) {
-    add("INFO", "Plataforma", `${P.label}${P.verified ? "" : " (specs no verificadas oficialmente: confirmar)"} — ${platformArg ? "elegida" : "inferida por aspecto; usá --platform para otra"}`);
+    const confirmed = P.specsVerified ?? P.verified;
+    add(platformArg ? "INFO" : "WARN", "Plataforma", `${P.label}${confirmed ? "" : " (specs sin confirmar oficialmente: verificá antes de la campaña)"} — ${platformArg ? "elegida" : "INFERIDA por aspecto/códec: pasá --platform (Reels, TikTok y Shorts tienen specs distintas)"}`);
     if (P.width && P.height) add(v.width === P.width && v.height === P.height ? "PASS" : "WARN", "Resolución", `${v.width}×${v.height} (esperado ${P.width}×${P.height})`);
     if (P.maxWidth) add(v.width <= P.maxWidth ? "PASS" : "FAIL", "Ancho máximo", `${v.width} ≤ ${P.maxWidth}`);
+    if (P.maxHeight) add(v.height <= P.maxHeight ? "PASS" : "FAIL", "Alto máximo", `${v.height} ≤ ${P.maxHeight}`);
     if (P.fps) add(fps >= P.fps[0] - 0.01 && fps <= P.fps[1] + 0.01 ? "PASS" : "FAIL", "fps", `${fps.toFixed(2)} (rango ${P.fps.join("–")})`);
-    if (P.videoCodec) add(P.videoCodec.includes(v.codec_name) ? "PASS" : /\.(mov|webm)$/i.test(file) ? "INFO" : "FAIL", "Codec de video", `${v.codec_name} (esperado ${P.videoCodec.join("/")})${/\.(mov|webm)$/i.test(file) ? " — archivo de master/overlay, no entregable" : ""}`);
-    if (P.pixFmt && v.pix_fmt) add(P.pixFmt.includes(v.pix_fmt) ? "PASS" : "WARN", "Pixel format", `${v.pix_fmt}`);
-    if (P.maxDurationS) add(dur <= P.maxDurationS ? "PASS" : "FAIL", "Duración", `${dur.toFixed(1)} s ≤ ${P.maxDurationS} s`);
+    if (P.videoCodec) {
+      const okCodec = P.videoCodec.includes(v.codec_name);
+      add(okCodec ? "PASS" : delivery || P.isMaster ? "FAIL" : isMov ? "INFO" : "FAIL", "Códec de video", `${v.codec_name} (esperado ${P.videoCodec.join("/")})`);
+    }
+    if (P.videoProfile) add(P.videoProfile.includes(v.profile) ? "PASS" : "FAIL", "Perfil de video", `${v.profile} (esperado ${P.videoProfile.join("/")})`);
+    if (P.pixFmt && v.pix_fmt) add(P.pixFmt.includes(v.pix_fmt) ? "PASS" : P.isMaster ? "FAIL" : "WARN", "Pixel format", `${v.pix_fmt} (esperado ${P.pixFmt.join("/")})`);
+    if (!P.isMaster && v.codec_name === "h264") add(v.color_space === "bt709" || v.color_primaries === "bt709" ? "PASS" : "WARN", "Color", `${v.color_primaries || "sin tag"} / ${v.color_space || "sin tag"} (esperado BT.709)`);
+    if (P.maxDurationS) {
+      const limit = P.maxDurationVerifiedAccountS || P.maxDurationS;
+      const st = dur > limit ? "FAIL" : dur > P.maxDurationS ? "WARN" : "PASS";
+      add(st, "Duración", `${dur.toFixed(1)} s ≤ ${P.maxDurationS} s${P.maxDurationVerifiedAccountS ? ` (hasta ${P.maxDurationVerifiedAccountS} s solo con cuenta verificada)` : ""}`);
+    }
     if (P.maxSizeMB) add(sizeMB <= P.maxSizeMB ? "PASS" : "FAIL", "Peso", `${sizeMB.toFixed(1)} MB ≤ ${P.maxSizeMB} MB`);
-    if (P.faststart) {
+    if (P.faststart && !P.isMaster) {
       const fs = faststart(file);
-      add(fs === true ? "PASS" : fs === false ? "WARN" : "INFO", "Fast start (moov al inicio)", fs === true ? "sí" : fs === false ? "no — re-muxear: ffmpeg -i in.mp4 -c copy -movflags +faststart out.mp4" : "no aplica");
+      add(fs === true ? "PASS" : fs === false ? (delivery ? "FAIL" : "WARN") : "INFO", "Fast start (moov al inicio)", fs === true ? "sí" : fs === false ? "no — re-muxear: ffmpeg -i in.mp4 -c copy -movflags +faststart out.mp4" : "no aplica");
     }
   }
+  const tgt = { ...specs.loudness, ...(P?.loudness || {}) };
+  if (lufsArg !== null && isFinite(lufsArg)) tgt.integrated = lufsArg;
   if (a) {
-    const L = loudness(file);
-    const tgt = specs.loudness;
-    if (isFinite(L.I)) add(Math.abs(L.I - tgt.integratedLUFS) <= tgt.toleranceLU ? "PASS" : "FAIL", "Loudness integrado", `${L.I.toFixed(1)} LUFS (objetivo ${tgt.integratedLUFS} ±${tgt.toleranceLU}) — corregir con npm run loudnorm`);
-    if (isFinite(L.TP)) add(L.TP <= tgt.truePeakDBTP ? "PASS" : "FAIL", "True peak", `${L.TP.toFixed(1)} dBTP (máx ${tgt.truePeakDBTP})`);
-    else add("INFO", "True peak", "silencio");
-  } else add("WARN", "Audio", "El render no tiene pista de audio (OK para overlays o piezas mudas; no para entregables con sonido).");
+    if (P?.audioCodec) add(P.audioCodec.includes(a.codec_name) ? "PASS" : delivery || P.isMaster ? "FAIL" : "WARN", "Códec de audio", `${a.codec_name} (esperado ${P.audioCodec.join("/")})`);
+    if (Number(a.sample_rate) !== 48000) add(delivery ? "FAIL" : "WARN", "Sample rate", `${a.sample_rate} Hz (esperado 48000)`);
+    if (P?.loudness || !P?.isMaster) {
+      const L = loudness(file);
+      const fix = delivery ? "" : " — se normaliza en npm run deliver";
+      if (isFinite(L.I)) add(hard(Math.abs(L.I - tgt.integrated) <= tgt.tolerance), "Loudness integrado", `${L.I.toFixed(1)} LUFS (objetivo ${tgt.integrated} ±${tgt.tolerance}${lufsArg !== null ? ", --lufs" : ""})${fix}`);
+      else add(hard(false), "Loudness integrado", "silencio total en la pista de audio");
+      if (isFinite(L.TP)) add(hard(L.TP <= tgt.truePeak), "True peak", `${L.TP.toFixed(1)} dBTP (máx ${tgt.truePeak})${fix}`);
+    }
+  } else {
+    const need = P?.requiresAudio && !allowSilent;
+    add(need ? (delivery ? "FAIL" : "WARN") : "INFO", "Audio", need ? `sin pista de audio y ${P.label} la requiere (pieza muda a propósito: --allow-silent y registrarlo en el brief)` : "sin pista de audio (OK para esta plataforma/overlay o con --allow-silent)");
+  }
 
   const blacks = detect(file, "blackdetect=d=0.4:pix_th=0.06", /black_start:([\d.]+) black_end:([\d.]+)/g).filter(([s, e]) => s > 0.3 && e < dur - 0.3);
   add(blacks.length ? "WARN" : "PASS", "Negros a mitad de pieza", blacks.length ? blacks.map(([s, e]) => `${s.toFixed(2)}–${e.toFixed(2)} s`).join(", ") : "ninguno");
@@ -185,9 +231,9 @@ for (const file of files) {
   anyFail ||= fails > 0;
   const verdict = fails ? "FAIL" : warns ? "PASS con advertencias" : "PASS";
   const md = `# QA técnico — ${basename(file)}\n\nGenerado: ${new Date().toISOString()} · Veredicto: **${verdict}** (${fails} fail, ${warns} warn)\n\n| Estado | Chequeo | Detalle |\n|---|---|---|\n${rows.map((r) => `| ${r.status} | ${r.check} | ${String(r.detail).replace(/\|/g, "\\|")} |`).join("\n")}\n\n> El QA automático no reemplaza: visionado completo en teléfono real, escucha en parlante de teléfono, verificación de claims y del checklist legal (templates/qa-checklist.md).\n`;
-  const report = join(outDir, basename(file).replace(/\.\w+$/, "") + "_qa.md");
+  const report = join(outDir, basename(file).replace(/\.\w+$/, "") + (platformArg && delivery ? `_${platformArg}` : "") + "_qa.md");
   writeFileSync(report, md);
-  writeFileSync(report.replace(/\.md$/, ".json"), JSON.stringify({ file, verdict, rows }, null, 2));
+  writeFileSync(report.replace(/\.md$/, ".json"), JSON.stringify({ file, platform: pid, mode: delivery ? "delivery" : "draft", verdict, rows }, null, 2));
   const icon = { PASS: "✓", WARN: "⚠", FAIL: "✗", INFO: "·" };
   console.log(`\n${fails ? "✗" : "✓"} ${basename(file)} → ${verdict}`);
   for (const r of rows) console.log(`  ${icon[r.status]} ${r.check}: ${r.detail}`);
