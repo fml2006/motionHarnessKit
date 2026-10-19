@@ -1,5 +1,7 @@
 # STORYBOARD — [CLIENTE] · [PIEZA]
 
+> **Estado en este ejemplo (2026-10-19):** plantilla **sin completar** (el ejemplo de abajo es el de la plantilla, no de esta pieza). En este proyecto la spec ejecutable se escribió directo en `scenes.json`; la ficha humana por escena queda pendiente.
+
 > Gate **G5** (storyboard) → **G6** (animatic). Dueño: Motion director · Aprueba: Director creativo · Cliente: opcional en G5, obligatorio en G6.
 > Este archivo tiene dos partes:
 > **A.** Ficha humana por escena (para revisión con cliente / equipo).

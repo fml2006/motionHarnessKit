@@ -18,7 +18,7 @@ export const brand = {
     "code": {
       "background": "#0E1422",
       "text": "#E6EDF7",
-      "comment": "#7D8AA5",
+      "comment": "#94A0B8",
       "keyword": "#7FB0FF",
       "string": "#5FE0B8",
       "number": "#FFC46B",
@@ -56,7 +56,7 @@ export const brand = {
       "Una cosa a la vez: el ojo sigue un solo foco por beat; el resto queda quieto.",
       "Nunca arrancar en t=0: primer movimiento a los 150-300 ms de iniciada la escena.",
       "Entradas decididas, salidas discretas: las salidas duran ~65% de las entradas y aceleran.",
-      "Holds generosos: el texto queda en pantalla al menos max(1,5 s; 0,8 s + 0,35 s por palabra).",
+      "Holds generosos: el texto queda en pantalla al menos max(1,5 s; 0,8 s + 0,35 s por palabra; caracteres / 15).",
       "Dirección consistente: lo nuevo entra de derecha/abajo, lo que se va sale a izquierda/arriba.",
       "Máximo 2 tweens con el mismo easing por escena; la escena más lenta dura ~3x la más rápida."
     ],
@@ -124,8 +124,10 @@ export const brand = {
       "letters": 25,
       "words": 70,
       "lines": 120,
-      "items": 100
+      "items": 60
     },
+    "staggerGroupMaxMs": 500,
+    "staggerComment": "Un grupo escalonado no supera staggerGroupMaxMs: BRAND.stagger(nombre, n) devuelve min(valor, staggerGroupMaxMs / n).",
     "distance": {
       "small": 1.5,
       "medium": 4,
@@ -136,18 +138,23 @@ export const brand = {
       "secondsPerWord": 0.35,
       "baseMs": 800,
       "minHoldMs": 1500,
-      "comment": "hold = max(minHold, base + 0.35 s x palabras)"
+      "charsPerSecond": 15,
+      "comment": "hold = max(minHold; base + 0,35 s × palabras; caracteres / 15). Sumá +20 % si el texto es técnico (código, cifras, nombres propios)."
     },
     "transitions": {
       "default": "cut",
       "allowed": [
         "cut",
-        "push",
-        "mask-wipe",
         "crossfade",
+        "push",
+        "mask-wipe"
+      ],
+      "comment": "Solo las transiciones implementadas en build:roots. Una transición fuera de esta lista hace fallar el build (nunca cae a corte en silencio).",
+      "manualInNLE": [
         "zoom-through",
         "match-cut"
       ],
+      "manualComment": "Permitidas por la marca pero no automatizadas: se resuelven en el editor (NLE) o como escena custom.",
       "forbidden": [
         "spin",
         "star-wipe",
@@ -185,7 +192,8 @@ export const brand = {
     "caption": 3.3,
     "label": 2.6,
     "code": 3,
-    "portraitMultiplier": 1.22
+    "portraitMultiplier": 1.22,
+    "feedMultiplier": 1.1
   }
 } as const;
 

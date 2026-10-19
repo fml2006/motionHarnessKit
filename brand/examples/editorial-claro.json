@@ -50,7 +50,7 @@
     "code": {
       "background": "#1E2328",
       "text": "#EDE6D9",
-      "comment": "#8C877D",
+      "comment": "#ABA59A",
       "keyword": "#E39A72",
       "string": "#9CC9A8",
       "number": "#E8C07A",
@@ -130,7 +130,8 @@
       "caption": 3.3,
       "label": 2.6,
       "code": 3.0,
-      "portraitMultiplier": 1.22
+      "portraitMultiplier": 1.22,
+      "feedMultiplier": 1.1
     },
     "rules": {
       "maxWordsPerLine": 7,
@@ -170,7 +171,7 @@
       "Una cosa a la vez: el ojo sigue un solo foco por beat; el resto queda quieto.",
       "Nunca arrancar en t=0: primer movimiento a los 150-300 ms de iniciada la escena.",
       "Entradas decididas, salidas discretas: las salidas duran ~65% de las entradas y aceleran.",
-      "Holds generosos: el texto queda en pantalla al menos max(1,5 s; 0,8 s + 0,35 s por palabra).",
+      "Holds generosos: el texto queda en pantalla al menos max(1,5 s; 0,8 s + 0,35 s por palabra; caracteres / 15).",
       "Dirección consistente: lo nuevo entra de derecha/abajo, lo que se va sale a izquierda/arriba.",
       "Máximo 2 tweens con el mismo easing por escena; la escena más lenta dura ~3x la más rápida."
     ],
@@ -238,8 +239,10 @@
       "letters": 25,
       "words": 90,
       "lines": 160,
-      "items": 130
+      "items": 80
     },
+    "staggerGroupMaxMs": 600,
+    "staggerComment": "Registro balanced: grupos algo más lentos que productive, pero nunca más de 600 ms.",
     "distance": {
       "small": 1.5,
       "medium": 4,
@@ -250,18 +253,23 @@
       "secondsPerWord": 0.35,
       "baseMs": 800,
       "minHoldMs": 1500,
-      "comment": "hold = max(minHold, base + 0.35 s x palabras)"
+      "charsPerSecond": 15,
+      "comment": "hold = max(minHold; base + 0,35 s × palabras; caracteres / 15). Sumá +20 % si el texto es técnico (código, cifras, nombres propios)."
     },
     "transitions": {
       "default": "crossfade",
       "allowed": [
         "cut",
-        "push",
-        "mask-wipe",
         "crossfade",
+        "push",
+        "mask-wipe"
+      ],
+      "comment": "Solo las transiciones implementadas en build:roots. Una transición fuera de esta lista hace fallar el build (nunca cae a corte en silencio).",
+      "manualInNLE": [
         "zoom-through",
         "match-cut"
       ],
+      "manualComment": "Permitidas por la marca pero no automatizadas: se resuelven en el editor (NLE) o como escena custom.",
       "forbidden": [
         "spin",
         "star-wipe",
@@ -292,7 +300,8 @@
     "safeMarginPct": {
       "landscape": 6,
       "portrait": 8,
-      "square": 7
+      "square": 7,
+      "feed": 7
     },
     "platformSafeZones": {
       "universal-9x16": {
@@ -344,8 +353,7 @@
       "label": "YouTube / web 16:9",
       "width": 1920,
       "height": 1080,
-      "fps": 30,
-      "root": "index.html"
+      "fps": 30
     },
     {
       "id": "portrait",
@@ -353,16 +361,21 @@
       "width": 1080,
       "height": 1920,
       "fps": 30,
-      "root": "vertical.html",
       "safeZone": "universal-9x16"
+    },
+    {
+      "id": "feed",
+      "label": "Feed 4:5 (LinkedIn / Instagram)",
+      "width": 1080,
+      "height": 1350,
+      "fps": 30
     },
     {
       "id": "square",
       "label": "Feed 1:1",
       "width": 1080,
       "height": 1080,
-      "fps": 30,
-      "root": "square.html"
+      "fps": 30
     }
   ],
   "audio": {
@@ -386,24 +399,33 @@
     "voice": {
       "provider": "",
       "voiceId": "",
-      "wordsPerMinute": 150,
+      "synthetic": false,
+      "wordsPerSecond": 2.2,
+      "comment": "Palabras netas de VO = duración (s) × 2,2 (≈130 para 60 s). Lo usan /guion, el guionista y el storyboard.",
       "consentOnFile": false
     }
   },
   "captions": {
     "enabled": true,
+    "file": "captions.srt",
+    "burnIn": [
+      "portrait",
+      "feed"
+    ],
+    "burnInComment": "Si existe captions.srt|.vtt en el proyecto, build:roots los quema en estos formatos. En el resto se entregan como archivo (sidecar).",
     "style": "rail",
     "maxCharsPerLine": 38,
     "maxLines": 2,
     "minDurationMs": 1000,
     "maxCharsPerSecond": 17,
     "position": "bottom",
-    "highlightActiveWord": true
+    "highlightActiveWord": false
   },
   "legal": {
     "aiDisclosure": "Este video incluye elementos generados o asistidos por IA.",
+    "disclosurePolicy": "Más estricta que el mínimo de las plataformas: se divulga SIEMPRE que haya voz sintética (TTS genérica o clon), además de personas o lugares realistas generados e imágenes de producto simuladas.",
     "requireDisclosureFor": [
-      "voz sintética",
+      "voz sintética (TTS genérica o clon)",
       "personas o lugares realistas generados",
       "imágenes de producto simuladas"
     ],

@@ -1,0 +1,7 @@
+fecha,persona,rol,gate,fase,horas,version,nota
+# Horas de esta sesión: NO se midieron. Quedan vacías a propósito (no se estiman a posteriori).
+2026-10-19,Claude Code (agente),investigador,G1,preproduccion,,,claims C-001..C-004 con fuente; sin firma SME
+2026-10-19,Claude Code (agente),guionista,G3,preproduccion,,,guion a dos columnas + VO limpia
+2026-10-19,Claude Code (agente),motion-designer,G7,produccion,,v001,primer build + QA
+2026-10-19,Claude Code (agente),motion-designer,G8,revision,,v002,R1 interna: exit none entre escenas
+2026-10-19,Claude Code (agente),motion-designer,G8,revision,,v003,R2 interna: chrome de código

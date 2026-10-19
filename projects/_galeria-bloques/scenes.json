@@ -1,22 +1,161 @@
 {
+  "$comment": "Galería de los 13 bloques con la marca activa. purpose=demo: las escenas con \"demo\": true muestran contenido ficticio rotulado y build:roots --strict las exceptúa SOLO porque el proyecto es demo. En un proyecto real, ese mismo contenido frena el render final.",
   "title": "Galería de bloques de marca",
   "slug": "galeria-bloques",
+  "purpose": "demo",
   "master": "landscape",
-  "formats": ["landscape", "portrait", "square"],
+  "formats": [
+    "landscape",
+    "portrait",
+    "feed",
+    "square"
+  ],
   "defaultTransition": "cut",
   "scenes": [
-    { "id": "b01-logo", "block": "logo-sting", "duration": 3, "vars": { "tagline": "Tecnología explicada con claridad" } },
-    { "id": "b02-title", "block": "title-card", "duration": 4.5, "vars": {} },
-    { "id": "b03-statement", "block": "kinetic-statement", "duration": 4.5, "vars": {} },
-    { "id": "b04-stat", "block": "stat-hit", "duration": 5, "vars": { "context": "Encuesta a 1.200 equipos de ingeniería.", "source": "Fuente: dato de ejemplo — reemplazar" } },
-    { "id": "b05-code", "block": "code-reveal", "duration": 7, "vars": {} },
-    { "id": "b06-terminal", "block": "terminal", "duration": 6, "vars": { "caption": "Un comando, un MP4 determinista." } },
-    { "id": "b07-chart", "block": "bar-chart", "duration": 7, "vars": {} },
-    { "id": "b08-steps", "block": "steps-flow", "duration": 8, "vars": {} },
-    { "id": "b09-compare", "block": "split-compare", "duration": 8, "vars": { "title": "Mismo modelo, otro *proceso*" } },
-    { "id": "b10-quote", "block": "quote", "duration": 6, "vars": {} },
-    { "id": "b11-lower", "block": "lower-third", "duration": 5, "vars": { "transparent": false } },
-    { "id": "b12-chapter", "block": "chapter", "duration": 2.6, "vars": {} },
-    { "id": "b13-end", "block": "end-card", "duration": 5, "vars": { "note": "Este video incluye elementos asistidos por IA." } }
-  ]
+    {
+      "id": "b01-logo",
+      "block": "logo-sting",
+      "duration": 3,
+      "vars": {
+        "tagline": "Tecnología explicada con claridad"
+      }
+    },
+    {
+      "id": "b02-title",
+      "block": "title-card",
+      "duration": 6.3,
+      "vars": {
+        "kicker": "Explainer",
+        "headline": "Qué es un *agente*|y por qué importa",
+        "subtitle": "En 60 segundos, sin jerga."
+      }
+    },
+    {
+      "id": "b03-statement",
+      "block": "kinetic-statement",
+      "duration": 4.5,
+      "vars": {
+        "text": "Una idea por pantalla, con *una* palabra clave."
+      }
+    },
+    {
+      "id": "b04-stat",
+      "block": "stat-hit",
+      "duration": 5,
+      "demo": true,
+      "vars": {
+        "value": 73,
+        "suffix": "%",
+        "label": "Dato ficticio para mostrar el bloque",
+        "source": "Dato ficticio · demo — no publicar"
+      }
+    },
+    {
+      "id": "b05-code",
+      "block": "code-reveal",
+      "duration": 7,
+      "demo": true,
+      "vars": {
+        "filename": "pseudocodigo-demo.ts",
+        "code": "const tools = [search, readFile];\nconst agent = new Agent({ tools });\n\n// pensar → usar herramienta → ver\nconst res = await agent.run(task);\nconsole.log(res.text);",
+        "highlight": "5",
+        "caption": "Un agente es un *loop*:|decide, usa una herramienta|y vuelve a decidir."
+      },
+      "notes": "Pseudocódigo rotulado: Agent no es una API real."
+    },
+    {
+      "id": "b06-terminal",
+      "block": "terminal",
+      "duration": 6,
+      "vars": {
+        "title": "bash — motion-harness-kit",
+        "prompt": "$",
+        "command": "npm run render -- _galeria-bloques",
+        "output": "▶ Render landscape (standard)\n100%  Render complete\n✓ fps: 30.00 (rango 24–60)\n✓ Codec de video: h264 (esperado h264)",
+        "caption": "Salida real (abreviada) del render y el QA de esta galería."
+      },
+      "notes": "Líneas copiadas del log real del render v002 de esta galería (render + QA automático), sin editar."
+    },
+    {
+      "id": "b07-chart",
+      "block": "bar-chart",
+      "duration": 7,
+      "demo": true,
+      "vars": {
+        "title": "Dato ficticio · demo del bloque",
+        "items": "Opción A: 32\nOpción B: 14\nOpción C: 6",
+        "unit": "",
+        "highlight": "Opción C",
+        "source": "Dato ficticio · demo — no publicar"
+      }
+    },
+    {
+      "id": "b08-steps",
+      "block": "steps-flow",
+      "duration": 9.2,
+      "vars": {
+        "title": "Cómo trabaja un agente",
+        "steps": "Pedido — vos describís el objetivo\nPlan — el modelo decide el próximo paso\nHerramienta — ejecuta: busca, lee, escribe\nObserva — evalúa el resultado y repite"
+      }
+    },
+    {
+      "id": "b09-compare",
+      "block": "split-compare",
+      "duration": 9.7,
+      "vars": {
+        "title": "Mismo modelo, otro *proceso*",
+        "leftTitle": "Sin harness",
+        "leftItems": "Prompt distinto cada vez\nColores y fuentes a ojo\nRevisión al final",
+        "rightTitle": "Con harness",
+        "rightItems": "Brief y storyboard versionados\nTokens de marca obligatorios\nQA automático en cada render"
+      }
+    },
+    {
+      "id": "b10-quote",
+      "block": "quote",
+      "duration": 7.3,
+      "demo": true,
+      "vars": {
+        "quote": "La herramienta no reemplaza el criterio:|lo *multiplica*.",
+        "author": "Cita ficticia · demo",
+        "role": "Reemplazala por una cita textual con fuente"
+      }
+    },
+    {
+      "id": "b11-lower",
+      "block": "lower-third",
+      "duration": 5,
+      "demo": true,
+      "vars": {
+        "name": "Nombre Apellido",
+        "role": "Rol ficticio · demo",
+        "transparent": false
+      }
+    },
+    {
+      "id": "b12-chapter",
+      "block": "chapter",
+      "duration": 3.5,
+      "vars": {
+        "number": "02",
+        "title": "Cómo se arma el pipeline",
+        "kicker": "Capítulo"
+      }
+    },
+    {
+      "id": "b13-end",
+      "block": "end-card",
+      "duration": 5,
+      "vars": {
+        "cta": "Bajá el kit y|*probalo* con tu marca",
+        "link": "tumarca.com/kit",
+        "note": "Este video incluye elementos asistidos por IA."
+      }
+    }
+  ],
+  "brandLock": {
+    "name": "TuMarca",
+    "version": "1.1.0",
+    "hash": "361204c4d0e15797"
+  }
 }

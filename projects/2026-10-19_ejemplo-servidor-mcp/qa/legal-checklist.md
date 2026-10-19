@@ -1,5 +1,7 @@
 # Checklist legal y de compliance por pieza
 
+> **Estado en este ejemplo (2026-10-19):** sin revisión legal. Ningún ítem marcado. La pieza no es publicable (claims pendientes).
+
 > Fuente: research/07-critica-legal-riesgos.md §6.4. **No es asesoramiento legal.** Niveles: N1 interno/bajo riesgo · N2 público/marca · N3 cliente, pauta paga, personas reales o voz clonada.
 
 ## Checklist IA – Pieza: ____________  | Nivel: N1 / N2 / N3 | Owner: ________ | Fecha: ________

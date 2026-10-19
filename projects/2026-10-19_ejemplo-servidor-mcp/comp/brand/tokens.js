@@ -4,6 +4,7 @@
      BRAND.ease("enter")      → nombre de ease registrado ("brand.enter")
      BRAND.dur("enter")       → segundos (0.6)
      BRAND.stagger("words")   → segundos entre elementos
+     BRAND.stagger("items", n)→ idem, acotado para que el grupo de n elementos dure ≤ staggerGroupMaxMs
      BRAND.hold("texto...")   → segundos mínimos de lectura para ese texto
      BRAND.color("accent")    → hex
      BRAND.u(el)              → px por 1cqmin del frame que contiene a el
@@ -13,7 +14,7 @@
   var B = {
   "name": "TuMarca",
   "slug": "tumarca",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "colors": {
     "background": "#0B0F19",
     "surface": "#131A2A",
@@ -30,7 +31,7 @@
     "code": {
       "background": "#0E1422",
       "text": "#E6EDF7",
-      "comment": "#7D8AA5",
+      "comment": "#94A0B8",
       "keyword": "#7FB0FF",
       "string": "#5FE0B8",
       "number": "#FFC46B",
@@ -68,7 +69,7 @@
       "Una cosa a la vez: el ojo sigue un solo foco por beat; el resto queda quieto.",
       "Nunca arrancar en t=0: primer movimiento a los 150-300 ms de iniciada la escena.",
       "Entradas decididas, salidas discretas: las salidas duran ~65% de las entradas y aceleran.",
-      "Holds generosos: el texto queda en pantalla al menos max(1,5 s; 0,8 s + 0,35 s por palabra).",
+      "Holds generosos: el texto queda en pantalla al menos max(1,5 s; 0,8 s + 0,35 s por palabra; caracteres / 15).",
       "Dirección consistente: lo nuevo entra de derecha/abajo, lo que se va sale a izquierda/arriba.",
       "Máximo 2 tweens con el mismo easing por escena; la escena más lenta dura ~3x la más rápida."
     ],
@@ -136,8 +137,10 @@
       "letters": 25,
       "words": 70,
       "lines": 120,
-      "items": 100
+      "items": 60
     },
+    "staggerGroupMaxMs": 500,
+    "staggerComment": "Un grupo escalonado no supera staggerGroupMaxMs: BRAND.stagger(nombre, n) devuelve min(valor, staggerGroupMaxMs / n).",
     "distance": {
       "small": 1.5,
       "medium": 4,
@@ -148,18 +151,23 @@
       "secondsPerWord": 0.35,
       "baseMs": 800,
       "minHoldMs": 1500,
-      "comment": "hold = max(minHold, base + 0.35 s x palabras)"
+      "charsPerSecond": 15,
+      "comment": "hold = max(minHold; base + 0,35 s × palabras; caracteres / 15). Sumá +20 % si el texto es técnico (código, cifras, nombres propios)."
     },
     "transitions": {
       "default": "cut",
       "allowed": [
         "cut",
-        "push",
-        "mask-wipe",
         "crossfade",
+        "push",
+        "mask-wipe"
+      ],
+      "comment": "Solo las transiciones implementadas en build:roots. Una transición fuera de esta lista hace fallar el build (nunca cae a corte en silencio).",
+      "manualInNLE": [
         "zoom-through",
         "match-cut"
       ],
+      "manualComment": "Permitidas por la marca pero no automatizadas: se resuelven en el editor (NLE) o como escena custom.",
       "forbidden": [
         "spin",
         "star-wipe",
@@ -188,13 +196,19 @@
   },
   "captions": {
     "enabled": true,
+    "file": "captions.srt",
+    "burnIn": [
+      "portrait",
+      "feed"
+    ],
+    "burnInComment": "Si existe captions.srt|.vtt en el proyecto, build:roots los quema en estos formatos. En el resto se entregan como archivo (sidecar).",
     "style": "rail",
     "maxCharsPerLine": 38,
     "maxLines": 2,
     "minDurationMs": 1000,
     "maxCharsPerSecond": 17,
     "position": "bottom",
-    "highlightActiveWord": true
+    "highlightActiveWord": false
   },
   "logo": {
     "primary": "logo/primary.svg",
@@ -221,17 +235,20 @@
     if (v == null) throw new Error("BRAND.dur: duración desconocida '" + name + "'");
     return v / 1000;
   };
-  B.stagger = function (name) {
+  B.stagger = function (name, n) {
     var v = B.motion.stagger[name];
     if (v == null) throw new Error("BRAND.stagger: stagger desconocido '" + name + "'");
+    var max = B.motion.staggerGroupMaxMs || 500;
+    if (n > 1) v = Math.min(v, max / n);
     return v / 1000;
   };
   B.hold = function (text) {
     var r = B.motion.reading || {};
     var spw = r.secondsPerWord || (r.wordsPerSecond ? 1 / r.wordsPerSecond : 0.35);
     var base = (r.baseMs != null ? r.baseMs : r.extraHoldMs != null ? r.extraHoldMs : 800) / 1000;
-    var words = String(text || "").trim().split(/\s+/).filter(Boolean).length;
-    return Math.max((r.minHoldMs || 1500) / 1000, base + words * spw);
+    var t = String(text || "").replace(/[|*]/g, " ").replace(/\s+/g, " ").trim();
+    var words = t ? t.split(" ").length : 0;
+    return Math.max((r.minHoldMs || 1500) / 1000, base + words * spw, t.length / (r.charsPerSecond || 15));
   };
   B.color = function (path) {
     return path.split(".").reduce(function (o, k) { return o == null ? undefined : o[k]; }, B.colors);

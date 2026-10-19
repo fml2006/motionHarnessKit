@@ -2,19 +2,21 @@
 <!--
   bm-block: stat-hit
   Uso: UN dato duro con conteo. El número es el momento de acento del frame.
-  REGLA: "source" es obligatoria. Si el dato no tiene fuente verificable, no va en pantalla.
+  REGLA: "source" es obligatoria y la escena declara "claims": ["C-…"] en scenes.json (claim con estado=ok y
+  verificado_por firmado en research/claims.csv). Sin eso, build:roots --strict frena el render final.
+  Los defaults son placeholders visibles (⟦…⟧): el bloque no trae datos, trae estructura.
   Duración sugerida: 4-6 s.
 -->
 <html
   lang="es"
   data-composition-variables='[
-    {"id":"value","type":"number","label":"Valor","default":73},
+    {"id":"value","type":"number","label":"Valor (sin default: tiene que venir de una claim verificada)","default":null},
     {"id":"decimals","type":"number","label":"Decimales","default":0,"min":0,"max":3,"step":1},
     {"id":"prefix","type":"string","label":"Prefijo","default":"","maxLength":4},
-    {"id":"suffix","type":"string","label":"Sufijo","default":"%","maxLength":6},
-    {"id":"label","type":"string","label":"Qué mide (≤8 palabras)","default":"de los equipos ya usa agentes","maxLength":60},
+    {"id":"suffix","type":"string","label":"Sufijo","default":"","maxLength":6},
+    {"id":"label","type":"string","label":"Qué mide (≤8 palabras)","default":"⟦COMPLETAR: qué mide el dato⟧","maxLength":60},
     {"id":"context","type":"string","label":"Contexto (opcional)","default":"","maxLength":90},
-    {"id":"source","type":"string","label":"Fuente (obligatoria)","default":"Fuente: completar antes de publicar","maxLength":90},
+    {"id":"source","type":"string","label":"Fuente (obligatoria)","default":"⟦COMPLETAR: Fuente · claim C-…⟧","maxLength":90},
     {"id":"exit","type":"enum","label":"Salida","default":"fade","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
     {"id":"dur","type":"number","label":"Duración de la escena (s)","default":5,"min":1,"max":30,"step":0.1,"unit":"s"}
   ]'
@@ -52,7 +54,7 @@
       <script>
         (function () {
           var root = document.getElementById("root");
-          var v = BM.vars({ value: 0, decimals: 0, prefix: "", suffix: "", label: "", context: "", source: "", exit: "fade", dur: 5 }, window.__hyperframes);
+          var v = BM.vars({ value: null, decimals: 0, prefix: "", suffix: "", label: "", context: "", source: "", exit: "fade", dur: 5 }, window.__hyperframes);
           var q = function (s) { return root.querySelector(s); };
           q(".sh-label").textContent = v.label;
           var ctx = q(".sh-ctx");
@@ -61,7 +63,10 @@
 
           var tl = gsap.timeline({ paused: true });
           BM.fadeUp(tl, q(".sh-num"), 0.15, { yPercent: 12 });
-          BM.countUp(tl, q(".sh-num"), v.value, 0.2, { decimals: Number(v.decimals), prefix: v.prefix, suffix: v.suffix, locale: (BRAND.motion && document.documentElement.lang) || "es-AR" });
+          // sin valor no hay número: se ve un placeholder (y build:roots --strict frena el render final)
+          var hasValue = v.value !== null && v.value !== "" && isFinite(Number(v.value));
+          if (hasValue) BM.countUp(tl, q(".sh-num"), Number(v.value), 0.2, { decimals: Number(v.decimals), prefix: v.prefix, suffix: v.suffix, locale: (BRAND.motion && document.documentElement.lang) || "es-AR" });
+          else q(".sh-num").textContent = "⟦—⟧";
           BM.drawLine(tl, q(".sh-bar"), 0.5, "x");
           BM.fadeUp(tl, q(".sh-label"), 0.7, { yPercent: 30 });
           if (ctx.isConnected) BM.fadeUp(tl, ctx, 1.0, { yPercent: 30 });

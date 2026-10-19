@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 // frames: captura un frame clave por escena (el "styleframe" real, antes de la salida) para revisión.
-//   node scripts/frames.mjs <proyecto> [--format landscape|portrait|square] [--at mid|end]
+//   node scripts/frames.mjs <proyecto> [--format landscape|portrait|square|feed] [--at mid|end]
 // Salida: <proyecto>/review/frames-<formato>/ (PNG por escena + contact-sheet.jpg)
 import { existsSync, mkdirSync, readdirSync, renameSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { readJson, resolveProject, runHf, loadBrand } from "./lib/common.mjs";
+import { timeline } from "./lib/plan.mjs";
 
 const args = process.argv.slice(2);
 const projectDir = resolveProject(args.find((a, i) => !a.startsWith("--") && !["--format", "--at"].includes(args[i - 1])));
@@ -20,19 +21,14 @@ if (!existsSync(join(dir, "index.html"))) {
   process.exit(1);
 }
 const exitMs = brand.motion?.durations?.exit ?? 360;
-let t = 0;
+// mismos tiempos que la raíz generada (transiciones con solapamiento incluidas)
 const times = [];
 const names = [];
-const overlap = plan.crossfade ?? 0.4;
-plan.scenes.filter((s) => !(s.skipIn || []).includes(fid)).forEach((s, i) => {
-  const o = (s.formats || {})[fid] || {};
-  const d = o.duration ?? s.duration;
-  if (i > 0 && (s.transition || plan.defaultTransition) === "crossfade") t = Math.max(0, t - overlap);
-  const at = mode === "mid" ? t + d / 2 : t + Math.max(d * 0.5, d - exitMs / 1000 - 0.25);
+for (const { scene: s, start, duration: d } of timeline(plan, fid, brand).items) {
+  const at = mode === "mid" ? start + d / 2 : start + Math.max(d * 0.5, d - exitMs / 1000 - 0.25);
   times.push(Math.round(at * 100) / 100);
   names.push(s.id);
-  t += d;
-});
+}
 const out = join(projectDir, "review", `frames-${fid}`);
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });

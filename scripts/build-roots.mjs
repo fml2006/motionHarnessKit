@@ -1,25 +1,60 @@
 #!/usr/bin/env node
 // build-roots: scenes.json → comp/ (proyecto HyperFrames maestro) + formats/<id>/ (variantes derivadas)
 //
-//   node scripts/build-roots.mjs <proyecto> [--reset <sceneId>] [--only-brand]
+//   node scripts/build-roots.mjs <proyecto> [--reset <sceneId>] [--only-brand] [--strict] [--rebrand]
 //
 // Reglas:
 //   - comp/index.html y formats/** se REGENERAN siempre: no se editan a mano.
 //   - comp/compositions/<sceneId>.html se crea UNA vez desde engine/blocks/<block>.html y después es tuyo
 //     (el agente lo puede personalizar). --reset <sceneId> lo vuelve a copiar desde el bloque.
-//   - comp/brand/ se sincroniza desde brand/dist/ en cada build (cambiar la marca = npm run brand + build).
-import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync, copyFileSync } from "node:fs";
+//   - comp/brand/ se sincroniza desde brand/dist/ en cada build, PERO solo si coincide con el brandLock del
+//     proyecto (scenes.json → brandLock). Si la marca cambió, el build se frena: --rebrand lo acepta a conciencia.
+//   - Gates de contenido (placeholders, cifras sin claim verificada, valores sueltos fuera de tokens, captions):
+//     WARN en un build normal; FAIL con --strict (render final / entrega).
+import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync, copyFileSync, appendFileSync } from "node:fs";
 import { join } from "node:path";
 import { ROOT, copyDir, readJson, loadBrand, resolveProject, esc, escAttrSingle } from "./lib/common.mjs";
+import { TRANSITIONS, transitionOf, timeline, compositionDefaults, compositionBodyText, findPlaceholder, loadClaims, claimProblem, NUMERIC_BLOCKS, brandFingerprint, parseCaptions, captionWarnings, tokenLint } from "./lib/plan.mjs";
 
 const args = process.argv.slice(2);
 const projectDir = resolveProject(args.find((a) => !a.startsWith("--") && args[args.indexOf(a) - 1] !== "--reset"));
 const resetId = args.includes("--reset") ? args[args.indexOf("--reset") + 1] : null;
 const onlyBrand = args.includes("--only-brand");
+const strict = args.includes("--strict");
+const rebrand = args.includes("--rebrand");
+const rel = (p) => p.replace(ROOT + "/", "");
 
 const brand = loadBrand();
-const plan = readJson(join(projectDir, "scenes.json"));
+const planPath = join(projectDir, "scenes.json");
+const plan = readJson(planPath);
 const comp = join(projectDir, "comp");
+const isDemo = plan.purpose === "demo";
+
+// 0) brandLock: un proyecto queda atado a la versión de marca con la que se aprobó
+const current = brandFingerprint(join(ROOT, "brand", "dist"), brand);
+const lock = plan.brandLock;
+const lockStr = (l) => `${l.name} v${l.version} #${l.hash}`;
+if (!lock) {
+  plan.brandLock = current;
+  writeFileSync(planPath, JSON.stringify(plan, null, 2) + "\n");
+  console.log(`  ⚠ El proyecto no tenía brandLock: queda atado a ${lockStr(current)} (scenes.json → brandLock).`);
+} else if (lock.hash !== current.hash) {
+  if (!rebrand) {
+    console.error(`✗ La marca cambió desde que se bloqueó este proyecto.`);
+    console.error(`    proyecto: ${lockStr(lock)}`);
+    console.error(`    actual:   ${lockStr(current)}  (brand/dist)`);
+    console.error(`  Si el cambio de marca es intencional para ESTA pieza: npm run build:roots -- ${rel(projectDir)} --rebrand`);
+    console.error(`  Si no: restaurá la marca del proyecto (git checkout brand/brand.config.json && npm run brand) o trabajá en otro clon.`);
+    process.exit(1);
+  }
+  plan.brandLock = current;
+  writeFileSync(planPath, JSON.stringify(plan, null, 2) + "\n");
+  const log = join(projectDir, "review", "CHANGELOG.md");
+  mkdirSync(join(projectDir, "review"), { recursive: true });
+  appendFileSync(log, `- ${new Date().toISOString().slice(0, 16).replace("T", " ")} · REBRAND · ${lockStr(lock)} → ${lockStr(current)} (build:roots --rebrand)\n`);
+  console.log(`  ⚠ Rebrand aceptado: ${lockStr(lock)} → ${lockStr(current)} (anotado en review/CHANGELOG.md)`);
+}
+
 mkdirSync(join(comp, "compositions"), { recursive: true });
 mkdirSync(join(comp, "assets"), { recursive: true });
 
@@ -29,7 +64,7 @@ copyDir(join(ROOT, "brand", "dist"), join(comp, "brand"), (s, n) => !["brand-boa
 copyFileSync(join(ROOT, "engine", "runtime", "bm-motion.js"), join(comp, "brand", "bm-motion.js"));
 copyFileSync(join(ROOT, "brand", "dist", "frame.md"), join(comp, "frame.md"));
 if (onlyBrand) {
-  console.log(`✓ Marca sincronizada en ${comp.replace(ROOT + "/", "")}/brand`);
+  console.log(`✓ Marca sincronizada en ${rel(comp)}/brand`);
   process.exit(0);
 }
 
@@ -42,6 +77,7 @@ const wanted = (plan.formats || [master.id]).filter((id) => {
   if (!fmtById[id]) errors.push(`Formato desconocido "${id}" (definidos en brand.config.json: ${Object.keys(fmtById).join(", ")})`);
   return fmtById[id];
 });
+const allowedTr = brand.motion?.transitions?.allowed || Object.keys(TRANSITIONS);
 const ids = new Set();
 for (const s of plan.scenes || []) {
   if (!s.id || !/^[a-z0-9][a-z0-9-]*$/.test(s.id)) errors.push(`Escena con id inválido: "${s.id}" (usá minúsculas, números y guiones)`);
@@ -52,31 +88,14 @@ for (const s of plan.scenes || []) {
   const sceneFile = join(comp, "compositions", `${s.id}.html`);
   if (s.block !== "custom" && !existsSync(blockFile) && !existsSync(sceneFile)) errors.push(`Escena ${s.id}: no existe el bloque "${s.block}" (ver engine/blocks/)`);
   if (s.block === "custom" && !existsSync(sceneFile)) errors.push(`Escena ${s.id}: block "custom" requiere comp/compositions/${s.id}.html`);
+  const tr = transitionOf(s, plan);
+  if (!TRANSITIONS[tr]) errors.push(`Escena ${s.id}: transición "${tr}" no implementada en el kit (implementadas: ${Object.keys(TRANSITIONS).join(", ")}). Las demás se hacen en el NLE.`);
+  else if (!allowedTr.includes(tr)) errors.push(`Escena ${s.id}: transición "${tr}" no está permitida por la marca (motion.transitions.allowed: ${allowedTr.join(", ")})`);
+  if (s.claims && !Array.isArray(s.claims)) errors.push(`Escena ${s.id}: "claims" tiene que ser una lista de IDs, p. ej. ["C-001"]`);
 }
 if (errors.length) {
   errors.forEach((e) => console.error("  ✗ " + e));
   process.exit(1);
-}
-
-// presupuesto de lectura: la escena tiene que durar al menos entrada + hold del texto visible + salida
-const RD = brand.motion?.reading || {};
-const spw = RD.secondsPerWord ?? 0.35;
-const base = (RD.baseMs ?? 800) / 1000;
-const minHold = (RD.minHoldMs ?? 1500) / 1000;
-const TEXT_VARS = ["text", "headline", "subtitle", "caption", "cta", "title", "quote", "label", "context", "steps", "items", "leftItems", "rightItems", "leftTitle", "rightTitle", "name", "role", "tagline", "kicker"];
-const warnings = [];
-for (const s of plan.scenes) {
-  const v = s.vars || {};
-  const words = TEXT_VARS.reduce((n, k) => n + (typeof v[k] === "string" ? v[k].replace(/[|*]/g, " ").split(/\s+/).filter(Boolean).length : 0), 0);
-  if (!words) continue;
-  // listas, pasos y gráficos se revelan de a poco y se escanean: 0.25 s/palabra en vez de lectura corrida
-  const scan = ["steps-flow", "split-compare", "bar-chart", "terminal", "code-reveal"].includes(s.block);
-  const need = Math.max(minHold, base + words * (scan ? 0.25 : spw)) + 0.6;
-  if (s.duration + 0.05 < need) warnings.push(`${s.id}: ${s.duration}s para ~${words} palabras en pantalla; el hold de lectura pide ≥ ${need.toFixed(1)}s (o menos texto)`);
-  if (typeof v.code === "string") {
-    const longest = Math.max(...v.code.replace(/\\n/g, "\n").split("\n").map((l) => l.length));
-    if (longest > 56) warnings.push(`${s.id}: línea de código de ${longest} caracteres; partila (≤ 56 en 16:9, ≤ 40 si va a 9:16)`);
-  }
 }
 
 // 3) escenas: crear desde bloque si no existen (o --reset)
@@ -91,28 +110,139 @@ for (const s of plan.scenes) {
   }
 }
 
-// 4) raíces
-function sceneList(fmtId) {
-  // per-format: "skipIn": ["square"], "formats": { "portrait": { "duration": 5, "vars": {...} } }
-  return plan.scenes.filter((s) => !(s.skipIn || []).includes(fmtId)).map((s) => {
-    const o = (s.formats || {})[fmtId] || {};
-    return { ...s, duration: o.duration ?? s.duration, vars: { ...(s.vars || {}), ...(o.vars || {}) } };
-  });
+// 4) gates de contenido: lectura, placeholders, claims, tokens
+const warnings = [];
+const gate = []; // WARN normal / FAIL con --strict
+const RD = brand.motion?.reading || {};
+const spw = RD.secondsPerWord ?? 0.35;
+const base = (RD.baseMs ?? 800) / 1000;
+const minHold = (RD.minHoldMs ?? 1500) / 1000;
+const cps = RD.charsPerSecond ?? 15;
+const TEXT_VARS = ["text", "headline", "subtitle", "caption", "cta", "title", "quote", "label", "context", "steps", "items", "leftItems", "rightItems", "leftTitle", "rightTitle", "name", "role", "tagline", "kicker"];
+const claims = loadClaims(projectDir);
+const exempt = (s) => isDemo && s.demo === true;
+
+for (const s of plan.scenes) {
+  const html = readFileSync(join(comp, "compositions", `${s.id}.html`), "utf8");
+  const defaults = compositionDefaults(html);
+  // variables efectivas por formato: defaults del bloque + vars de la escena + override del formato
+  const perFormat = wanted.map((f) => ({ f, v: { ...defaults, ...(s.vars || {}), ...(((s.formats || {})[f] || {}).vars || {}) } }));
+  const v = perFormat.find((p) => p.f === master.id)?.v || { ...defaults, ...(s.vars || {}) };
+
+  // presupuesto de lectura: entrada + hold del texto visible + salida
+  const text = TEXT_VARS.map((k) => (typeof v[k] === "string" ? v[k].replace(/[|*]/g, " ").replace(/\\n|\n/g, " ") : "")).join(" ").trim();
+  const words = text.split(/\s+/).filter(Boolean).length;
+  if (words) {
+    // listas, pasos y gráficos se revelan de a poco y se escanean: 0.25 s/palabra; el resto se lee corrido
+    const scan = ["steps-flow", "split-compare", "bar-chart", "terminal", "code-reveal"].includes(s.block);
+    const hold = scan ? Math.max(minHold, base + words * 0.25) : Math.max(minHold, base + words * spw, text.replace(/\s+/g, " ").length / cps);
+    const need = hold + 0.6;
+    if (s.duration + 0.05 < need) warnings.push(`${s.id}: ${s.duration}s para ~${words} palabras en pantalla; el hold de lectura pide ≥ ${need.toFixed(1)}s (o menos texto)`);
+  }
+  // código y terminal: el tamaño se ajusta a la línea más larga; pasado el límite queda chico o se parte
+  const narrow = wanted.some((f) => fmtById[f].width < fmtById[f].height);
+  const maxChars = narrow ? 40 : 56;
+  const monoLines = [v.code, s.block === "terminal" ? `${v.prompt || "$"} ${v.command || ""}` : null, s.block === "terminal" ? v.output : null]
+    .filter((x) => typeof x === "string")
+    .flatMap((x) => x.replace(/\\n/g, "\n").split("\n"));
+  const longest = Math.max(0, ...monoLines.map((l) => l.length));
+  if (longest > maxChars) warnings.push(`${s.id}: línea de ${s.block === "terminal" ? "terminal" : "código"} de ${longest} caracteres; partila (≤ 56 en 16:9, ≤ 40 si la pieza va a 9:16 o 4:5)`);
+  if (exempt(s)) continue;
+
+  // placeholders en variables (defaults incluidos: si no pisaste el default, se ve el placeholder)
+  const byIssue = new Map(); // un mensaje por problema, con los formatos afectados
+  const note = (msg, f) => byIssue.set(msg, [...(byIssue.get(msg) || []), f]);
+  for (const { f, v: vf } of perFormat) {
+    for (const [k, val] of Object.entries(vf)) {
+      const ph = findPlaceholder(val);
+      if (ph) note(`la variable "${k}" tiene un placeholder ("${ph}") → completala con contenido real`, f);
+    }
+    if (s.block === "stat-hit" && (vf.value === null || vf.value === undefined || vf.value === "" || !isFinite(Number(vf.value))))
+      note(`stat-hit sin "value" numérico`, f);
+  }
+  for (const [msg, fs] of byIssue) gate.push(`${s.id}${fs.length < wanted.length ? ` [${fs.join(", ")}]` : ""}: ${msg}`);
+  // placeholders escritos a mano en la composición (escenas custom o personalizadas)
+  const ph = findPlaceholder(compositionBodyText(html));
+  if (ph) gate.push(`${s.id}: compositions/${s.id}.html contiene un placeholder ("${ph}")`);
+
+  // cifras ↔ claims verificadas
+  const needsClaims = NUMERIC_BLOCKS.includes(s.block) || (s.claims || []).length > 0;
+  if (needsClaims) {
+    if (!(s.claims || []).length) gate.push(`${s.id}: el bloque ${s.block} muestra cifras y no declara "claims": ["C-…"] (research/claims.csv)`);
+    else if (!claims) gate.push(`${s.id}: declara claims ${s.claims.join(", ")} pero no existe research/claims.csv`);
+    else for (const id of s.claims) {
+      const p = claimProblem(claims[id]);
+      if (p) gate.push(`${s.id}: claim ${id} ${p}`);
+    }
+  }
+
+  // valores sueltos fuera de los tokens de marca
+  for (const issue of tokenLint(html)) gate.push(`${s.id} (tokens): ${issue}`);
 }
 
+// 5) captions quemados (opcional): captions.srt|.vtt en la raíz del proyecto
+const capCfg = { ...(brand.captions || {}), ...(plan.captions || {}) };
+const capFile = [capCfg.file, "captions.srt", "captions.vtt"].filter(Boolean).map((f) => join(projectDir, f)).find((p) => existsSync(p));
+const capBurn = capCfg.burnIn || ["portrait", "feed"];
+let cues = [];
+if (capFile) {
+  cues = parseCaptions(readFileSync(capFile, "utf8"));
+  if (!cues.length) warnings.push(`${rel(capFile)}: no encontré cues válidos (formato SRT o WebVTT)`);
+  for (const w of captionWarnings(cues, capCfg)) warnings.push(`captions ${w}`);
+}
+
+function captionsHtml() {
+  const items = cues
+    .map((c, i) => `            <div class="cap-cue" data-i="${i}">${c.lines.map((l) => `<span class="cap-line">${esc(l)}</span>`).join("")}</div>`)
+    .join("\n");
+  const sets = cues.map((c, i) => `          tl.set(q[${i}], { autoAlpha: 1 }, ${c.start.toFixed(3)}); tl.set(q[${i}], { autoAlpha: 0 }, ${c.end.toFixed(3)});`).join("\n");
+  return `<!doctype html>
+<!-- GENERADO por scripts/build-roots.mjs desde ${esc(capFile ? capFile.split("/").pop() : "captions")}. No editar: editá el archivo de captions. -->
+<html lang="${esc(brand.identity?.voice?.language || "es")}">
+  <head><meta charset="UTF-8" /><title>captions</title></head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; pointer-events: none; }
+        #root .cap-wrap { display: flex; align-items: flex-end; justify-content: center; }
+        #root .cap-cue { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; gap: 0.6cqmin; visibility: hidden; opacity: 0; }
+        #root .cap-line { display: inline-block; max-width: 100%; padding: 0.5cqmin 1.6cqmin; border-radius: var(--radius-sm); background: color-mix(in srgb, var(--c-background) 82%, transparent); color: var(--c-text); font-weight: 600; text-align: center; }
+      </style>
+      <div id="root" data-composition-id="captions">
+        <div class="bm-frame is-transparent">
+          <div class="bm-safe cap-wrap bm-body">
+${items}
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var q = root.querySelectorAll(".cap-cue");
+          var tl = gsap.timeline({ paused: true });
+${sets}
+          window.__timelines["captions"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>
+`;
+}
+const capComp = join(comp, "compositions", "_captions.html");
+if (cues.length) writeFileSync(capComp, captionsHtml());
+else rmSync(capComp, { force: true });
+
+// 6) raíces
 function rootHtml(fmt) {
-  const scenes = sceneList(fmt.id);
-  const overlap = plan.crossfade ?? 0.4;
-  let t = 0;
+  const { items, total } = timeline(plan, fmt.id, brand);
   const hosts = [];
-  const fades = [];
-  scenes.forEach((s, i) => {
-    const xf = i > 0 && (s.transition || plan.defaultTransition) === "crossfade";
-    if (xf) t = Math.max(0, t - overlap);
-    const start = Math.round(t * 1000) / 1000;
+  const fx = [];
+  const move = `BRAND.ease("move")`;
+  items.forEach(({ scene: s, start, duration, transition, overlap }, i) => {
     // entre escenas la transición ES la salida: sin salida animada salvo que la escena la pida explícitamente
-    const vars = { exit: "none", ...s.vars, dur: s.duration };
-    hosts.push(`      <!-- ${esc(s.id)} · ${esc(s.block)}${s.notes ? " · " + esc(s.notes).slice(0, 120) : ""} -->
+    const vars = { exit: "none", ...s.vars, dur: duration };
+    hosts.push(`      <!-- ${esc(s.id)} · ${esc(s.block)}${i > 0 && transition !== "cut" ? " · entra con " + transition : ""}${s.notes ? " · " + esc(s.notes).slice(0, 120) : ""} -->
       <div
         id="scene-${s.id}"
         class="clip"
@@ -120,15 +250,23 @@ function rootHtml(fmt) {
         data-composition-src="compositions/${s.id}.html"
         data-variable-values='${escAttrSingle(JSON.stringify(vars))}'
         data-start="${start}"
-        data-duration="${s.duration}"
-        data-track-index="${xf ? 2 : 1}"
+        data-duration="${duration}"
+        data-track-index="${1 + (i % 2)}"
         data-width="${fmt.width}"
         data-height="${fmt.height}"
       ></div>`);
-    if (xf) fades.push(`      tl.fromTo("#scene-${s.id}", { opacity: 0 }, { opacity: 1, duration: ${overlap}, ease: "none" }, ${start});`);
-    t = start + s.duration;
+    if (!overlap) return;
+    const prev = items[i - 1].scene.id;
+    const d = overlap;
+    // la escena entrante va después en el DOM: se pinta encima de la saliente
+    if (transition === "crossfade") fx.push(`      tl.fromTo("#scene-${s.id}", { opacity: 0 }, { opacity: 1, duration: ${d}, ease: "none" }, ${start});`);
+    if (transition === "push") {
+      // lo nuevo entra desde la derecha, lo viejo sale a la izquierda (dirección consistente de la marca)
+      fx.push(`      tl.fromTo("#scene-${prev}", { xPercent: 0 }, { xPercent: -100, duration: ${d}, ease: ${move} }, ${start});`);
+      fx.push(`      tl.fromTo("#scene-${s.id}", { xPercent: 100 }, { xPercent: 0, duration: ${d}, ease: ${move} }, ${start});`);
+    }
+    if (transition === "mask-wipe") fx.push(`      tl.fromTo("#scene-${s.id}", { clipPath: "inset(0% 0% 0% 100%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: ${d}, ease: ${move} }, ${start});`);
   });
-  const total = Math.round(t * 1000) / 1000;
   const audio = [];
   const A = plan.audio || {};
   for (const [id, a] of Object.entries(A)) {
@@ -138,6 +276,10 @@ function rootHtml(fmt) {
   const wm = brand.logo?.watermark;
   const watermark = wm?.enabled
     ? `      <div id="brand-watermark" class="clip" data-start="0" data-duration="${total}" data-track-index="5" style="position:absolute;${wm.position?.includes("top") ? "top" : "bottom"}:5cqmin;${wm.position?.includes("left") ? "left" : "right"}:5cqmin;height:5cqmin;opacity:${wm.opacity ?? 0.6}"><img src="brand/logo/mark.svg" alt="" style="height:100%;width:auto;display:block" /></div>`
+    : "";
+  const captions = cues.length && capBurn.includes(fmt.id)
+    ? `      <!-- captions quemados (${esc(capFile.split("/").pop())}) -->
+      <div id="captions" class="clip" data-track-kind="captions" data-composition-id="captions" data-composition-src="compositions/_captions.html" data-start="0" data-duration="${total}" data-track-index="6" data-width="${fmt.width}" data-height="${fmt.height}"></div>`
     : "";
   return {
     total,
@@ -163,11 +305,12 @@ function rootHtml(fmt) {
     <div id="root" data-composition-id="main" data-start="0" data-duration="${total}" data-width="${fmt.width}" data-height="${fmt.height}" data-fps="${fmt.fps || 30}">
 ${hosts.join("\n")}
 ${watermark}
+${captions}
 ${audio.join("\n")}
     </div>
     <script>
       const tl = gsap.timeline({ paused: true });
-${fades.join("\n")}
+${fx.join("\n")}
       window.__timelines["main"] = tl;
     </script>
   </body>
@@ -182,8 +325,8 @@ writeFileSync(join(comp, "meta.json"), JSON.stringify({ id: plan.slug || "video"
 if (!existsSync(join(comp, "hyperframes.json")))
   writeFileSync(join(comp, "hyperframes.json"), JSON.stringify({ $schema: "https://hyperframes.heygen.com/schema/hyperframes.json", paths: { blocks: "compositions", components: "compositions/components", assets: "assets" }, media: { autoProxy: true } }, null, 2));
 
-// 5) variantes por formato: copia del maestro con la raíz re-dimensionada
-const summary = [`${master.id} ${master.width}×${master.height} · ${masterRoot.total}s → comp/`];
+// 7) variantes por formato: copia del maestro con la raíz re-dimensionada
+const summary = [`${master.id} ${master.width}×${master.height} · ${masterRoot.total}s → comp/${cues.length && capBurn.includes(master.id) ? " · captions" : ""}`];
 rmSync(join(projectDir, "formats"), { recursive: true, force: true });
 for (const id of wanted) {
   if (id === master.id) continue;
@@ -192,11 +335,21 @@ for (const id of wanted) {
   copyDir(comp, dir, (s, n) => ![".hyperframes", "renders", "node_modules"].includes(n));
   const r = rootHtml(fmt);
   writeFileSync(join(dir, "index.html"), r.html);
-  summary.push(`${id} ${fmt.width}×${fmt.height} · ${r.total}s → formats/${id}/`);
+  summary.push(`${id} ${fmt.width}×${fmt.height} · ${r.total}s → formats/${id}/${cues.length && capBurn.includes(id) ? " · captions" : ""}`);
 }
 
-console.log(`✓ Build de "${plan.title || plan.slug}" (${plan.scenes.length} escenas)`);
+console.log(`✓ Build de "${plan.title || plan.slug}" (${plan.scenes.length} escenas · marca ${lockStr(plan.brandLock)}${isDemo ? " · DEMO" : ""})`);
 summary.forEach((l) => console.log("  · " + l));
 if (created.length) console.log(`  · escenas nuevas desde bloques: ${created.join(", ")}`);
 for (const w of warnings) console.log(`  ⚠ ${w}`);
-console.log("  Siguiente: npm run render -- " + projectDir.replace(ROOT + "/", "") + "   (o preview: cd comp && npx hyperframes preview)");
+const uniqueGate = [...new Set(gate)];
+if (uniqueGate.length) {
+  const tag = strict ? "✗" : "⚠";
+  console.log(`  ${strict ? "Gate de contenido (--strict): FALLA" : "Gate de contenido (en --strict esto frena el render final)"}:`);
+  for (const g of uniqueGate) console.log(`  ${tag} ${g}`);
+}
+if (strict && uniqueGate.length) {
+  console.error(`✗ ${uniqueGate.length} problema(s) de contenido. Un render final no sale con placeholders, cifras sin claim verificada ni valores fuera de marca.`);
+  process.exit(1);
+}
+console.log("  Siguiente: npm run render -- " + rel(projectDir) + "   (o preview: cd comp && npx hyperframes preview)");

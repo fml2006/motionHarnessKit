@@ -17,7 +17,7 @@
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="main" data-start="0" data-duration="71.6" data-width="1920" data-height="1080" data-fps="30">
+    <div id="root" data-composition-id="main" data-start="0" data-duration="78.5" data-width="1920" data-height="1080" data-fps="30">
       <!-- b01-logo · logo-sting -->
       <div
         id="scene-b01-logo"
@@ -37,10 +37,10 @@
         class="clip"
         data-composition-id="b02-title"
         data-composition-src="compositions/b02-title.html"
-        data-variable-values='{"exit":"none","dur":4.5}'
+        data-variable-values='{"exit":"none","kicker":"Explainer","headline":"Qué es un *agente*|y por qué importa","subtitle":"En 60 segundos, sin jerga.","dur":6.3}'
         data-start="3"
-        data-duration="4.5"
-        data-track-index="1"
+        data-duration="6.3"
+        data-track-index="2"
         data-width="1920"
         data-height="1080"
       ></div>
@@ -50,8 +50,8 @@
         class="clip"
         data-composition-id="b03-statement"
         data-composition-src="compositions/b03-statement.html"
-        data-variable-values='{"exit":"none","dur":4.5}'
-        data-start="7.5"
+        data-variable-values='{"exit":"none","text":"Una idea por pantalla, con *una* palabra clave.","dur":4.5}'
+        data-start="9.3"
         data-duration="4.5"
         data-track-index="1"
         data-width="1920"
@@ -63,36 +63,36 @@
         class="clip"
         data-composition-id="b04-stat"
         data-composition-src="compositions/b04-stat.html"
-        data-variable-values='{"exit":"none","context":"Encuesta a 1.200 equipos de ingeniería.","source":"Fuente: dato de ejemplo — reemplazar","dur":5}'
-        data-start="12"
+        data-variable-values='{"exit":"none","value":73,"suffix":"%","label":"Dato ficticio para mostrar el bloque","source":"Dato ficticio · demo — no publicar","dur":5}'
+        data-start="13.8"
         data-duration="5"
-        data-track-index="1"
+        data-track-index="2"
         data-width="1920"
         data-height="1080"
       ></div>
-      <!-- b05-code · code-reveal -->
+      <!-- b05-code · code-reveal · Pseudocódigo rotulado: Agent no es una API real. -->
       <div
         id="scene-b05-code"
         class="clip"
         data-composition-id="b05-code"
         data-composition-src="compositions/b05-code.html"
-        data-variable-values='{"exit":"none","dur":7}'
-        data-start="17"
+        data-variable-values='{"exit":"none","filename":"pseudocodigo-demo.ts","code":"const tools = [search, readFile];\nconst agent = new Agent({ tools });\n\n// pensar → usar herramienta → ver\nconst res = await agent.run(task);\nconsole.log(res.text);","highlight":"5","caption":"Un agente es un *loop*:|decide, usa una herramienta|y vuelve a decidir.","dur":7}'
+        data-start="18.8"
         data-duration="7"
         data-track-index="1"
         data-width="1920"
         data-height="1080"
       ></div>
-      <!-- b06-terminal · terminal -->
+      <!-- b06-terminal · terminal · Líneas copiadas del log real del render v002 de esta galería (render + QA automático), sin editar. -->
       <div
         id="scene-b06-terminal"
         class="clip"
         data-composition-id="b06-terminal"
         data-composition-src="compositions/b06-terminal.html"
-        data-variable-values='{"exit":"none","caption":"Un comando, un MP4 determinista.","dur":6}'
-        data-start="24"
+        data-variable-values='{"exit":"none","title":"bash — motion-harness-kit","prompt":"$","command":"npm run render -- _galeria-bloques","output":"▶ Render landscape (standard)\n100%  Render complete\n✓ fps: 30.00 (rango 24–60)\n✓ Codec de video: h264 (esperado h264)","caption":"Salida real (abreviada) del render y el QA de esta galería.","dur":6}'
+        data-start="25.8"
         data-duration="6"
-        data-track-index="1"
+        data-track-index="2"
         data-width="1920"
         data-height="1080"
       ></div>
@@ -102,8 +102,8 @@
         class="clip"
         data-composition-id="b07-chart"
         data-composition-src="compositions/b07-chart.html"
-        data-variable-values='{"exit":"none","dur":7}'
-        data-start="30"
+        data-variable-values='{"exit":"none","title":"Dato ficticio · demo del bloque","items":"Opción A: 32\nOpción B: 14\nOpción C: 6","unit":"","highlight":"Opción C","source":"Dato ficticio · demo — no publicar","dur":7}'
+        data-start="31.8"
         data-duration="7"
         data-track-index="1"
         data-width="1920"
@@ -115,10 +115,10 @@
         class="clip"
         data-composition-id="b08-steps"
         data-composition-src="compositions/b08-steps.html"
-        data-variable-values='{"exit":"none","dur":8}'
-        data-start="37"
-        data-duration="8"
-        data-track-index="1"
+        data-variable-values='{"exit":"none","title":"Cómo trabaja un agente","steps":"Pedido — vos describís el objetivo\nPlan — el modelo decide el próximo paso\nHerramienta — ejecuta: busca, lee, escribe\nObserva — evalúa el resultado y repite","dur":9.2}'
+        data-start="38.8"
+        data-duration="9.2"
+        data-track-index="2"
         data-width="1920"
         data-height="1080"
       ></div>
@@ -128,9 +128,9 @@
         class="clip"
         data-composition-id="b09-compare"
         data-composition-src="compositions/b09-compare.html"
-        data-variable-values='{"exit":"none","title":"Mismo modelo, otro *proceso*","dur":8}'
-        data-start="45"
-        data-duration="8"
+        data-variable-values='{"exit":"none","title":"Mismo modelo, otro *proceso*","leftTitle":"Sin harness","leftItems":"Prompt distinto cada vez\nColores y fuentes a ojo\nRevisión al final","rightTitle":"Con harness","rightItems":"Brief y storyboard versionados\nTokens de marca obligatorios\nQA automático en cada render","dur":9.7}'
+        data-start="48"
+        data-duration="9.7"
         data-track-index="1"
         data-width="1920"
         data-height="1080"
@@ -141,10 +141,10 @@
         class="clip"
         data-composition-id="b10-quote"
         data-composition-src="compositions/b10-quote.html"
-        data-variable-values='{"exit":"none","dur":6}'
-        data-start="53"
-        data-duration="6"
-        data-track-index="1"
+        data-variable-values='{"exit":"none","quote":"La herramienta no reemplaza el criterio:|lo *multiplica*.","author":"Cita ficticia · demo","role":"Reemplazala por una cita textual con fuente","dur":7.3}'
+        data-start="57.7"
+        data-duration="7.3"
+        data-track-index="2"
         data-width="1920"
         data-height="1080"
       ></div>
@@ -154,8 +154,8 @@
         class="clip"
         data-composition-id="b11-lower"
         data-composition-src="compositions/b11-lower.html"
-        data-variable-values='{"exit":"none","transparent":false,"dur":5}'
-        data-start="59"
+        data-variable-values='{"exit":"none","name":"Nombre Apellido","role":"Rol ficticio · demo","transparent":false,"dur":5}'
+        data-start="65"
         data-duration="5"
         data-track-index="1"
         data-width="1920"
@@ -167,10 +167,10 @@
         class="clip"
         data-composition-id="b12-chapter"
         data-composition-src="compositions/b12-chapter.html"
-        data-variable-values='{"exit":"none","dur":2.6}'
-        data-start="64"
-        data-duration="2.6"
-        data-track-index="1"
+        data-variable-values='{"exit":"none","number":"02","title":"Cómo se arma el pipeline","kicker":"Capítulo","dur":3.5}'
+        data-start="70"
+        data-duration="3.5"
+        data-track-index="2"
         data-width="1920"
         data-height="1080"
       ></div>
@@ -180,13 +180,14 @@
         class="clip"
         data-composition-id="b13-end"
         data-composition-src="compositions/b13-end.html"
-        data-variable-values='{"exit":"none","note":"Este video incluye elementos asistidos por IA.","dur":5}'
-        data-start="66.6"
+        data-variable-values='{"exit":"none","cta":"Bajá el kit y|*probalo* con tu marca","link":"tumarca.com/kit","note":"Este video incluye elementos asistidos por IA.","dur":5}'
+        data-start="73.5"
         data-duration="5"
         data-track-index="1"
         data-width="1920"
         data-height="1080"
       ></div>
+
 
 
     </div>

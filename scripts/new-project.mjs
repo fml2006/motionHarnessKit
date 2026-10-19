@@ -1,17 +1,18 @@
 #!/usr/bin/env node
 // new-project: crea la carpeta de una pieza con preproducción, plan de escenas y composición con la marca aplicada.
 //   node scripts/new-project.mjs <slug> [--title "Título"] [--type explainer|launch|social|tutorial|data|overlay]
-//                                [--formats landscape,portrait,square] [--date 2026-10-19]
+//                                [--formats landscape,portrait,feed,square] [--date 2026-10-19]
 import { existsSync, mkdirSync, writeFileSync, copyFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { ROOT, slugify, loadBrand } from "./lib/common.mjs";
+import { NUMERIC_BLOCKS, brandFingerprint } from "./lib/plan.mjs";
 
 const args = process.argv.slice(2);
 const val = (n, d) => (args.includes(n) ? args[args.indexOf(n) + 1] : d);
 const raw = args.find((a, i) => !a.startsWith("--") && !["--title", "--type", "--formats", "--date"].includes(args[i - 1]));
 if (!raw) {
-  console.error('Uso: npm run new -- <slug> [--title "Título"] [--type explainer|launch|social|tutorial|data|overlay] [--formats landscape,portrait]');
+  console.error('Uso: npm run new -- <slug> [--title "Título"] [--type explainer|launch|social|tutorial|data|overlay] [--formats landscape,portrait,feed,square]');
   process.exit(1);
 }
 const brand = loadBrand();
@@ -19,21 +20,24 @@ const slug = slugify(raw);
 const title = val("--title", raw);
 const type = val("--type", "explainer");
 const date = val("--date", new Date().toISOString().slice(0, 10));
-const formats = val("--formats", type === "social" ? "portrait,square,landscape" : type === "overlay" ? "landscape" : "landscape,portrait").split(",");
+// social: 9:16 (Reels/Shorts/TikTok) + 4:5 (feed de LinkedIn/Instagram) + 16:9 (YouTube/web)
+const formats = val("--formats", type === "social" ? "portrait,feed,landscape" : type === "overlay" ? "landscape" : "landscape,portrait").split(",");
 const dir = join(ROOT, "projects", `${date}_${slug}`);
 if (existsSync(dir)) {
   console.error(`✗ Ya existe ${dir}`);
   process.exit(1);
 }
 
-// Plan de escenas inicial por tipo de pieza (es un punto de partida: /storyboard lo reemplaza)
+// Plan de escenas inicial por tipo de pieza (es un punto de partida: /storyboard lo reemplaza).
+// Sin datos inventados: lo que no se completa queda como placeholder visible (⟦…⟧) y build:roots --strict
+// no deja salir el render final. Los bloques con cifras arrancan con "claims": [] para completar.
 const STARTERS = {
   explainer: [
-    ["s01-hook", "kinetic-statement", 4, { text: "Una afirmación que genere *tensión* en 3 segundos." }, "HOOK: resultado o tensión primero. Nada de 'Bienvenidos'."],
+    ["s01-hook", "kinetic-statement", 4.5, { text: "Una afirmación que genere *tensión* en 3 segundos." }, "HOOK: resultado o tensión primero. Nada de 'Bienvenidos'."],
     ["s02-titulo", "title-card", 4.5, { kicker: "Explainer", headline: title, subtitle: "" }, "Promesa: qué va a entender la audiencia."],
     ["s03-como", "steps-flow", 8, {}, "Mecanismo en 3-4 pasos, uno por vez."],
-    ["s04-prueba", "stat-hit", 5, { source: "Fuente: COMPLETAR (claim C-001)" }, "Prueba: un dato con fuente verificable."],
-    ["s05-cta", "end-card", 5, { cta: "Un *único* llamado|a la acción", link: "tumarca.com" }, "CTA único."],
+    ["s04-prueba", "stat-hit", 5, {}, "Prueba: un dato con fuente verificable (claim C-… firmada por SME)."],
+    ["s05-cta", "end-card", 5, { cta: "Un *único* llamado|a la acción" }, "CTA único."],
   ],
   launch: [
     ["s01-logo", "logo-sting", 2.4, {}, "Firma breve."],
@@ -44,7 +48,7 @@ const STARTERS = {
   ],
   social: [
     ["s01-hook", "kinetic-statement", 3.5, { text: "El *dato* que nadie te contó.", size: "hero" }, "Hook visual mudo: se entiende sin sonido."],
-    ["s02-dato", "stat-hit", 4.5, { source: "Fuente: COMPLETAR" }, ""],
+    ["s02-dato", "stat-hit", 4.5, {}, "Dato con claim firmada."],
     ["s03-cierre", "end-card", 4, { cta: "Seguinos para|más *datos*" }, ""],
   ],
   tutorial: [
@@ -85,6 +89,7 @@ const copies = [
   ["delivery-checklist.md", "delivery/delivery-checklist.md"],
   ["provenance.yaml.md", "PROVENANCE.md"],
 ];
+copies.push(["horas.csv", "review/HORAS.csv"]);
 for (const [src, dst] of copies) if (existsSync(join(T, src))) copyFileSync(join(T, src), join(dir, dst));
 
 const plan = {
@@ -92,6 +97,7 @@ const plan = {
   title,
   slug,
   type,
+  purpose: "production",
   date,
   // social se piensa vertical-first: el maestro es 9:16 y el resto se deriva
   master: type === "social" && formats.includes("portrait") ? "portrait" : formats.includes("landscape") ? "landscape" : formats[0],
@@ -102,7 +108,9 @@ const plan = {
     voiceover: { src: "", volume: 1 },
     music: { src: "", volume: 0.25 },
   },
-  scenes: starter.map(([id, block, duration, vars, notes]) => ({ id, block, duration, vars, notes })),
+  scenes: starter.map(([id, block, duration, vars, notes]) => ({ id, block, duration, ...(NUMERIC_BLOCKS.includes(block) ? { claims: [] } : {}), vars, notes })),
+  // la pieza queda atada a esta versión de la marca: si brand/ cambia, build:roots frena (salvo --rebrand)
+  brandLock: brandFingerprint(join(ROOT, "brand", "dist"), brand),
 };
 writeFileSync(join(dir, "scenes.json"), JSON.stringify(plan, null, 2) + "\n");
 
@@ -110,17 +118,21 @@ writeFileSync(
   join(dir, "README.md"),
   `# ${title}
 
-Tipo: **${type}** · Formatos: ${formats.join(", ")} · Creado: ${date} · Marca: ${brand.meta.name} v${brand.meta.version}
+Tipo: **${type}** · Formatos: ${formats.join(", ")} · Creado: ${date} · Marca: ${brand.meta.name} v${brand.meta.version} (bloqueada en \`scenes.json → brandLock\`)
+
+Horas reales por rol y gate: \`review/HORAS.csv\` (se cargan a medida que se trabaja; sin estimar a posteriori).
 
 ## Estado del pipeline (marcar al aprobar cada gate)
 
 - [ ] G0 Brief firmado → \`00_brief.md\`
-- [ ] G1 Investigación y claims → \`research/\` (claims.csv con fuente por cada número)
+- [ ] G1 Investigación y claims → \`research/claims.csv\` (fuente por cada número; estado=ok + firma del SME en verificado_por)
+- [ ] G2 Treatment aprobado (idea, tono, referencias y estructura en una página) → \`01_guion.md\` (/guion)
 - [ ] G3 Guion a dos columnas aprobado → \`01_guion.md\`
 - [ ] G4 Styleframes aprobados → \`review/frames-*/\` (npm run frames)
 - [ ] G5 Storyboard = spec ejecutable → \`02_storyboard.md\` + \`scenes.json\`
 - [ ] G6 Animatic aprobado (render draft + VO scratch)
 - [ ] G7 Build v01 (npm run render) + QA automático sin FAIL
+- [ ] G7b Gate de contenido: \`npm run build:roots -- ${date}_${slug} --strict\` sin errores (placeholders, claims, tokens)
 - [ ] G8 Revisión R1 / R2 → \`review/R*.md\` + \`review/CHANGELOG.md\`
 - [ ] G9 Picture lock
 - [ ] G10 Mezcla a −14 LUFS / −1 dBTP (npm run loudnorm)

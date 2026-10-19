@@ -4,15 +4,16 @@
   Uso: un comando real tipeándose + su salida. Ideal para CLIs, instalaciones, demos de dev tools.
   REGLA: comando y salida reales (copiados de una corrida). Ocultá tokens, paths personales y datos de clientes.
   "output": líneas separadas por \n; una línea que empieza con "✓" se pinta como éxito.
+  Los defaults son placeholders visibles (⟦…⟧): si no los reemplazás, se ven en pantalla y --strict frena el final.
   Duración sugerida: 1.2 s + largo del comando/28 + 0.25 s por línea de salida + 1.5 s.
 -->
 <html
   lang="es"
   data-composition-variables='[
-    {"id":"title","type":"string","label":"Título de la ventana","default":"zsh — demo","maxLength":40},
+    {"id":"title","type":"string","label":"Título de la ventana","default":"terminal","maxLength":40},
     {"id":"prompt","type":"string","label":"Prompt","default":"$","maxLength":12},
-    {"id":"command","type":"string","label":"Comando","default":"npx hyperframes render --output intro.mp4","maxLength":120},
-    {"id":"output","type":"string","label":"Salida (\\n entre líneas)","default":"Compilando composición…\nCapturando 135 frames (2 workers)\nCodificando H.264\n✓ intro.mp4 · 4.5 s · 1920×1080","maxLength":600},
+    {"id":"command","type":"string","label":"Comando","default":"echo \"reemplazar por una corrida real\"","maxLength":120},
+    {"id":"output","type":"string","label":"Salida (\\n entre líneas)","default":"⟦COMPLETAR: pegá la salida real de esa corrida⟧","maxLength":600},
     {"id":"caption","type":"string","label":"Leyenda (opcional)","default":"","maxLength":90},
     {"id":"exit","type":"enum","label":"Salida","default":"fade","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
     {"id":"dur","type":"number","label":"Duración de la escena (s)","default":6,"min":1,"max":30,"step":0.1,"unit":"s"}
@@ -31,8 +32,10 @@
         #root .tm-bar { display: flex; align-items: center; gap: 1.2cqmin; padding: 1.6cqmin 2.2cqmin; border-bottom: var(--stroke) solid var(--c-code-line); }
         #root .tm-dot { width: 1.3cqmin; height: 1.3cqmin; border-radius: 50%; background: var(--c-code-line); }
         #root .tm-title { margin-left: 1.2cqmin; font-family: var(--font-mono); font-size: var(--fs-label); color: var(--c-code-chrome); }
-        #root .tm-body { --code-avail: 80cqw; padding: 3cqmin 3.4cqmin; min-height: 30cqmin; color: var(--c-code-text); font-size: min(var(--fs-code), calc(var(--code-avail) / (var(--code-chars, 40) * 0.61))); }
+        #root .tm-body { --code-avail: 80cqw; padding: 3cqmin 3.4cqmin; min-height: 30cqmin; color: var(--c-code-text); font-size: max(2.2cqmin, min(var(--fs-code), calc(var(--code-avail) / (var(--code-chars, 40) * 0.61)))); }
+        /* con el piso de 2,2cqmin una línea muy larga no se achica ilegible: se parte (build:roots avisa si pasa de 40/56) */
         #root .tm-cmdline { display: flex; gap: 1.6cqmin; white-space: pre; }
+        #root .tm-cmdline > span:last-child { min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
         #root .tm-prompt { color: var(--c-secondary); }
         #root .tm-caret { display: inline-block; width: 0.55em; height: 1.1em; vertical-align: -0.15em; background: var(--c-text); margin-left: 0.1em; }
         #root .tm-out { margin-top: 2cqmin; color: var(--c-code-chrome); white-space: pre-wrap; }

@@ -3,14 +3,16 @@
   bm-block: quote
   Uso: cita textual con atribución (cliente, experto, documentación oficial).
   REGLA: cita literal y verificable; si es paráfrasis, no uses comillas. Pedí permiso para citar personas.
+  Declará la cita como claim ("claims": ["C-…"]) para que --strict verifique que está firmada.
+  Los defaults son placeholders visibles (⟦…⟧).
   Duración sugerida: BRAND.hold(cita) + 2 s.
 -->
 <html
   lang="es"
   data-composition-variables='[
-    {"id":"quote","type":"string","label":"Cita (líneas con |)","default":"La herramienta no reemplaza el criterio:|lo *multiplica*.","maxLength":200},
-    {"id":"author","type":"string","label":"Autor","default":"Nombre Apellido","maxLength":50},
-    {"id":"role","type":"string","label":"Rol / organización","default":"Directora creativa, Empresa","maxLength":70},
+    {"id":"quote","type":"string","label":"Cita (líneas con |)","default":"⟦COMPLETAR: cita textual|con fuente verificable⟧","maxLength":200},
+    {"id":"author","type":"string","label":"Autor","default":"⟦Nombre Apellido⟧","maxLength":50},
+    {"id":"role","type":"string","label":"Rol / organización","default":"⟦Rol, organización⟧","maxLength":70},
     {"id":"exit","type":"enum","label":"Salida","default":"fade","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
     {"id":"dur","type":"number","label":"Duración de la escena (s)","default":6,"min":1,"max":30,"step":0.1,"unit":"s"}
   ]'

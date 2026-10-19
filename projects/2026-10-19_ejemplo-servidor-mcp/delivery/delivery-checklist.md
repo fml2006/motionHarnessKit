@@ -1,5 +1,7 @@
 # CHECKLIST DE ENTREGA Y ARCHIVO — [CLIENTE] · [PROYECTO]
 
+> **Estado en este ejemplo (2026-10-19):** no hubo entrega. Ningún ítem marcado.
+
 > Gate **G15**. Dueño: Productor (A) · Ejecuta: Technical director + Editor + Sound designer · Requiere: QA aprobado (G14).
 > **Publicar o enviar es una acción humana.** El agente prepara el paquete; una persona lo envía / sube.
 

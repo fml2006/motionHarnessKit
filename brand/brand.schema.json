@@ -3,156 +3,648 @@
   "title": "motion-harness-kit · brand.config.json",
   "description": "Fuente única de verdad de la marca para motion. Después de editar: npm run brand.",
   "type": "object",
-  "required": ["meta", "colors", "typography", "motion", "formats"],
+  "required": [
+    "meta",
+    "colors",
+    "typography",
+    "motion",
+    "formats"
+  ],
   "definitions": {
-    "hex": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$", "description": "Color #RRGGBB (tipeado del manual de marca, no muestreado de un JPG)" },
-    "bezier": { "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4, "description": "cubic-bezier [x1, y1, x2, y2]; x1 y x2 entre 0 y 1" },
+    "hex": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$",
+      "description": "Color #RRGGBB (tipeado del manual de marca, no muestreado de un JPG)"
+    },
+    "bezier": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 4,
+      "maxItems": 4,
+      "description": "cubic-bezier [x1, y1, x2, y2]; x1 y x2 entre 0 y 1"
+    },
     "font": {
       "type": "object",
-      "required": ["family", "weights", "source"],
+      "required": [
+        "family",
+        "weights",
+        "source"
+      ],
       "properties": {
-        "family": { "type": "string", "description": "Nombre exacto de la familia" },
-        "fallback": { "type": "string" },
-        "weights": { "type": "array", "items": { "type": "integer", "minimum": 100, "maximum": 900 } },
-        "source": { "enum": ["fontsource", "local"], "description": "fontsource = paquete npm @fontsource/* (OFL); local = archivos en brand/fonts/" },
-        "package": { "type": "string", "description": "Si source=fontsource: p. ej. @fontsource/inter" },
-        "files": { "type": "object", "description": "Si source=local: { \"400\": \"Mi-Regular.woff2\" }", "additionalProperties": { "type": "string" } },
-        "license": { "type": "string", "description": "Licencia y alcance (¿cubre video?)" },
-        "tracking": { "type": "string" },
-        "lineHeight": { "type": "number" },
-        "case": { "enum": ["sentence", "upper", "title", "as-is"] }
+        "family": {
+          "type": "string",
+          "description": "Nombre exacto de la familia"
+        },
+        "fallback": {
+          "type": "string"
+        },
+        "weights": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 900
+          }
+        },
+        "source": {
+          "enum": [
+            "fontsource",
+            "local"
+          ],
+          "description": "fontsource = paquete npm @fontsource/* (OFL); local = archivos en brand/fonts/"
+        },
+        "package": {
+          "type": "string",
+          "description": "Si source=fontsource: p. ej. @fontsource/inter"
+        },
+        "files": {
+          "type": "object",
+          "description": "Si source=local: { \"400\": \"Mi-Regular.woff2\" }",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "license": {
+          "type": "string",
+          "description": "Licencia y alcance (¿cubre video?)"
+        },
+        "tracking": {
+          "type": "string"
+        },
+        "lineHeight": {
+          "type": "number"
+        },
+        "case": {
+          "enum": [
+            "sentence",
+            "upper",
+            "title",
+            "as-is"
+          ]
+        }
       }
     }
   },
   "properties": {
     "meta": {
       "type": "object",
-      "required": ["name", "slug"],
+      "required": [
+        "name",
+        "slug"
+      ],
       "properties": {
-        "name": { "type": "string" },
-        "slug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
-        "version": { "type": "string" },
-        "owner": { "type": "string" },
-        "updated": { "type": "string" },
-        "notes": { "type": "string" }
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "version": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "updated": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
       }
     },
     "identity": {
       "type": "object",
       "properties": {
-        "tagline": { "type": "string" },
-        "mission": { "type": "string" },
-        "audience": { "type": "string" },
-        "personality": { "type": "array", "items": { "type": "string" } },
+        "tagline": {
+          "type": "string"
+        },
+        "mission": {
+          "type": "string"
+        },
+        "audience": {
+          "type": "string"
+        },
+        "personality": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "voice": {
           "type": "object",
           "properties": {
-            "language": { "type": "string", "description": "es-AR, es-419, es-ES, en-US…" },
-            "register": { "type": "string", "description": "vos / tú / usted" },
-            "tone": { "type": "string" },
-            "do": { "type": "array", "items": { "type": "string" } },
-            "dont": { "type": "array", "items": { "type": "string" } }
+            "language": {
+              "type": "string",
+              "description": "es-AR, es-419, es-ES, en-US…"
+            },
+            "register": {
+              "type": "string",
+              "description": "vos / tú / usted"
+            },
+            "tone": {
+              "type": "string"
+            },
+            "do": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "dont": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         }
       }
     },
     "colors": {
       "type": "object",
-      "required": ["background", "text", "primary", "accent"],
+      "required": [
+        "background",
+        "text",
+        "primary",
+        "accent"
+      ],
       "properties": {
-        "background": { "$ref": "#/definitions/hex" },
-        "surface": { "$ref": "#/definitions/hex" },
-        "surfaceAlt": { "$ref": "#/definitions/hex" },
-        "border": { "$ref": "#/definitions/hex" },
-        "text": { "$ref": "#/definitions/hex" },
-        "textMuted": { "$ref": "#/definitions/hex" },
-        "primary": { "$ref": "#/definitions/hex" },
-        "secondary": { "$ref": "#/definitions/hex" },
-        "accent": { "$ref": "#/definitions/hex", "description": "Racionado: un momento por frame" },
-        "danger": { "$ref": "#/definitions/hex" },
-        "success": { "$ref": "#/definitions/hex" },
-        "onPrimary": { "$ref": "#/definitions/hex", "description": "Texto sobre bandas/botones primarios" },
+        "background": {
+          "$ref": "#/definitions/hex"
+        },
+        "surface": {
+          "$ref": "#/definitions/hex"
+        },
+        "surfaceAlt": {
+          "$ref": "#/definitions/hex"
+        },
+        "border": {
+          "$ref": "#/definitions/hex"
+        },
+        "text": {
+          "$ref": "#/definitions/hex"
+        },
+        "textMuted": {
+          "$ref": "#/definitions/hex"
+        },
+        "primary": {
+          "$ref": "#/definitions/hex"
+        },
+        "secondary": {
+          "$ref": "#/definitions/hex"
+        },
+        "accent": {
+          "$ref": "#/definitions/hex",
+          "description": "Racionado: un momento por frame"
+        },
+        "danger": {
+          "$ref": "#/definitions/hex"
+        },
+        "success": {
+          "$ref": "#/definitions/hex"
+        },
+        "onPrimary": {
+          "$ref": "#/definitions/hex",
+          "description": "Texto sobre bandas/botones primarios"
+        },
         "code": {
           "type": "object",
           "properties": {
-            "background": { "$ref": "#/definitions/hex" }, "text": { "$ref": "#/definitions/hex" }, "comment": { "$ref": "#/definitions/hex" },
-            "keyword": { "$ref": "#/definitions/hex" }, "string": { "$ref": "#/definitions/hex" }, "number": { "$ref": "#/definitions/hex" }, "function": { "$ref": "#/definitions/hex" }
+            "background": {
+              "$ref": "#/definitions/hex"
+            },
+            "text": {
+              "$ref": "#/definitions/hex"
+            },
+            "comment": {
+              "$ref": "#/definitions/hex"
+            },
+            "keyword": {
+              "$ref": "#/definitions/hex"
+            },
+            "string": {
+              "$ref": "#/definitions/hex"
+            },
+            "number": {
+              "$ref": "#/definitions/hex"
+            },
+            "function": {
+              "$ref": "#/definitions/hex"
+            }
           }
         },
-        "dataViz": { "type": "array", "items": { "$ref": "#/definitions/hex" }, "description": "Serie categórica en orden de uso" },
-        "gradients": { "type": "object", "additionalProperties": { "type": "array", "items": { "$ref": "#/definitions/hex" } } },
-        "rules": { "type": "object" }
+        "dataViz": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/hex"
+          },
+          "description": "Serie categórica en orden de uso"
+        },
+        "gradients": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/hex"
+            }
+          }
+        },
+        "rules": {
+          "type": "object"
+        }
       }
     },
     "typography": {
       "type": "object",
-      "required": ["display", "body", "mono", "scale"],
+      "required": [
+        "display",
+        "body",
+        "mono",
+        "scale"
+      ],
       "properties": {
-        "display": { "$ref": "#/definitions/font" },
-        "body": { "$ref": "#/definitions/font" },
-        "mono": { "$ref": "#/definitions/font" },
+        "display": {
+          "$ref": "#/definitions/font"
+        },
+        "body": {
+          "$ref": "#/definitions/font"
+        },
+        "mono": {
+          "$ref": "#/definitions/font"
+        },
         "scale": {
           "type": "object",
           "description": "Tamaños en cqmin (% del lado corto del frame; 1cqmin = 10,8 px a 1080p)",
           "properties": {
-            "unit": { "const": "cqmin" },
-            "hero": { "type": "number" }, "h1": { "type": "number" }, "h2": { "type": "number" }, "h3": { "type": "number" },
-            "body": { "type": "number" }, "caption": { "type": "number" }, "label": { "type": "number" }, "code": { "type": "number" },
-            "portraitMultiplier": { "type": "number", "minimum": 1, "maximum": 1.6, "description": "Escala tipográfica extra en 9:16" }
+            "unit": {
+              "const": "cqmin"
+            },
+            "hero": {
+              "type": "number"
+            },
+            "h1": {
+              "type": "number"
+            },
+            "h2": {
+              "type": "number"
+            },
+            "h3": {
+              "type": "number"
+            },
+            "body": {
+              "type": "number"
+            },
+            "caption": {
+              "type": "number"
+            },
+            "label": {
+              "type": "number"
+            },
+            "code": {
+              "type": "number"
+            },
+            "portraitMultiplier": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1.6,
+              "description": "Escala tipográfica extra en 9:16"
+            },
+            "feedMultiplier": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1.6,
+              "description": "Escala tipográfica extra en 4:5"
+            }
           }
         },
-        "rules": { "type": "object" }
+        "rules": {
+          "type": "object"
+        }
       }
     },
     "logo": {
       "type": "object",
       "properties": {
-        "primary": { "type": "string" }, "mark": { "type": "string" }, "onDark": { "type": "string" }, "onLight": { "type": "string" },
-        "clearSpaceRatio": { "type": "number" }, "minHeightPx1080": { "type": "number" },
-        "watermark": { "type": "object", "properties": { "enabled": { "type": "boolean" }, "position": { "enum": ["top-left", "top-right", "bottom-left", "bottom-right"] }, "opacity": { "type": "number" } } },
-        "dont": { "type": "array", "items": { "type": "string" } }
+        "primary": {
+          "type": "string"
+        },
+        "mark": {
+          "type": "string"
+        },
+        "onDark": {
+          "type": "string"
+        },
+        "onLight": {
+          "type": "string"
+        },
+        "clearSpaceRatio": {
+          "type": "number"
+        },
+        "minHeightPx1080": {
+          "type": "number"
+        },
+        "watermark": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "position": {
+              "enum": [
+                "top-left",
+                "top-right",
+                "bottom-left",
+                "bottom-right"
+              ]
+            },
+            "opacity": {
+              "type": "number"
+            }
+          }
+        },
+        "dont": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     },
     "motion": {
       "type": "object",
-      "required": ["durations", "easings", "stagger"],
+      "required": [
+        "durations",
+        "easings",
+        "stagger"
+      ],
       "properties": {
-        "personality": { "enum": ["productive", "balanced", "expressive"] },
-        "principles": { "type": "array", "items": { "type": "string" } },
-        "durations": { "type": "object", "description": "Milisegundos", "additionalProperties": { "type": "number" } },
-        "easings": { "type": "object", "additionalProperties": { "$ref": "#/definitions/bezier" } },
-        "easingNotes": { "type": "object", "additionalProperties": { "type": "string" } },
-        "stagger": { "type": "object", "description": "Milisegundos entre elementos", "additionalProperties": { "type": "number" } },
+        "personality": {
+          "enum": [
+            "productive",
+            "balanced",
+            "expressive"
+          ]
+        },
+        "principles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "durations": {
+          "type": "object",
+          "description": "Milisegundos",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "easings": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/bezier"
+          }
+        },
+        "easingNotes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "stagger": {
+          "type": "object",
+          "description": "Milisegundos entre elementos",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
         "reading": {
           "type": "object",
-          "properties": { "secondsPerWord": { "type": "number" }, "baseMs": { "type": "number" }, "minHoldMs": { "type": "number" } }
+          "properties": {
+            "secondsPerWord": {
+              "type": "number"
+            },
+            "baseMs": {
+              "type": "number"
+            },
+            "minHoldMs": {
+              "type": "number"
+            },
+            "charsPerSecond": {
+              "type": "number",
+              "description": "Velocidad de lectura en caracteres/s para el término caracteres/15 del hold"
+            },
+            "comment": {
+              "type": "string"
+            }
+          }
         },
         "transitions": {
           "type": "object",
           "properties": {
-            "default": { "enum": ["cut", "crossfade"] },
-            "allowed": { "type": "array", "items": { "type": "string" } },
-            "forbidden": { "type": "array", "items": { "type": "string" } }
+            "default": {
+              "enum": [
+                "cut",
+                "crossfade",
+                "push",
+                "mask-wipe"
+              ]
+            },
+            "allowed": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "cut",
+                  "crossfade",
+                  "push",
+                  "mask-wipe"
+                ]
+              },
+              "description": "Solo transiciones implementadas en build:roots"
+            },
+            "comment": {
+              "type": "string"
+            },
+            "manualInNLE": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Permitidas por la marca, pero se hacen en el editor"
+            },
+            "manualComment": {
+              "type": "string"
+            },
+            "forbidden": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         },
-        "forbidden": { "type": "array", "items": { "type": "string" } }
+        "forbidden": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "staggerGroupMaxMs": {
+          "type": "number",
+          "description": "Duración máxima de un grupo escalonado (ms)"
+        },
+        "staggerComment": {
+          "type": "string"
+        }
       }
     },
-    "layout": { "type": "object" },
+    "layout": {
+      "type": "object"
+    },
     "formats": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "width", "height"],
+        "required": [
+          "id",
+          "width",
+          "height"
+        ],
         "properties": {
-          "id": { "type": "string" }, "label": { "type": "string" },
-          "width": { "type": "integer", "multipleOf": 2 }, "height": { "type": "integer", "multipleOf": 2 },
-          "fps": { "type": "number" }, "root": { "type": "string" }, "safeZone": { "type": "string" }
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "width": {
+            "type": "integer",
+            "multipleOf": 2
+          },
+          "height": {
+            "type": "integer",
+            "multipleOf": 2
+          },
+          "fps": {
+            "type": "number"
+          },
+          "safeZone": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "audio": {
+      "type": "object",
+      "properties": {
+        "loudness": {
+          "type": "object"
+        },
+        "music": {
+          "type": "object"
+        },
+        "sfx": {
+          "type": "object"
+        },
+        "voice": {
+          "type": "object",
+          "properties": {
+            "provider": {
+              "type": "string"
+            },
+            "voiceId": {
+              "type": "string"
+            },
+            "synthetic": {
+              "type": "boolean"
+            },
+            "wordsPerSecond": {
+              "type": "number",
+              "minimum": 1.5,
+              "maximum": 3.5,
+              "description": "Palabras netas de VO por segundo (2,2 ≈ 130 por minuto con aire)"
+            },
+            "comment": {
+              "type": "string"
+            },
+            "consentOnFile": {
+              "type": "boolean"
+            }
+          }
         }
       }
     },
-    "audio": { "type": "object" },
-    "captions": { "type": "object" },
-    "legal": { "type": "object" }
+    "captions": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "file": {
+          "type": "string"
+        },
+        "burnIn": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Formatos donde build:roots quema los captions"
+        },
+        "burnInComment": {
+          "type": "string"
+        },
+        "style": {
+          "type": "string"
+        },
+        "maxCharsPerLine": {
+          "type": "number"
+        },
+        "maxLines": {
+          "type": "number"
+        },
+        "minDurationMs": {
+          "type": "number"
+        },
+        "maxCharsPerSecond": {
+          "type": "number"
+        },
+        "position": {
+          "type": "string"
+        },
+        "highlightActiveWord": {
+          "type": "boolean"
+        }
+      }
+    },
+    "legal": {
+      "type": "object",
+      "properties": {
+        "aiDisclosure": {
+          "type": "string"
+        },
+        "disclosurePolicy": {
+          "type": "string"
+        },
+        "requireDisclosureFor": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "thirdPartyLogos": {
+          "type": "string"
+        },
+        "fontsLicensedForVideo": {
+          "type": "boolean"
+        },
+        "musicLicenseRequired": {
+          "type": "boolean"
+        }
+      }
+    }
   }
 }

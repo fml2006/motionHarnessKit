@@ -1,5 +1,7 @@
 # Revisión de dirección anti-slop — [PIEZA] · [VERSIÓN]
 
+> **Estado en este ejemplo (2026-10-19):** sin revisar. Ningún ítem está marcado porque la revisión de dirección con este checklist no se hizo; las notas de dirección que sí hubo están en `review/CHANGELOG.md` (R1, R2).
+
 > Usar en cada ronda de review (G8) y antes de picture lock (G9). Fuente: research/04-fundamentos-motion.md §12. Los valores numéricos son los tokens de brand/brand.config.json.
 
 ## 1 El "look IA" (diagnóstico)

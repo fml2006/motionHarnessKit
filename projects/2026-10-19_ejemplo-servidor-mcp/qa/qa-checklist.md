@@ -1,5 +1,7 @@
 # CHECKLIST DE QA FINAL — [CLIENTE] · [PIEZA] · [VERSIÓN]
 
+> **Estado en este ejemplo (2026-10-19):** G14 no ejecutado. Solo corrió el QA automático (`qa/*_qa.md`); el visionado y la escucha humanos no se hicieron. Ningún ítem marcado.
+
 > Gate **G14**. Dueño y aprobador: QA / compliance (con **veto de entrega**).
 > Regla: el QA lo hacen **dos personas que no construyeron la pieza**. Lo automatizable lo corre el agente/TD; **el visionado completo y la escucha son humanos**.
 > Marcar: ✅ OK · ❌ falla (abrir defecto) · N/A. Columna "Auto" = se puede automatizar (comando sugerido).

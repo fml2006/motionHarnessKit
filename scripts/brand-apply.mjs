@@ -2,7 +2,9 @@
 // brand-apply: brand/brand.config.json (fuente única de verdad) → brand/dist/
 //   tokens.css · tokens.js · frame.md · brand-rules.md · remotion-theme.ts · brand-board.html
 //   fonts/ · logo/ · vendor/ (gsap + CustomEase) · contrast-report.md
-// Uso: node scripts/brand-apply.mjs [--config brand/brand.config.json] [--check]
+// Uso: node scripts/brand-apply.mjs [--config brand/brand.config.json] [--out brand/dist] [--check]
+//   Con --out distinto de brand/dist (prueba de otra marca), MOTION.md y brand.md se escriben dentro de --out
+//   y NO pisan los de la raíz del repo.
 import { readFileSync, writeFileSync, mkdirSync, copyFileSync, existsSync, rmSync, readdirSync } from "node:fs";
 import { dirname, join, resolve, basename, extname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -15,6 +17,7 @@ const opt = (n, d) => (args.includes(n) ? args[args.indexOf(n) + 1] : d);
 const CONFIG_PATH = resolve(ROOT, opt("--config", "brand/brand.config.json"));
 const OUT = resolve(ROOT, opt("--out", "brand/dist"));
 const CHECK_ONLY = flag("--check");
+const DEFAULT_OUT = OUT === resolve(ROOT, "brand/dist");
 
 const errors = [];
 const warnings = [];
@@ -53,7 +56,15 @@ for (const [name, e] of Object.entries(cfg.motion?.easings || {})) {
 for (const f of cfg.formats || []) {
   if (!f.id || !f.width || !f.height) errors.push(`Formato incompleto: ${JSON.stringify(f)}`);
   if (f.width % 2 || f.height % 2) errors.push(`Formato ${f.id}: ancho/alto deben ser pares (H.264)`);
+  if (f.root) warnings.push(`Formato ${f.id}: "root" ya no se usa (build:roots genera comp/index.html y formats/<id>/index.html); podés borrarlo.`);
 }
+// transiciones: solo las implementadas en build:roots (las demás van a motion.transitions.manualInNLE)
+const IMPLEMENTED_TRANSITIONS = ["cut", "crossfade", "push", "mask-wipe"];
+const TR = cfg.motion?.transitions || {};
+for (const t of TR.allowed || []) {
+  if (!IMPLEMENTED_TRANSITIONS.includes(t)) errors.push(`motion.transitions.allowed incluye "${t}", que el kit no implementa (${IMPLEMENTED_TRANSITIONS.join(", ")}). Movela a motion.transitions.manualInNLE.`);
+}
+if (TR.default && !(TR.allowed || IMPLEMENTED_TRANSITIONS).includes(TR.default)) errors.push(`motion.transitions.default "${TR.default}" no está en allowed.`);
 
 // ---------- contraste WCAG ----------
 function lum(hex) {
@@ -66,21 +77,46 @@ function ratio(a, b) {
   return (l1 + 0.05) / (l2 + 0.05);
 }
 const C = cfg.colors;
+const colorAt = (path) => path.split(".").reduce((o, k) => (o == null ? undefined : o[k]), C);
+// [frente, fondo, mínimo, uso]. Texto ≥ 4,5:1 (WCAG 1.4.3); texto grande, íconos y marcas de datos ≥ 3:1 (1.4.11).
 const pairs = [
   ["text", "background", 7, "Texto principal sobre fondo (objetivo AAA 7:1 para video)"],
   ["text", "surface", 4.5, "Texto sobre tarjetas"],
+  ["text", "surfaceAlt", 4.5, "Texto sobre chips / superficie alternativa"],
   ["textMuted", "background", 4.5, "Texto secundario sobre fondo"],
+  ["textMuted", "surface", 4.5, "Texto secundario sobre tarjetas"],
   ["primary", "background", 3, "Primario como texto grande/ícono"],
+  ["primary", "surface", 3, "Primario sobre tarjetas"],
   ["accent", "background", 3, "Acento como texto grande/dato"],
+  ["accent", "surface", 3, "Acento sobre tarjetas"],
   ["secondary", "background", 3, "Secundario como texto grande/ícono"],
+  ["danger", "background", 3, "Estado de error (ícono/texto grande)"],
+  ["success", "background", 3, "Estado OK (ícono/texto grande)"],
   ["onPrimary", "primary", 4.5, "Texto sobre botón/banda primaria"],
+  ["code.text", "code.background", 4.5, "Código: texto"],
+  ["code.comment", "code.background", 4.5, "Código: comentarios"],
+  ["code.keyword", "code.background", 4.5, "Código: keywords"],
+  ["code.string", "code.background", 4.5, "Código: strings"],
+  ["code.number", "code.background", 4.5, "Código: números"],
+  ["code.function", "code.background", 4.5, "Código: funciones"],
+  ["code.text", "code.background", 4.5, "Código atenuado al 80 % (líneas no resaltadas)", 0.8],
+  ["code.comment", "code.background", 4.5, "Comentario atenuado al 80 % (líneas no resaltadas)", 0.8],
+  ...(C.dataViz || []).map((_, i) => [`dataViz.${i}`, "background", 3, `Data viz serie ${i} sobre fondo (marca gráfica)`]),
 ];
 const contrastRows = [];
-for (const [fg, bg, min, label] of pairs) {
-  if (!C[fg] || !C[bg]) continue;
-  const r = ratio(C[fg], C[bg]);
+let contrastChecked = 0;
+let contrastFailed = 0;
+// alpha < 1: el frente se mezcla con el fondo (opacidad aplicada en un bloque)
+const blend = (fg, bg, alpha) => "#" + [1, 3, 5].map((i) => Math.round(alpha * parseInt(fg.slice(i, i + 2), 16) + (1 - alpha) * parseInt(bg.slice(i, i + 2), 16)).toString(16).padStart(2, "0")).join("");
+for (const [fg, bg, min, label, alpha = 1] of pairs) {
+  const b = colorAt(bg);
+  const a = colorAt(fg) && b ? blend(colorAt(fg), b, alpha) : undefined;
+  if (!a || !b) continue;
+  contrastChecked++;
+  const r = ratio(a, b);
   const ok = r >= min;
-  contrastRows.push(`| ${label} | \`${fg}\` ${C[fg]} / \`${bg}\` ${C[bg]} | ${r.toFixed(2)}:1 | ≥ ${min}:1 | ${ok ? "OK" : "FALLA"} |`);
+  if (!ok) contrastFailed++;
+  contrastRows.push(`| ${label} | \`${fg}\` ${a} / \`${bg}\` ${b} | ${r.toFixed(2)}:1 | ≥ ${min}:1 | ${ok ? "OK" : "FALLA"} |`);
   if (!ok) warnings.push(`Contraste bajo: ${fg} sobre ${bg} = ${r.toFixed(2)}:1 (mínimo ${min}:1) — ${label}`);
 }
 
@@ -91,7 +127,11 @@ if (D.enter && (D.enter < 250 || D.enter > 1200)) warnings.push(`motion.duration
 const RD = cfg.motion.reading || {};
 const spw = RD.secondsPerWord ?? (RD.wordsPerSecond ? 1 / RD.wordsPerSecond : 0.35);
 const wps = Math.round((1 / spw) * 100) / 100;
-const holdRule = `max(${(RD.minHoldMs ?? 1500) / 1000} s; ${(RD.baseMs ?? RD.extraHoldMs ?? 800) / 1000} s + ${spw} s × palabras)`;
+const cps = RD.charsPerSecond ?? 15;
+const holdRule = `max(${(RD.minHoldMs ?? 1500) / 1000} s; ${(RD.baseMs ?? RD.extraHoldMs ?? 800) / 1000} s + ${spw} s × palabras; caracteres / ${cps})`;
+const staggerMax = cfg.motion.staggerGroupMaxMs ?? 500;
+const wordsPerSecond = cfg.audio?.voice?.wordsPerSecond ?? 2.2;
+const voRule = `palabras netas de VO = duración (s) × ${String(wordsPerSecond).replace(".", ",")} (≈${Math.round((wordsPerSecond * 60) / 10) * 10} para 60 s)`;
 if (spw < 0.25) warnings.push(`motion.reading.secondsPerWord=${spw} es demasiado rápido para lectura en pantalla (0.3-0.4 recomendado).`);
 
 function report() {
@@ -104,7 +144,7 @@ if (errors.length) {
   process.exit(1);
 }
 if (CHECK_ONLY) {
-  console.log(`✓ Config válida (${warnings.length} advertencia(s))`);
+  console.log(`✓ Config válida (${warnings.length} advertencia(s)) · contraste: ${contrastChecked - contrastFailed}/${contrastChecked} pares OK`);
   report();
   process.exit(0);
 }
@@ -178,7 +218,7 @@ const L = cfg.layout || {};
 const ms = (v) => `${v}ms`;
 const bez = (e) => `cubic-bezier(${e.join(", ")})`;
 const colorVars = colorEntries.map(([k, v]) => `  --c-${kebab(k)}: ${v};`).join("\n");
-const sizeVars = Object.entries(S).filter(([k, v]) => typeof v === "number" && k !== "portraitMultiplier").map(([k, v]) => `  --fs-${k}: ${v}${S.unit || "cqmin"};`).join("\n");
+const sizeVars = Object.entries(S).filter(([k, v]) => typeof v === "number" && !k.endsWith("Multiplier")).map(([k, v]) => `  --fs-${k}: ${v}${S.unit || "cqmin"};`).join("\n");
 const durVars = Object.entries(cfg.motion.durations).map(([k, v]) => `  --dur-${k}: ${ms(v)};`).join("\n");
 const easeVars = Object.entries(cfg.motion.easings).map(([k, v]) => `  --ease-${k}: ${bez(v)};`).join("\n");
 const radiusU = L.radius?.unit || "cqmin";
@@ -249,12 +289,19 @@ ${radiusVars}
 /* Cada escena es un contenedor "frame": las unidades cq* y las container queries se resuelven contra él. */
 .bm-frame { position: absolute; inset: 0; overflow: hidden; container: frame / size; background: var(--c-background); color: var(--c-text); font-family: var(--font-body); }
 .bm-frame.is-transparent { background: transparent; }
-@container frame (orientation: portrait) {
+/* 9:16 (aspect < 0,7): zonas de UI de Reels/Shorts/TikTok + tipografía ×portraitMultiplier */
+@container frame (aspect-ratio < 0.7) {
   .bm-safe { --safe-x: ${Math.max(zone.leftPct || sm.portrait, sm.portrait)}cqw; --safe-top: ${zone.topPct}cqh; --safe-bottom: ${zone.bottomPct}cqh; --safe-right: ${Math.max(zone.rightPct || sm.portrait, sm.portrait)}cqw;
-${Object.entries(S).filter(([k, v]) => typeof v === "number" && k !== "portraitMultiplier").map(([k, v]) => `    --fs-${k}: ${Math.round(v * (S.portraitMultiplier || 1) * 100) / 100}${S.unit || "cqmin"};`).join("\n")}
+${Object.entries(S).filter(([k, v]) => typeof v === "number" && !k.endsWith("Multiplier")).map(([k, v]) => `    --fs-${k}: ${Math.round(v * (S.portraitMultiplier || 1) * 100) / 100}${S.unit || "cqmin"};`).join("\n")}
   }
 }
-@container frame (aspect-ratio < 1.2) and (aspect-ratio > 0.85) {
+/* 4:5 feed (0,7 ≤ aspect ≤ 0,85): sin UI encima, márgenes de feed + tipografía ×feedMultiplier */
+@container frame (aspect-ratio >= 0.7) and (aspect-ratio <= 0.85) {
+  .bm-safe { --safe-x: ${sm.feed ?? sm.square}cqw; --safe-top: ${sm.feed ?? sm.square}cqh; --safe-bottom: ${sm.feed ?? sm.square}cqh; --safe-right: ${sm.feed ?? sm.square}cqw;
+${Object.entries(S).filter(([k, v]) => typeof v === "number" && !k.endsWith("Multiplier")).map(([k, v]) => `    --fs-${k}: ${Math.round(v * (S.feedMultiplier || 1) * 100) / 100}${S.unit || "cqmin"};`).join("\n")}
+  }
+}
+@container frame (aspect-ratio > 0.85) and (aspect-ratio < 1.2) {
   .bm-safe { --safe-x: ${sm.square}cqw; --safe-top: ${sm.square}cqh; --safe-bottom: ${sm.square}cqh; --safe-right: ${sm.square}cqw; }
 }
 .bm-safe { position: absolute; top: var(--safe-top); bottom: var(--safe-bottom); left: var(--safe-x); right: var(--safe-right); }
@@ -309,6 +356,7 @@ const tokensJs = `/* ${cfg.meta.name} — tokens JS para GSAP (GENERADO por scri
      BRAND.ease("enter")      → nombre de ease registrado ("brand.enter")
      BRAND.dur("enter")       → segundos (0.6)
      BRAND.stagger("words")   → segundos entre elementos
+     BRAND.stagger("items", n)→ idem, acotado para que el grupo de n elementos dure ≤ staggerGroupMaxMs
      BRAND.hold("texto...")   → segundos mínimos de lectura para ese texto
      BRAND.color("accent")    → hex
      BRAND.u(el)              → px por 1cqmin del frame que contiene a el
@@ -332,17 +380,20 @@ const tokensJs = `/* ${cfg.meta.name} — tokens JS para GSAP (GENERADO por scri
     if (v == null) throw new Error("BRAND.dur: duración desconocida '" + name + "'");
     return v / 1000;
   };
-  B.stagger = function (name) {
+  B.stagger = function (name, n) {
     var v = B.motion.stagger[name];
     if (v == null) throw new Error("BRAND.stagger: stagger desconocido '" + name + "'");
+    var max = B.motion.staggerGroupMaxMs || 500;
+    if (n > 1) v = Math.min(v, max / n);
     return v / 1000;
   };
   B.hold = function (text) {
     var r = B.motion.reading || {};
     var spw = r.secondsPerWord || (r.wordsPerSecond ? 1 / r.wordsPerSecond : 0.35);
     var base = (r.baseMs != null ? r.baseMs : r.extraHoldMs != null ? r.extraHoldMs : 800) / 1000;
-    var words = String(text || "").trim().split(/\\s+/).filter(Boolean).length;
-    return Math.max((r.minHoldMs || 1500) / 1000, base + words * spw);
+    var t = String(text || "").replace(/[|*]/g, " ").replace(/\\s+/g, " ").trim();
+    var words = t ? t.split(" ").length : 0;
+    return Math.max((r.minHoldMs || 1500) / 1000, base + words * spw, t.length / (r.charsPerSecond || 15));
   };
   B.color = function (path) {
     return path.split(".").reduce(function (o, k) { return o == null ? undefined : o[k]; }, B.colors);
@@ -366,7 +417,7 @@ name: ${cfg.meta.name} — Frame (capa de video)
 description: >
   Sistema de diseño a escala de frame para ${cfg.meta.name}. Generado desde brand/brand.config.json
   (v${cfg.meta.version}). Los átomos (hex, familias, pesos, motion tokens) son sagrados; la composición es libre.
-unit: el frame — 1920×1080 principal; 1080×1920 (9:16) y 1080×1080 (1:1) derivados
+unit: el frame — ${cfg.formats.map((f) => `${f.width}×${f.height} (${f.id})`).join(", ")}
 principle: átomos sagrados · composición libre · los números salen del guion verificado
 
 colors:
@@ -386,15 +437,17 @@ spacing:
   safe-landscape: "${sm.landscape}%"
   safe-portrait: "${sm.portrait}% + zonas UI de plataforma (top ${zone.topPct}%, bottom ${zone.bottomPct}%)"
   safe-square: "${sm.square}%"
+  safe-feed: "${sm.feed ?? sm.square}%"
 ${Object.entries(L.radius || {}).filter(([k]) => k !== "unit").map(([k, v]) => `  radius-${k}: "${v}cqmin"`).join("\n")}
 
 motion:
   personality: ${cfg.motion.personality}
   durations-ms: { ${Object.entries(cfg.motion.durations).map(([k, v]) => `${k}: ${v}`).join(", ")} }
   easings: { ${Object.entries(cfg.motion.easings).map(([k, v]) => `${k}: "cubic-bezier(${v.join(",")})"`).join(", ")} }
-  stagger-ms: { ${Object.entries(cfg.motion.stagger).map(([k, v]) => `${k}: ${v}`).join(", ")} }
+  stagger-ms: { ${Object.entries(cfg.motion.stagger).map(([k, v]) => `${k}: ${v}`).join(", ")}, group-max: ${staggerMax} }
   reading: "${holdRule}"
   transitions-allowed: [${(cfg.motion.transitions?.allowed || []).join(", ")}]
+  transitions-manual-nle: [${(cfg.motion.transitions?.manualInNLE || []).join(", ")}]
 
 components:
   card:
@@ -465,7 +518,7 @@ const brandRules = `# Reglas de marca — ${cfg.meta.name} (GENERADO desde brand
 - Acento \`--c-accent\`: máximo ${cfg.colors.rules?.maxAccentMomentsPerFrame ?? 1} momento por frame.
 - Data viz: usar \`--c-data-viz-0..${(cfg.colors.dataViz || []).length - 1}\` en ese orden.
 - Tipografía: clases \`.bm-hero .bm-h1 .bm-h2 .bm-h3 .bm-body .bm-caption .bm-kicker .bm-label .bm-code\`. Prohibido declarar otras font-family.
-- Tamaños en \`cqmin\` (vía variables \`--fs-*\`), nunca px fijos: así la escena funciona en 16:9, 9:16 y 1:1.
+- Tamaños en \`cqmin\` (vía variables \`--fs-*\`), nunca px fijos: así la escena funciona en 16:9, 9:16, 4:5 y 1:1.
 - Máximo ${T.rules?.maxWordsPerLine ?? 7} palabras por línea, ${T.rules?.maxLinesPerFrame ?? 3} líneas por frame, nada menor a ${T.rules?.minSizePx1080 ?? 28}px en 1080p.
 - Contenido dentro de \`.bm-safe\` (márgenes seguros por formato, incluye zonas de UI de Reels/Shorts/TikTok en vertical).
 
@@ -475,9 +528,9 @@ ${(cfg.motion.principles || []).map((p) => `- ${p}`).join("\n")}
 - Duraciones: usar \`BRAND.dur("enter"|"exit"|"micro"|"short"|"emphasis"|"scene"|"long")\` (${Object.entries(cfg.motion.durations).map(([k, v]) => `${k}=${v}ms`).join(", ")}).
 - Easings: usar \`BRAND.ease(nombre)\`:
 ${Object.keys(cfg.motion.easings).map((k) => `  - \`${k}\` (${cfg.motion.easings[k].join(", ")}) — ${(cfg.motion.easingNotes || {})[k] || ""}`).join("\n")}
-- Stagger: \`BRAND.stagger("letters"|"words"|"lines"|"items")\` (${Object.entries(cfg.motion.stagger).map(([k, v]) => `${k}=${v}ms`).join(", ")}).
+- Stagger: \`BRAND.stagger("letters"|"words"|"lines"|"items", n)\` (${Object.entries(cfg.motion.stagger).map(([k, v]) => `${k}=${v}ms`).join(", ")}); con \`n\` el grupo completo dura ≤ ${staggerMax} ms.
 - Tiempo en pantalla de un texto: \`BRAND.hold(texto)\` como mínimo = ${holdRule}.
-- Transiciones permitidas: ${(cfg.motion.transitions?.allowed || []).join(", ")}. Default: ${cfg.motion.transitions?.default}. Prohibidas: ${(cfg.motion.transitions?.forbidden || []).join(", ")}.
+- Transiciones en \`scenes.json\` (implementadas): ${(cfg.motion.transitions?.allowed || []).join(", ")}. Default: ${cfg.motion.transitions?.default}. Se hacen en el editor (NLE): ${(cfg.motion.transitions?.manualInNLE || []).join(", ") || "—"}. Prohibidas: ${(cfg.motion.transitions?.forbidden || []).join(", ")}.
 - Prohibido: ${(cfg.motion.forbidden || []).join("; ")}.
 
 ## Logo
@@ -485,13 +538,15 @@ ${Object.keys(cfg.motion.easings).map((k) => `  - \`${k}\` (${cfg.motion.easings
 - No: ${(cfg.logo?.dont || []).join(", ")}.
 
 ## Audio y captions
+- Voz en off: ${voRule}. Voz por defecto de la marca: ${cfg.audio?.voice?.synthetic ? "sintética → toda pieza lleva disclosure" : "no definida como sintética (si una pieza usa TTS o clon, lleva disclosure)"}.
 - Loudness final: ${cfg.audio?.loudness?.integratedLUFS} LUFS integrados, true peak ≤ ${cfg.audio?.loudness?.truePeakDBTP} dBTP.
 - Música: ${cfg.audio?.music?.policy || "—"}
 - SFX: ${cfg.audio?.sfx?.style || "—"} (máx. ${cfg.audio?.sfx?.maxPerScene ?? 3} por escena).
-- Captions: ${cfg.captions?.maxCharsPerLine} caracteres/línea, ${cfg.captions?.maxLines} líneas, ≤ ${cfg.captions?.maxCharsPerSecond} caracteres/s, mínimo ${cfg.captions?.minDurationMs}ms.
+- Captions: ${cfg.captions?.maxCharsPerLine} caracteres/línea, ${cfg.captions?.maxLines} líneas, ≤ ${cfg.captions?.maxCharsPerSecond} caracteres/s, mínimo ${cfg.captions?.minDurationMs}ms. Si el proyecto tiene \`captions.srt\` (o .vtt), build:roots los quema en: ${(cfg.captions?.burnIn || []).join(", ") || "—"}.
 
 ## Legal
 - Disclosure IA: "${cfg.legal?.aiDisclosure}" cuando haya: ${(cfg.legal?.requireDisclosureFor || []).join(", ")}.
+${cfg.legal?.disclosurePolicy ? `- Política: ${cfg.legal.disclosurePolicy}` : ""}
 - Logos de terceros: ${cfg.legal?.thirdPartyLogos}
 `;
 
@@ -545,7 +600,7 @@ table{border-collapse:collapse;font-size:14px}td,th{border:1px solid ${C.border 
 <h2>Principios de motion</h2><ul>${(cfg.motion.principles || []).map((p) => `<li>${p}</li>`).join("")}</ul>
 </body></html>`;
 
-const contrastMd = `# Reporte de contraste — ${cfg.meta.name}\n\n| Uso | Colores | Ratio | Mínimo | Estado |\n|---|---|---|---|---|\n${contrastRows.join("\n")}\n\n${warnings.length ? "## Advertencias\n\n" + warnings.map((w) => `- ${w}`).join("\n") : "Sin advertencias."}\n`;
+const contrastMd = `# Reporte de contraste — ${cfg.meta.name}\n\n${contrastChecked - contrastFailed} de ${contrastChecked} pares cumplen el mínimo (texto ≥ 4,5:1; texto grande, íconos y series de datos ≥ 3:1; texto principal con objetivo 7:1).\n\n| Uso | Colores | Ratio | Mínimo | Estado |\n|---|---|---|---|---|\n${contrastRows.join("\n")}\n\n${warnings.length ? "## Advertencias\n\n" + warnings.map((w) => `- ${w}`).join("\n") : "Sin advertencias."}\n`;
 
 // ---------- MOTION.md + brand.md en la raíz (convención del pack charlie947/motion-graphics-skills) ----------
 const motionMd = `# MOTION.md — ${cfg.meta.name}
@@ -562,16 +617,17 @@ ${colorEntries.filter(([k]) => !k.includes(".")).map(([k, v]) => `- \`${v}\` **$
 ## 2. Tipografía y tamaños
 - Display: ${T.display.family} ${T.display.weights.join("/")} · tracking ${T.display.tracking} · ${T.display.case}
 - Body: ${T.body.family} · Mono: ${T.mono.family}
-- Escala (${S.unit}, % del lado corto): ${Object.entries(S).filter(([k, v]) => typeof v === "number" && k !== "portraitMultiplier").map(([k, v]) => `${k} ${v}`).join(" · ")} · vertical ×${S.portraitMultiplier || 1}
+- Escala (${S.unit}, % del lado corto): ${Object.entries(S).filter(([k, v]) => typeof v === "number" && !k.endsWith("Multiplier")).map(([k, v]) => `${k} ${v}`).join(" · ")} · 9:16 ×${S.portraitMultiplier || 1} · 4:5 ×${S.feedMultiplier || 1}
 - Máx ${T.rules?.maxWordsPerLine} palabras/línea, ${T.rules?.maxLinesPerFrame} líneas/frame, mínimo ${T.rules?.minSizePx1080}px a 1080p.
 
 ## 3. Timing: cómo entra, cuánto se queda, cómo sale
 - Entrada ${cfg.motion.durations.enter} ms (\`enter\`), énfasis ${cfg.motion.durations.emphasis} ms (\`emphasized\`), salida ${cfg.motion.durations.exit} ms (\`exit\`).
 - Hold de lectura: ${holdRule}. Primer movimiento a 150-300 ms, nunca en t=0.
-- Stagger: ${Object.entries(cfg.motion.stagger).map(([k, v]) => `${k} ${v} ms`).join(", ")}.
+- Stagger: ${Object.entries(cfg.motion.stagger).map(([k, v]) => `${k} ${v} ms`).join(", ")}; un grupo escalonado dura ≤ ${staggerMax} ms (\`BRAND.stagger(nombre, n)\`).
+- Voz en off: ${voRule}.
 
 ## 4. Cómo se mueve
-- Personalidad: **${cfg.motion.personality}**. 30 fps. Transición por defecto: ${cfg.motion.transitions?.default}.
+- Personalidad: **${cfg.motion.personality}**. 30 fps. Transición por defecto: ${cfg.motion.transitions?.default}. Implementadas: ${(cfg.motion.transitions?.allowed || []).join(", ")}; en el editor: ${(cfg.motion.transitions?.manualInNLE || []).join(", ") || "—"}.
 ${Object.entries(cfg.motion.easings).map(([k, v]) => `- \`${k}\` cubic-bezier(${v.join(", ")}) — ${(cfg.motion.easingNotes || {})[k] || ""}`).join("\n")}
 
 ## 5. Textura y acabado
@@ -612,8 +668,9 @@ ${cfg.identity?.voice?.tone || ""} (${cfg.identity?.voice?.language || "es"}, ${
 ## Nunca
 ${[...(cfg.identity?.voice?.dont || []), ...(cfg.logo?.dont || []).map((d) => `logo: ${d}`)].map((d) => `- ${d}`).join("\n")}
 `;
-writeFileSync(join(ROOT, "MOTION.md"), motionMd);
-writeFileSync(join(ROOT, "brand.md"), brandMd);
+// MOTION.md / brand.md en la raíz solo para la marca activa; una prueba con --out los deja dentro de --out
+writeFileSync(join(DEFAULT_OUT ? ROOT : OUT, "MOTION.md"), motionMd);
+writeFileSync(join(DEFAULT_OUT ? ROOT : OUT, "brand.md"), brandMd);
 
 writeFileSync(join(OUT, "tokens.css"), tokensCss);
 writeFileSync(join(OUT, "tokens.js"), tokensJs);
@@ -625,6 +682,6 @@ writeFileSync(join(OUT, "contrast-report.md"), contrastMd);
 writeFileSync(join(OUT, "brand.json"), JSON.stringify(cfg, null, 2));
 
 console.log(`✓ Marca "${cfg.meta.name}" v${cfg.meta.version} aplicada → ${OUT.replace(ROOT + "/", "")}/`);
-console.log(`  fuentes: ${fontFiles.length} · logos: ${Object.keys(logoMap).length} · colores: ${colorEntries.length} · contraste: ${contrastRows.length - warnings.filter((w) => w.startsWith("Contraste")).length}/${contrastRows.length} OK`);
+console.log(`  fuentes: ${fontFiles.length} · logos: ${Object.keys(logoMap).length} · colores: ${colorEntries.length} · contraste: ${contrastChecked - contrastFailed}/${contrastChecked} pares OK`);
 report();
 console.log(`  Siguiente: npm run new -- <slug-del-video>   (o re-aplicar a un proyecto existente: npm run build:roots -- <proyecto>)`);

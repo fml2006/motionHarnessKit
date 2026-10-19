@@ -1,0 +1,28 @@
+◆  Checking portrait
+[hyperframes] browserGpuMode probe → software (WebGL unavailable)
+
+Lint
+  ◇ 0 errors, 0 warnings
+
+Runtime
+  ◇ 0 errors, 0 warnings
+
+Layout
+  ℹ t=28.111s text_occluded h3.bm-h3.cr-cap > span:nth-of-type(1) > span:nth-of-type(1) inside div.cr-win "Conectar un servidor es entrada de configuración." — Text is hidden beneath an opaque element.
+        Fix: Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.
+  ℹ t=28.111s text_occluded h3.bm-h3.cr-cap > span:nth-of-type(1) > span:nth-of-type(1) > em:nth-of-type(1) inside div.cr-win "una" — Text is hidden beneath an opaque element.
+        Fix: Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.
+  ℹ t=28.111s container_overflow h3.bm-h3.cr-cap > span:nth-of-type(1) > span:nth-of-type(1) inside h3.bm-h3.cr-cap > span:nth-of-type(1) overflowed bottom 136.94px — Element extends outside a clipping layout container.
+        Fix: Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.
+  0 error(s), 0 warning(s), 3 info(s)
+
+Motion
+  ◇ 0 errors, 0 warnings
+
+Contrast
+  ◇ 64/64 text checks pass WCAG AA
+
+Snapshots
+  ◇ disabled
+
+◇  Check passed

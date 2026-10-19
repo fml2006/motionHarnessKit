@@ -3,18 +3,19 @@
   bm-block: bar-chart
   Uso: comparar 2-6 valores. Barras horizontales desde CERO (nunca truncar el eje), valores con conteo.
   "items": "Etiqueta: valor" por línea. "highlight": etiqueta que lleva el acento (1 sola).
-  REGLA: "source" obligatoria; mismo período/unidad para todas las barras.
+  REGLA: "source" obligatoria; mismo período/unidad para todas las barras; la escena declara "claims": ["C-…"].
+  Los defaults son ficticios y rotulados (⟦A⟧ ficticio…): build:roots --strict no deja renderizarlos como final.
   Duración sugerida: 6-8 s.
 -->
 <html
   lang="es"
   data-composition-variables='[
-    {"id":"title","type":"string","label":"Título","default":"Tiempo de primer corte (horas)","maxLength":70},
-    {"id":"items","type":"string","label":"Items (Etiqueta: valor, \\n entre items)","default":"Tradicional: 32\nPlantillas: 14\nIA + harness: 6","maxLength":400},
-    {"id":"unit","type":"string","label":"Unidad/sufijo","default":" h","maxLength":8},
+    {"id":"title","type":"string","label":"Título","default":"⟦COMPLETAR: qué se compara (unidad)⟧","maxLength":70},
+    {"id":"items","type":"string","label":"Items (Etiqueta: valor, \\n entre items)","default":"⟦A⟧ ficticio: 3\n⟦B⟧ ficticio: 2\n⟦C⟧ ficticio: 1","maxLength":400},
+    {"id":"unit","type":"string","label":"Unidad/sufijo","default":"","maxLength":8},
     {"id":"decimals","type":"number","label":"Decimales","default":0,"min":0,"max":2,"step":1},
-    {"id":"highlight","type":"string","label":"Etiqueta destacada","default":"IA + harness","maxLength":40},
-    {"id":"source","type":"string","label":"Fuente (obligatoria)","default":"Fuente: datos internos de ejemplo — reemplazar","maxLength":90},
+    {"id":"highlight","type":"string","label":"Etiqueta destacada","default":"⟦C⟧ ficticio","maxLength":40},
+    {"id":"source","type":"string","label":"Fuente (obligatoria)","default":"⟦COMPLETAR: Fuente · claim C-…⟧","maxLength":90},
     {"id":"exit","type":"enum","label":"Salida","default":"fade","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
     {"id":"dur","type":"number","label":"Duración de la escena (s)","default":7,"min":1,"max":30,"step":0.1,"unit":"s"}
   ]'

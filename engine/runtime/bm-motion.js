@@ -15,6 +15,7 @@
      BM.drawLine(tl, el, at, axis)         dibuja una línea/conector (scaleX o scaleY desde 0)
      BM.highlightCode(code, lang)          HTML con spans de sintaxis (keyword/string/number/comment/fn)
      BM.esc(text)                          escapa HTML
+     BM.PLACEHOLDER                        marca visible de dato faltante (⟦—⟧)
 */
 (function () {
   "use strict";
@@ -217,7 +218,11 @@
     return out + esc(code.slice(last));
   }
 
+  // lo que se ve cuando falta un dato obligatorio (build:roots --strict no deja renderizar el final así)
+  var PLACEHOLDER = "\u27E6—\u27E7";
+
   window.BM = {
+    PLACEHOLDER: PLACEHOLDER,
     vars: vars, lines: lines, words: words, revealLines: revealLines, revealWords: revealWords,
     fadeUp: fadeUp, exit: exit, empty: empty, countUp: countUp, typeText: typeText, drawLine: drawLine,
     highlightCode: highlightCode, esc: esc, fmt: fmt, accentMarkup: accentMarkup,

@@ -4,15 +4,16 @@
   Uso: mostrar código real (≤ 12 líneas) con reveal por línea y resaltado de las líneas clave.
   REGLA: el código mostrado tiene que compilar/ejecutar o estar marcado como pseudocódigo. Nada inventado.
   "code": líneas separadas por \n. "highlight": números de línea separados por coma (ej. "3,4").
+  Los defaults son placeholders visibles (⟦…⟧): si no los reemplazás, se ven en pantalla y --strict frena el final.
   Duración sugerida: 1 s + 0.35 s por línea + BRAND.hold(caption).
 -->
 <html
   lang="es"
   data-composition-variables='[
-    {"id":"filename","type":"string","label":"Archivo","default":"agent.ts","maxLength":40},
-    {"id":"code","type":"string","label":"Código (\\n entre líneas)","default":"const tools = [search, readFile];\nconst agent = new Agent({ model, tools });\n\n// el loop: pensar → usar herramienta → observar\nconst result = await agent.run(\"Resumí el repo\");\nconsole.log(result.text);","maxLength":900},
-    {"id":"highlight","type":"string","label":"Líneas a resaltar","default":"5","maxLength":20},
-    {"id":"caption","type":"string","label":"Explicación (líneas con |)","default":"Un agente es un *loop*:|decide, usa una herramienta|y vuelve a decidir.","maxLength":120},
+    {"id":"filename","type":"string","label":"Archivo","default":"⟦archivo⟧","maxLength":40},
+    {"id":"code","type":"string","label":"Código (\\n entre líneas)","default":"// ⟦COMPLETAR⟧ pegá código real y probado\n// (copiado del repo o de la doc oficial:\n// nunca APIs inventadas)","maxLength":900},
+    {"id":"highlight","type":"string","label":"Líneas a resaltar","default":"","maxLength":20},
+    {"id":"caption","type":"string","label":"Explicación (líneas con |)","default":"⟦COMPLETAR: qué tiene que mirar|la audiencia⟧","maxLength":120},
     {"id":"exit","type":"enum","label":"Salida","default":"fade","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
     {"id":"dur","type":"number","label":"Duración de la escena (s)","default":7,"min":1,"max":30,"step":0.1,"unit":"s"}
   ]'
@@ -37,16 +38,21 @@
         @container (orientation: portrait) { #root .cr.is-wide .cr-win { --code-avail: 62cqw; } }
         #root .cr-line { position: relative; display: flex; gap: 2.4cqmin; padding: 0 3cqmin 0 0; white-space: pre; color: var(--c-code-text); }
         #root .cr-ln { flex: 0 0 5.5cqmin; text-align: right; color: var(--c-code-comment); opacity: 0.7; }
-        #root .cr-hl { position: absolute; left: 0; right: 0; background: rgba(255, 255, 255, 0.06); border-left: 0.5cqmin solid var(--c-accent); transform-origin: left center; }
+        /* el texto va por encima de la banda de resaltado (ambos posicionados: gana el orden del DOM) */
+        #root .cr-line > span:not(.cr-hl) { position: relative; }
+        #root .cr-hl { position: absolute; left: 0; right: 0; background: color-mix(in srgb, var(--c-code-text) 8%, transparent); border-left: 0.5cqmin solid var(--c-accent); transform-origin: left center; }
         #root .tok-keyword { color: var(--c-code-keyword); }
         #root .tok-string { color: var(--c-code-string); }
         #root .tok-number { color: var(--c-code-number); }
         #root .tok-comment { color: var(--c-code-comment); }
         #root .tok-fn { color: var(--c-code-function); }
         #root .cr-cap { flex: 1 1 auto; }
+        /* apilado (código ancho o vertical): caption y ventana juntos y centrados, sin hueco entre ellos */
+        #root .cr.is-wide .cr-cap { flex: 0 0 auto; }
         @container (orientation: portrait) {
           #root .cr { flex-direction: column-reverse; justify-content: center; align-items: stretch; gap: 6cqmin; }
           #root .cr-win { flex: 0 0 auto; --code-avail: 66cqw; }
+          #root .cr-cap { flex: 0 0 auto; }
         }
       </style>
       <div id="root" data-composition-id="__ID__">
@@ -98,7 +104,8 @@
           if (hlBoxes.length) {
             tl.fromTo(hlBoxes, { scaleX: 0 }, { scaleX: 1, duration: BRAND.dur("enter"), ease: BRAND.ease("standard"), stagger: 0.1 }, codeDone + 0.2);
             var others = lineEls.filter(function (_, i) { return hl.indexOf(i + 1) === -1; });
-            tl.to(others, { opacity: 0.45, duration: BRAND.dur("short"), ease: BRAND.ease("standard") }, codeDone + 0.2);
+            // atenuar al 80 %: enfoca sin bajar el texto (ni los comentarios) de 4,5:1 — brand-apply lo verifica
+            tl.to(others, { opacity: 0.8, duration: BRAND.dur("short"), ease: BRAND.ease("standard") }, codeDone + 0.2);
           }
           if (capLines.length) BM.revealLines(tl, capLines, codeDone + 0.3);
           BM.exit(tl, q(".cr"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);

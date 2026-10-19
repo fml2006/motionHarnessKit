@@ -1,6 +1,6 @@
 # MOTION.md — TuMarca
 
-> GENERADO desde brand/brand.config.json v1.0.0 por `npm run brand`. No editar a mano.
+> GENERADO desde brand/brand.config.json v1.1.0 por `npm run brand`. No editar a mano.
 > Lo leen: este kit, las skills de HyperFrames (vía frame.md) y packs como charlie947/motion-graphics-skills.
 
 ## 1. Colores y para qué sirve cada uno
@@ -16,23 +16,24 @@
 - `#FF6B6B` **danger**
 - `#3DDC84` **success**
 - `#06101F` **onPrimary**
-- Código: background `#0E1422`, text `#E6EDF7`, comment `#7D8AA5`, keyword `#7FB0FF`, string `#5FE0B8`, number `#FFC46B`, function `#C9A7FF`
+- Código: background `#0E1422`, text `#E6EDF7`, comment `#94A0B8`, keyword `#7FB0FF`, string `#5FE0B8`, number `#FFC46B`, function `#C9A7FF`
 - Data viz (en orden): `#4C8DFF` → `#2ED3A7` → `#FFB547` → `#C9A7FF` → `#FF6B6B` → `#8A96B0`
 - Regla: El acento (accent) se raciona: una sola vez por frame, para el dato o la palabra clave. Nunca para texto corrido.
 
 ## 2. Tipografía y tamaños
 - Display: Space Grotesk 500/700 · tracking -0.025em · sentence
 - Body: Inter · Mono: JetBrains Mono
-- Escala (cqmin, % del lado corto): hero 13 · h1 9 · h2 6.4 · h3 4.8 · body 3.7 · caption 3.3 · label 2.6 · code 3 · vertical ×1.22
+- Escala (cqmin, % del lado corto): hero 13 · h1 9 · h2 6.4 · h3 4.8 · body 3.7 · caption 3.3 · label 2.6 · code 3 · 9:16 ×1.22 · 4:5 ×1.1
 - Máx 7 palabras/línea, 3 líneas/frame, mínimo 28px a 1080p.
 
 ## 3. Timing: cómo entra, cuánto se queda, cómo sale
 - Entrada 500 ms (`enter`), énfasis 800 ms (`emphasized`), salida 325 ms (`exit`).
-- Hold de lectura: max(1.5 s; 0.8 s + 0.35 s × palabras). Primer movimiento a 150-300 ms, nunca en t=0.
-- Stagger: letters 25 ms, words 70 ms, lines 120 ms, items 100 ms.
+- Hold de lectura: max(1.5 s; 0.8 s + 0.35 s × palabras; caracteres / 15). Primer movimiento a 150-300 ms, nunca en t=0.
+- Stagger: letters 25 ms, words 70 ms, lines 120 ms, items 60 ms; un grupo escalonado dura ≤ 500 ms (`BRAND.stagger(nombre, n)`).
+- Voz en off: palabras netas de VO = duración (s) × 2,2 (≈130 para 60 s).
 
 ## 4. Cómo se mueve
-- Personalidad: **productive**. 30 fps. Transición por defecto: cut.
+- Personalidad: **productive**. 30 fps. Transición por defecto: cut. Implementadas: cut, crossfade, push, mask-wipe; en el editor: zoom-through, match-cut.
 - `standard` cubic-bezier(0.2, 0, 0, 1) — Reposicionar algo visible (Material 3 standard)
 - `enter` cubic-bezier(0.165, 0.84, 0.44, 1) — Entrada por defecto, desacelera sin rebote (= GSAP power3.out)
 - `exit` cubic-bezier(0.55, 0.055, 0.675, 0.19) — Salida por defecto, acelera (= power2.in)

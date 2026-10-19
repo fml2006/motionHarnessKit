@@ -1,13 +1,14 @@
 # Catálogo de bloques de marca
 
-> GENERADO por `node scripts/blocks-catalog.mjs`. Cada bloque es una sub-composición HyperFrames parametrizable que lee los tokens de marca (`brand/dist`) y se adapta sola a 16:9, 9:16 y 1:1.
+> GENERADO por `node scripts/blocks-catalog.mjs`. Cada bloque es una sub-composición HyperFrames parametrizable que lee los tokens de marca (`brand/dist`) y se adapta sola a 16:9, 9:16, 4:5 y 1:1.
 > Uso: en `scenes.json` → `{ "id": "s03-dato", "block": "stat-hit", "duration": 5, "vars": { ... } }`. La primera vez se copia a `comp/compositions/<id>.html` y desde ahí se puede personalizar.
 > Convenciones de texto: separá líneas con `|`, marcá UNA palabra de acento con `*asteriscos*`, listas con `\n`. Todos aceptan `exit` (none/fade/up) y reciben `dur` automáticamente.
+> **Los bloques no traen contenido, traen estructura.** Todo default es un placeholder visible (`⟦COMPLETAR…⟧`, `⟦A⟧ ficticio`, `⟦—⟧`): si no lo pisás en `scenes.json`, se ve en pantalla y `npm run build:roots -- <proyecto> --strict` frena el render final. Los bloques con cifras (`stat-hit`, `bar-chart`) exigen `"claims": ["C-…"]` con estado `ok` y firma del SME en `research/claims.csv`.
 
 | Bloque | Para qué | Duración sugerida |
 |---|---|---|
 | [`bar-chart`](#bar-chart) | comparar 2-6 valores. Barras horizontales desde CERO (nunca truncar el eje), valores con conteo. | 6-8 s. |
-| [`chapter`](#chapter) | separador de capítulo/sección en piezas de 2+ minutos (bumper). Corto y consistente en toda la serie. | 2-3 s. |
+| [`chapter`](#chapter) | separador de capítulo/sección en piezas de 2+ minutos (bumper). Corto y consistente en toda la serie. | BRAND.hold(kicker + título) + 0,6 s (≈ 3-3,5 s con 5-6 palabras). |
 | [`code-reveal`](#code-reveal) | mostrar código real (≤ 12 líneas) con reveal por línea y resaltado de las líneas clave. | 1 s + 0.35 s por línea + BRAND.hold(caption). |
 | [`end-card`](#end-card) | cierre con UN llamado a la acción + dónde ir. Un solo CTA (no tres). | 4-6 s (en YouTube, 5-20 s si vas a usar pantallas finales nativas: dejá zona libre). |
 | [`kinetic-statement`](#kinetic-statement) | una afirmación clave, palabra por palabra (hook, tesis, transición de argumento). | BRAND.hold(texto) + 1.5 s (≈ 3.5-6 s). |
@@ -20,7 +21,15 @@
 | [`terminal`](#terminal) | un comando real tipeándose + su salida. Ideal para CLIs, instalaciones, demos de dev tools. | 1.2 s + largo del comando/28 + 0.25 s por línea de salida + 1.5 s. |
 | [`title-card`](#title-card) | apertura de la pieza o de una sección. Kicker + titular (1-3 líneas) + bajada. | 3.5-5 s. |
 
-Para ver todos con la marca actual: `npm run frames -- _galeria-bloques` (y `--format portrait`).
+Para ver todos con la marca actual: `npm run frames -- _galeria-bloques` (y `--format portrait` / `--format feed`). La galería es `"purpose": "demo"`: sus escenas con cifras están rotuladas como ficticias y marcadas `"demo": true`, lo único que las exceptúa del gate estricto.
+
+## Transiciones entre escenas
+
+En `scenes.json`: `"defaultTransition"` o `"transition"` por escena (la transición con la que ENTRA esa escena). Implementadas: `cut`, `crossfade` (solapa `crossfade` s, 0,4 por defecto), `push` (lo nuevo entra desde la derecha; dura `BRAND.dur("scene")`, ease `move`) y `mask-wipe` (revelado de derecha a izquierda). Cualquier otra hace fallar el build; `zoom-through` y `match-cut` se resuelven en el editor.
+
+## Captions quemados
+
+Si el proyecto tiene `captions.srt` (o `.vtt`), build:roots genera `compositions/_captions.html` y lo monta en los formatos de `captions.burnIn` (por defecto 9:16 y 4:5), dentro de la zona segura. Avisa si un cue pasa de 38 caracteres por línea, 2 líneas, 17 caracteres/s o dura menos de 1 s.
 
 ## Detalle
 
@@ -29,16 +38,17 @@ Para ver todos con la marca actual: `npm run frames -- _galeria-bloques` (y `--f
 comparar 2-6 valores. Barras horizontales desde CERO (nunca truncar el eje), valores con conteo.
 
 - "items": "Etiqueta: valor" por línea. "highlight": etiqueta que lleva el acento (1 sola).
-- REGLA: "source" obligatoria; mismo período/unidad para todas las barras.
+- REGLA: "source" obligatoria; mismo período/unidad para todas las barras; la escena declara "claims": ["C-…"].
+- Los defaults son ficticios y rotulados (⟦A⟧ ficticio…): build:roots --strict no deja renderizarlos como final.
 
 | Variable | Tipo | Default | Descripción |
 |---|---|---|---|
-| `title` | string | "Tiempo de primer corte (horas)" | Título |
-| `items` | string | "Tradicional: 32\nPlantillas: 14\nIA + harness: 6" | Items (Etiqueta: valor, \n entre items) |
-| `unit` | string | " h" | Unidad/sufijo |
+| `title` | string | "⟦COMPLETAR: qué se compara (unidad)⟧" | Título |
+| `items` | string | "⟦A⟧ ficticio: 3\n⟦B⟧ ficticio: 2\n⟦C⟧ ficticio: 1" | Items (Etiqueta: valor, \n entre items) |
+| `unit` | string | "" | Unidad/sufijo |
 | `decimals` | number | 0 | Decimales |
-| `highlight` | string | "IA + harness" | Etiqueta destacada |
-| `source` | string | "Fuente: datos internos de ejemplo — reemplazar" | Fuente (obligatoria) |
+| `highlight` | string | "⟦C⟧ ficticio" | Etiqueta destacada |
+| `source` | string | "⟦COMPLETAR: Fuente · claim C-…⟧" | Fuente (obligatoria) |
 | `exit` | enum (none / fade / up) | "fade" | Salida |
 | `dur` | number | 7 | Duración de la escena (s) |
 
@@ -50,8 +60,8 @@ separador de capítulo/sección en piezas de 2+ minutos (bumper). Corto y consis
 
 | Variable | Tipo | Default | Descripción |
 |---|---|---|---|
-| `number` | string | "02" | Número |
-| `title` | string | "Cómo se arma el pipeline" | Título del capítulo |
+| `number` | string | "01" | Número |
+| `title` | string | "⟦COMPLETAR: título del capítulo⟧" | Título del capítulo |
 | `kicker` | string | "Capítulo" | Kicker (opcional) |
 | `exit` | enum (none / fade / up) | "up" | Salida |
 | `dur` | number | 2.6 | Duración de la escena (s) |
@@ -62,13 +72,14 @@ mostrar código real (≤ 12 líneas) con reveal por línea y resaltado de las l
 
 - REGLA: el código mostrado tiene que compilar/ejecutar o estar marcado como pseudocódigo. Nada inventado.
 - "code": líneas separadas por \n. "highlight": números de línea separados por coma (ej. "3,4").
+- Los defaults son placeholders visibles (⟦…⟧): si no los reemplazás, se ven en pantalla y --strict frena el final.
 
 | Variable | Tipo | Default | Descripción |
 |---|---|---|---|
-| `filename` | string | "agent.ts" | Archivo |
-| `code` | string | "const tools = [search, readFile];\nconst agent = new Agent({ model, tools });\n | Código (\n entre líneas) |
-| `highlight` | string | "5" | Líneas a resaltar |
-| `caption` | string | "Un agente es un *loop*:\|decide, usa una herramienta\|y vuelve a decidir." | Explicación (líneas con |) |
+| `filename` | string | "⟦archivo⟧" | Archivo |
+| `code` | string | "// ⟦COMPLETAR⟧ pegá código real y probado\n// (copiado del repo o de la doc ofi | Código (\n entre líneas) |
+| `highlight` | string | "" | Líneas a resaltar |
+| `caption` | string | "⟦COMPLETAR: qué tiene que mirar\|la audiencia⟧" | Explicación (líneas con |) |
 | `exit` | enum (none / fade / up) | "fade" | Salida |
 | `dur` | number | 7 | Duración de la escena (s) |
 
@@ -80,8 +91,8 @@ cierre con UN llamado a la acción + dónde ir. Un solo CTA (no tres).
 
 | Variable | Tipo | Default | Descripción |
 |---|---|---|---|
-| `cta` | string | "Bajá el kit y\|*probalo* con tu marca" | CTA (líneas con |, acento con *) |
-| `link` | string | "tumarca.com/kit" | Link / handle |
+| `cta` | string | "⟦COMPLETAR: un único\|*llamado* a la acción⟧" | CTA (líneas con |, acento con *) |
+| `link` | string | "⟦COMPLETAR: link⟧" | Link / handle |
 | `note` | string | "" | Nota legal / disclosure (opcional) |
 | `exit` | enum (none / fade / up) | "none" | Salida |
 | `dur` | number | 5 | Duración de la escena (s) |
@@ -94,7 +105,7 @@ una afirmación clave, palabra por palabra (hook, tesis, transición de argument
 
 | Variable | Tipo | Default | Descripción |
 |---|---|---|---|
-| `text` | string | "El modelo no *recuerda*: lee todo de nuevo cada vez." | Afirmación (acento con *) |
+| `text` | string | "⟦COMPLETAR: una *idea* por pantalla⟧" | Afirmación (acento con *) |
 | `align` | enum (center / left) | "center" | Alineación |
 | `size` | enum (h1 / hero) | "h1" | Tamaño |
 | `exit` | enum (none / fade / up) | "fade" | Salida |
@@ -121,8 +132,8 @@ identificar a una persona/fuente sobre video (talking head, entrevista, demo).
 
 | Variable | Tipo | Default | Descripción |
 |---|---|---|---|
-| `name` | string | "Nombre Apellido" | Nombre |
-| `role` | string | "Staff Engineer · Plataforma" | Rol |
+| `name` | string | "⟦Nombre Apellido⟧" | Nombre |
+| `role` | string | "⟦Rol · organización⟧" | Rol |
 | `side` | enum (left / right) | "left" | Lado |
 | `transparent` | boolean | true | Fondo transparente |
 | `exit` | enum (none / fade / up) | "fade" | Salida |
@@ -133,12 +144,14 @@ identificar a una persona/fuente sobre video (talking head, entrevista, demo).
 cita textual con atribución (cliente, experto, documentación oficial).
 
 - REGLA: cita literal y verificable; si es paráfrasis, no uses comillas. Pedí permiso para citar personas.
+- Declará la cita como claim ("claims": ["C-…"]) para que --strict verifique que está firmada.
+- Los defaults son placeholders visibles (⟦…⟧).
 
 | Variable | Tipo | Default | Descripción |
 |---|---|---|---|
-| `quote` | string | "La herramienta no reemplaza el criterio:\|lo *multiplica*." | Cita (líneas con |) |
-| `author` | string | "Nombre Apellido" | Autor |
-| `role` | string | "Directora creativa, Empresa" | Rol / organización |
+| `quote` | string | "⟦COMPLETAR: cita textual\|con fuente verificable⟧" | Cita (líneas con |) |
+| `author` | string | "⟦Nombre Apellido⟧" | Autor |
+| `role` | string | "⟦Rol, organización⟧" | Rol / organización |
 | `exit` | enum (none / fade / up) | "fade" | Salida |
 | `dur` | number | 6 | Duración de la escena (s) |
 
@@ -151,10 +164,10 @@ A vs B, antes/después, mito/realidad. 2-4 ítems por lado, paralelos en estruct
 | Variable | Tipo | Default | Descripción |
 |---|---|---|---|
 | `title` | string | "" | Título (opcional) |
-| `leftTitle` | string | "Sin harness" | Título izquierda |
-| `leftItems` | string | "Prompt distinto cada vez\nColores y fuentes a ojo\nRevisión al final" | Items izquierda (\n entre items) |
-| `rightTitle` | string | "Con harness" | Título derecha |
-| `rightItems` | string | "Brief y storyboard versionados\nTokens de marca obligatorios\nQA automático en  | Items derecha (\n entre items) |
+| `leftTitle` | string | "⟦Antes⟧" | Título izquierda |
+| `leftItems` | string | "⟦COMPLETAR⟧\n⟦COMPLETAR⟧" | Items izquierda (\n entre items) |
+| `rightTitle` | string | "⟦Después⟧" | Título derecha |
+| `rightItems` | string | "⟦COMPLETAR⟧\n⟦COMPLETAR⟧" | Items derecha (\n entre items) |
 | `exit` | enum (none / fade / up) | "fade" | Salida |
 | `dur` | number | 8 | Duración de la escena (s) |
 
@@ -162,17 +175,19 @@ A vs B, antes/después, mito/realidad. 2-4 ítems por lado, paralelos en estruct
 
 UN dato duro con conteo. El número es el momento de acento del frame.
 
-- REGLA: "source" es obligatoria. Si el dato no tiene fuente verificable, no va en pantalla.
+- REGLA: "source" es obligatoria y la escena declara "claims": ["C-…"] en scenes.json (claim con estado=ok y
+- verificado_por firmado en research/claims.csv). Sin eso, build:roots --strict frena el render final.
+- Los defaults son placeholders visibles (⟦…⟧): el bloque no trae datos, trae estructura.
 
 | Variable | Tipo | Default | Descripción |
 |---|---|---|---|
-| `value` | number | 73 | Valor |
+| `value` | number | null | Valor (sin default: tiene que venir de una claim verificada) |
 | `decimals` | number | 0 | Decimales |
 | `prefix` | string | "" | Prefijo |
-| `suffix` | string | "%" | Sufijo |
-| `label` | string | "de los equipos ya usa agentes" | Qué mide (≤8 palabras) |
+| `suffix` | string | "" | Sufijo |
+| `label` | string | "⟦COMPLETAR: qué mide el dato⟧" | Qué mide (≤8 palabras) |
 | `context` | string | "" | Contexto (opcional) |
-| `source` | string | "Fuente: completar antes de publicar" | Fuente (obligatoria) |
+| `source` | string | "⟦COMPLETAR: Fuente · claim C-…⟧" | Fuente (obligatoria) |
 | `exit` | enum (none / fade / up) | "fade" | Salida |
 | `dur` | number | 5 | Duración de la escena (s) |
 
@@ -184,8 +199,8 @@ proceso o arquitectura simple en 2-5 pasos (pipeline, flujo de datos, cómo func
 
 | Variable | Tipo | Default | Descripción |
 |---|---|---|---|
-| `title` | string | "Cómo trabaja un agente" | Título |
-| `steps` | string | "Pedido — vos describís el objetivo\nPlan — el modelo decide el próximo paso\nHe | Pasos (Título — descripción, \n entre pasos) |
+| `title` | string | "⟦COMPLETAR: título⟧" | Título |
+| `steps` | string | "⟦Paso 1⟧ — ⟦qué pasa⟧\n⟦Paso 2⟧ — ⟦qué pasa⟧\n⟦Paso 3⟧ — ⟦qué pasa⟧" | Pasos (Título — descripción, \n entre pasos) |
 | `exit` | enum (none / fade / up) | "fade" | Salida |
 | `dur` | number | 8 | Duración de la escena (s) |
 
@@ -195,13 +210,14 @@ un comando real tipeándose + su salida. Ideal para CLIs, instalaciones, demos d
 
 - REGLA: comando y salida reales (copiados de una corrida). Ocultá tokens, paths personales y datos de clientes.
 - "output": líneas separadas por \n; una línea que empieza con "✓" se pinta como éxito.
+- Los defaults son placeholders visibles (⟦…⟧): si no los reemplazás, se ven en pantalla y --strict frena el final.
 
 | Variable | Tipo | Default | Descripción |
 |---|---|---|---|
-| `title` | string | "zsh — demo" | Título de la ventana |
+| `title` | string | "terminal" | Título de la ventana |
 | `prompt` | string | "$" | Prompt |
-| `command` | string | "npx hyperframes render --output intro.mp4" | Comando |
-| `output` | string | "Compilando composición…\nCapturando 135 frames (2 workers)\nCodificando H.264\n | Salida (\n entre líneas) |
+| `command` | string | "echo \"reemplazar por una corrida real\"" | Comando |
+| `output` | string | "⟦COMPLETAR: pegá la salida real de esa corrida⟧" | Salida (\n entre líneas) |
 | `caption` | string | "" | Leyenda (opcional) |
 | `exit` | enum (none / fade / up) | "fade" | Salida |
 | `dur` | number | 6 | Duración de la escena (s) |
@@ -215,8 +231,8 @@ apertura de la pieza o de una sección. Kicker + titular (1-3 líneas) + bajada.
 | Variable | Tipo | Default | Descripción |
 |---|---|---|---|
 | `kicker` | string | "Explainer" | Kicker (1-4 palabras) |
-| `headline` | string | "Qué es un *agente*\|y por qué importa" | Titular (líneas con |, acento con *) |
-| `subtitle` | string | "En 60 segundos, sin jerga." | Bajada |
+| `headline` | string | "⟦COMPLETAR: titular\|con *acento*⟧" | Titular (líneas con |, acento con *) |
+| `subtitle` | string | "⟦COMPLETAR: bajada⟧" | Bajada |
 | `showMark` | boolean | true | Mostrar isotipo |
 | `bg` | enum (grid / glow / solid) | "grid" | Fondo |
 | `exit` | enum (none / fade / up) | "fade" | Salida |
