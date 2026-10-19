@@ -93,7 +93,8 @@ const plan = {
   slug,
   type,
   date,
-  master: formats.includes("landscape") ? "landscape" : formats[0],
+  // social se piensa vertical-first: el maestro es 9:16 y el resto se deriva
+  master: type === "social" && formats.includes("portrait") ? "portrait" : formats.includes("landscape") ? "landscape" : formats[0],
   formats,
   defaultTransition: brand.motion?.transitions?.default === "crossfade" ? "crossfade" : "cut",
   crossfade: 0.4,
