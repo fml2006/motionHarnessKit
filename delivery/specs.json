@@ -79,6 +79,6 @@
   "archive": {
     "master": "ProRes 422 HQ (10 bit) + PCM 48 kHz/24 bit, generado desde el intermedio ProRes 4444 (nunca desde el H.264)",
     "alpha": "ProRes 4444 (npm run render -- <p> --alpha)",
-    "sourceOfTruth": "El proyecto (scenes.json con brandLock + compositions + brand/dist sincronizado + package-lock.json) con tag de versión: permite re-renderizar en cualquier formato del plan con la misma marca."
+    "sourceOfTruth": "El proyecto (scenes.json con brandLock + compositions + brands/<marca>/dist sincronizado + package-lock.json) con tag de versión: permite re-renderizar en cualquier formato del plan con la misma marca."
   }
 }

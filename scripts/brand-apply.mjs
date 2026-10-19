@@ -1,23 +1,56 @@
 #!/usr/bin/env node
-// brand-apply: brand/brand.config.json (fuente única de verdad) → brand/dist/
-//   tokens.css · tokens.js · frame.md · brand-rules.md · remotion-theme.ts · brand-board.html
-//   fonts/ · logo/ · vendor/ (gsap + CustomEase) · contrast-report.md
-// Uso: node scripts/brand-apply.mjs [--config brand/brand.config.json] [--out brand/dist] [--check]
-//   Con --out distinto de brand/dist (prueba de otra marca), MOTION.md y brand.md se escriben dentro de --out
-//   y NO pisan los de la raíz del repo.
+// brand-apply: brands/<marca>/brand.config.json (fuente única de verdad de esa marca) → brands/<marca>/dist/
+//   tokens.css · tokens.js · frame.md · brand-rules.md · MOTION.md · brand.md · remotion-theme.ts · brand-board.html
+//   fonts/ · logo/ · vendor/ (gsap + CustomEase) · contrast-report.md · brand.json
+// y al final regenera los índices del estudio: brands/INDEX.md, MOTION.md y brand.md de la raíz.
+// Uso:
+//   node scripts/brand-apply.mjs                 todas las marcas de brands/ (= --all)
+//   node scripts/brand-apply.mjs <marca> [...]   solo esas marcas
+//   node scripts/brand-apply.mjs [<marca>|--all] --check   validar sin escribir
+//   node scripts/brand-apply.mjs --config <json> --out <dir>   prueba ad hoc (no toca brands/ ni los índices)
 import { readFileSync, writeFileSync, mkdirSync, copyFileSync, existsSync, rmSync, readdirSync } from "node:fs";
 import { dirname, join, resolve, basename, extname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { spawnSync } from "node:child_process";
+import { listBrands, brandDir, configPath, distDir, writeIndex, lookSummary } from "./lib/brands.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const flag = (n) => args.includes(n);
 const opt = (n, d) => (args.includes(n) ? args[args.indexOf(n) + 1] : d);
-
-const CONFIG_PATH = resolve(ROOT, opt("--config", "brand/brand.config.json"));
-const OUT = resolve(ROOT, opt("--out", "brand/dist"));
 const CHECK_ONLY = flag("--check");
-const DEFAULT_OUT = OUT === resolve(ROOT, "brand/dist");
+const VALUE_FLAGS = ["--config", "--out", "--brand"];
+const positional = args.filter((a, i) => !a.startsWith("--") && !VALUE_FLAGS.includes(args[i - 1]));
+
+// varias marcas (o ninguna = todas): un proceso por marca y después los índices
+if (!flag("--config") && !flag("--brand")) {
+  const all = listBrands();
+  const wanted = flag("--all") || !positional.length ? all : positional;
+  const unknown = wanted.filter((b) => !all.includes(b));
+  if (unknown.length) {
+    console.error(`✗ Marca(s) desconocida(s): ${unknown.join(", ")}. Marcas en brands/: ${all.join(", ") || "ninguna"} (crear una: npm run brand:new -- <slug>)`);
+    process.exit(1);
+  }
+  let failed = 0;
+  for (const b of wanted) {
+    const r = spawnSync(process.execPath, [fileURLToPath(import.meta.url), "--brand", b, ...(CHECK_ONLY ? ["--check"] : [])], { stdio: "inherit" });
+    if (r.status !== 0) failed++;
+  }
+  if (!CHECK_ONLY) {
+    const ix = writeIndex();
+    console.log(`✓ Índices del estudio: brands/INDEX.md, MOTION.md, brand.md (${ix.brands.length} marca(s), default ${ix.default})`);
+  }
+  process.exit(failed ? 1 : 0);
+}
+
+const SLUG = opt("--brand", null);
+const CONFIG_PATH = SLUG ? configPath(SLUG) : resolve(ROOT, opt("--config"));
+const OUT = SLUG ? distDir(SLUG) : resolve(ROOT, opt("--out", join(dirname(CONFIG_PATH), "dist")));
+// carpeta de la marca: logos, fuentes locales y bloques firma se resuelven contra ella
+const BRAND_DIR = SLUG ? brandDir(SLUG) : dirname(CONFIG_PATH);
+const rel = (p) => p.replace(ROOT + "/", "");
+// ruta de un asset declarado en la config: relativa a la carpeta de la marca (o a la raíz del repo si empieza con brands/)
+const assetPath = (p) => (!p ? null : p.startsWith("brands/") || p.startsWith("/") ? resolve(ROOT, p) : join(BRAND_DIR, p));
 
 const errors = [];
 const warnings = [];
@@ -65,6 +98,44 @@ for (const t of TR.allowed || []) {
   if (!IMPLEMENTED_TRANSITIONS.includes(t)) errors.push(`motion.transitions.allowed incluye "${t}", que el kit no implementa (${IMPLEMENTED_TRANSITIONS.join(", ")}). Movela a motion.transitions.manualInNLE.`);
 }
 if (TR.default && !(TR.allowed || IMPLEMENTED_TRANSITIONS).includes(TR.default)) errors.push(`motion.transitions.default "${TR.default}" no está en allowed.`);
+if (SLUG && cfg.meta?.slug && cfg.meta.slug !== SLUG) errors.push(`meta.slug "${cfg.meta.slug}" no coincide con la carpeta brands/${SLUG}/`);
+
+// ---------- look: lo que hace que la MISMA escena se vea distinta en cada marca ----------
+// Lo consumen todos los bloques (tokens.css + BRAND.look en tokens.js + bm-motion.js).
+const LOOK_ENUM = {
+  background: ["grid", "glow", "grid+glow", "flat", "paper", "gradient"],
+  align: ["start", "center"],
+  statementAlign: ["start", "center"],
+  statementSize: ["h1", "hero"],
+  headlineCase: ["none", "uppercase"],
+  accentStyle: ["color", "underline", "highlight", "italic"],
+  textReveal: ["mask", "fade", "rise", "blur"],
+  kicker: ["line", "dot", "none"],
+  cards: ["outline", "filled", "none"],
+  density: ["airy", "regular", "compact"],
+};
+const LEGACY_BG = { "subtle-grid": "grid", "gradient-glow": "grid+glow", solid: "flat" };
+if (!cfg.look) warnings.push(`Sin bloque "look": uso los defaults (${cfg.layout?.background?.style ? "fondo derivado de layout.background.style" : "grilla, alineado a la izquierda, reveal por máscara"}). Definilo con /marca para que la marca tenga estilo propio.`);
+const look = {
+  background: LEGACY_BG[cfg.layout?.background?.style] || "grid",
+  align: "start",
+  statementAlign: "center",
+  statementSize: "h1",
+  headlineCase: "none",
+  accentStyle: "color",
+  textReveal: "mask",
+  kicker: "line",
+  cards: "filled",
+  density: "regular",
+  ...(cfg.look || {}),
+};
+for (const [k, opts] of Object.entries(LOOK_ENUM)) {
+  if (!opts.includes(look[k])) errors.push(`look.${k} = "${look[k]}" no es válido (opciones: ${opts.join(" | ")})`);
+}
+if (look.accentStyle === "italic" && !cfg.typography?.display?.italic)
+  warnings.push(`look.accentStyle "italic" sin typography.display.italic: true → el navegador sintetiza una itálica falsa. Activá la itálica real de la fuente.`);
+look.summary = look.summary || lookSummary(look);
+cfg.look = look;
 
 // ---------- contraste WCAG ----------
 function lum(hex) {
@@ -77,7 +148,25 @@ function ratio(a, b) {
   return (l1 + 0.05) / (l2 + 0.05);
 }
 const C = cfg.colors;
-const colorAt = (path) => path.split(".").reduce((o, k) => (o == null ? undefined : o[k]), C);
+// "#RRGGBB" literal o ruta dentro de colors (p. ej. "code.text")
+const colorAt = (path) => (path.startsWith("#") ? path : path.split(".").reduce((o, k) => (o == null ? undefined : o[k]), C));
+// color sobre el que se apoya el texto del acento resaltado: el que más contraste tenga contra accent
+if (!C.onAccent && HEX.test(C.accent || "") && HEX.test(C.background || "") && HEX.test(C.text || ""))
+  C.onAccent = ratio(C.background, C.accent) >= ratio(C.text, C.accent) ? C.background : C.text;
+if (C.onAccent && !colorEntries.some(([k]) => k === "onAccent")) colorEntries.push(["onAccent", C.onAccent]);
+const mix = (fg, bg, a) => "#" + [1, 3, 5].map((i) => Math.round(a * parseInt(fg.slice(i, i + 2), 16) + (1 - a) * parseInt(bg.slice(i, i + 2), 16)).toString(16).padStart(2, "0")).join("");
+// intensidad de los fondos con color (glow / gradient): se usa en tokens.css y para chequear el peor caso de contraste
+const BG_ALPHA = { glow: [0.18, 0.12], gradient: [0.5, 0.38], gradientHero: [0.68, 0.52] };
+const [hg1, hg2] = C.gradients?.hero || [C.primary, C.secondary || C.primary];
+const lookPairs = [];
+if (look.accentStyle === "highlight") lookPairs.push(["onAccent", "accent", 4.5, "Texto sobre el resaltado de acento (look.accentStyle highlight)"]);
+if (look.background === "gradient" && HEX.test(hg1 || "") && HEX.test(hg2 || "")) {
+  const hot1 = mix(hg1, C.background, BG_ALPHA.gradientHero[0]);
+  const hot2 = mix(hg2, C.background, BG_ALPHA.gradientHero[1]);
+  lookPairs.push([C.text, hot1, 4.5, "Texto sobre el punto más intenso del gradiente (gradients.hero[0])"]);
+  lookPairs.push([C.text, hot2, 4.5, "Texto sobre el punto más intenso del gradiente (gradients.hero[1])"]);
+  lookPairs.push([C.textMuted || C.text, mix(hg1, C.background, BG_ALPHA.gradient[0]), 4.5, "Texto secundario sobre el gradiente de escena"]);
+}
 // [frente, fondo, mínimo, uso]. Texto ≥ 4,5:1 (WCAG 1.4.3); texto grande, íconos y marcas de datos ≥ 3:1 (1.4.11).
 const pairs = [
   ["text", "background", 7, "Texto principal sobre fondo (objetivo AAA 7:1 para video)"],
@@ -102,6 +191,7 @@ const pairs = [
   ["code.text", "code.background", 4.5, "Código atenuado al 80 % (líneas no resaltadas)", 0.8],
   ["code.comment", "code.background", 4.5, "Comentario atenuado al 80 % (líneas no resaltadas)", 0.8],
   ...(C.dataViz || []).map((_, i) => [`dataViz.${i}`, "background", 3, `Data viz serie ${i} sobre fondo (marca gráfica)`]),
+  ...lookPairs,
 ];
 const contrastRows = [];
 let contrastChecked = 0;
@@ -176,11 +266,23 @@ for (const role of ["display", "body", "mono"]) {
         copyFileSync(extSrc, join(OUT, "fonts", extName));
         fontFaces.push({ family: t.family, weight: w, file: extName, ext: true });
       }
+      // itálica real (p. ej. para look.accentStyle "italic"): typography.<rol>.italic = true
+      if (t.italic) {
+        const itSrc = join(pkgDir, "files", `${slug}-latin-${w}-italic.woff2`);
+        if (!existsSync(itSrc)) { errors.push(`typography.${role}.italic: ${t.package} no trae itálica para el peso ${w}`); continue; }
+        copyFileSync(itSrc, join(OUT, "fonts", `${slug}-${w}-italic.woff2`));
+        fontFaces.push({ family: t.family, weight: w, file: `${slug}-${w}-italic.woff2`, italic: true });
+        const itExt = join(pkgDir, "files", `${slug}-latin-ext-${w}-italic.woff2`);
+        if (existsSync(itExt)) {
+          copyFileSync(itExt, join(OUT, "fonts", `${slug}-ext-${w}-italic.woff2`));
+          fontFaces.push({ family: t.family, weight: w, file: `${slug}-ext-${w}-italic.woff2`, italic: true, ext: true });
+        }
+      }
     } else {
-      // source: "local" → archivos en brand/fonts/, mapeados por peso en t.files { "400": "MiFuente-Regular.woff2" }
+      // source: "local" → archivos en brands/<marca>/fonts/, mapeados por peso en t.files { "400": "MiFuente-Regular.woff2" }
       const file = t.files?.[String(w)];
-      src = file && join(ROOT, "brand", "fonts", file);
-      if (!src || !existsSync(src)) { errors.push(`Fuente local faltante para ${role} ${w}: definí typography.${role}.files["${w}"] y copiá el archivo a brand/fonts/`); continue; }
+      src = file && join(BRAND_DIR, "fonts", file);
+      if (!src || !existsSync(src)) { errors.push(`Fuente local faltante para ${role} ${w}: definí typography.${role}.files["${w}"] y copiá el archivo a ${rel(join(BRAND_DIR, "fonts"))}/`); continue; }
       copyFileSync(src, join(OUT, "fonts", basename(src)));
       fontFiles.push(basename(src));
       fontFaces.push({ family: t.family, weight: w, file: basename(src) });
@@ -194,14 +296,14 @@ const logoMap = {};
 for (const key of ["primary", "mark", "onDark", "onLight"]) {
   const p = cfg.logo?.[key];
   if (!p) continue;
-  const abs = join(ROOT, p);
-  if (!existsSync(abs)) { warnings.push(`Logo ${key} no encontrado: ${p}`); continue; }
+  const abs = assetPath(p);
+  if (!existsSync(abs)) { warnings.push(`Logo ${key} no encontrado: ${p} (rutas relativas a ${rel(BRAND_DIR)}/)`); continue; }
   const name = `${key}${extname(abs)}`;
   copyFileSync(abs, join(OUT, "logo", name));
   logoMap[key] = `logo/${name}`;
 }
-const inlineMark = cfg.logo?.mark && existsSync(join(ROOT, cfg.logo.mark)) ? readFileSync(join(ROOT, cfg.logo.mark), "utf8") : "";
-const inlineLogo = cfg.logo?.primary && existsSync(join(ROOT, cfg.logo.primary)) ? readFileSync(join(ROOT, cfg.logo.primary), "utf8") : "";
+const inlineMark = cfg.logo?.mark && existsSync(assetPath(cfg.logo.mark)) ? readFileSync(assetPath(cfg.logo.mark), "utf8") : "";
+const inlineLogo = cfg.logo?.primary && existsSync(assetPath(cfg.logo.primary)) ? readFileSync(assetPath(cfg.logo.primary), "utf8") : "";
 
 // vendor GSAP (local: renders deterministas y offline, sin CDN)
 for (const f of ["gsap.min.js", "CustomEase.min.js"]) {
@@ -232,9 +334,71 @@ const isLightBg = lum(C.background) > 0.4;
 const glowK = isLightBg ? 0.4 : 1; // en fondos claros el glow se reduce: si no, ensucia
 const hexA = (hex, a) => `rgba(${parseInt(hex.slice(1, 3), 16)}, ${parseInt(hex.slice(3, 5), 16)}, ${parseInt(hex.slice(5, 7), 16)}, ${a})`;
 
+// ---------- CSS del look (fondo, alineación, caja, acento, kicker, tarjetas, densidad, reveal) ----------
+const centered = look.align === "center";
+const space = { airy: 1.3, regular: 1, compact: 0.8 }[look.density] || 1;
+const grain = `<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.25 0 0 0 0 0.2 0 0 0 0 0.15 0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(#n)'/></svg>`;
+const gridLines = `background-image: linear-gradient(${hexA(C.text, gridOpacity)} 1px, transparent 1px), linear-gradient(90deg, ${hexA(C.text, gridOpacity)} 1px, transparent 1px); background-size: 6cqmin 6cqmin; background-position: center;`;
+const glowFill = (k = 1) => `background: radial-gradient(40% 35% at 70% 30%, ${hexA(g1, BG_ALPHA.glow[0] * glowK * k)}, transparent 70%), radial-gradient(35% 30% at 25% 80%, ${hexA(g2, BG_ALPHA.glow[1] * glowK * k)}, transparent 70%);`;
+const gradFill = (a1, a2) => `background: radial-gradient(85% 70% at 88% 8%, ${hexA(g1, a1)}, transparent 70%), radial-gradient(75% 60% at 8% 96%, ${hexA(g2, a2)}, transparent 70%);`;
+const BG_CSS = {
+  grid: `.bm-bg::before { inset: 0; ${gridLines} }`,
+  glow: `.bm-bg::after { inset: -20%; ${glowFill()} }\n.bm-bg.is-hero::after, .bm-bg.glow::after { ${glowFill(1.4)} }`,
+  "grid+glow": `.bm-bg::before { inset: 0; ${gridLines} }\n.bm-bg.is-hero::after, .bm-bg.glow::after { inset: -20%; ${glowFill()} }`,
+  flat: ``,
+  // papel: grano determinista (feTurbulence con seed fija) + filete de página
+  paper: `.bm-bg::before { inset: 0; background-image: url("data:image/svg+xml,${encodeURIComponent(grain)}"); background-size: 34cqmin 34cqmin; opacity: ${isLightBg ? 0.03 : 0.05}; mix-blend-mode: ${isLightBg ? "multiply" : "screen"}; }
+.bm-bg::after { inset: 3cqmin; border: var(--stroke) solid ${hexA(C.border || C.textMuted, 0.9)}; }
+.bm-bg.is-hero::after, .bm-bg.glow::after { inset: 3cqmin; border-width: calc(var(--stroke) * 2); box-shadow: inset 0 0 0 1.2cqmin ${hexA(C.background, 1)}, inset 0 0 0 calc(1.2cqmin + var(--stroke)) ${hexA(C.border || C.textMuted, 0.9)}; }`,
+  gradient: `.bm-bg::after { inset: 0; ${gradFill(BG_ALPHA.gradient[0], BG_ALPHA.gradient[1])} }
+.bm-bg.is-hero::after, .bm-bg.glow::after { ${gradFill(BG_ALPHA.gradientHero[0], BG_ALPHA.gradientHero[1])} }`,
+}[look.background];
+const ACCENT_CSS = {
+  color: `.bm-accent { color: var(--c-accent); font-style: normal; }`,
+  underline: `.bm-accent { color: inherit; font-style: normal; background-image: linear-gradient(var(--c-accent), var(--c-accent)); background-repeat: no-repeat; background-position: 0 94%; background-size: 100% 0.1em; padding-bottom: 0.03em; }`,
+  highlight: `.bm-accent { color: var(--c-on-accent); font-style: normal; background-color: var(--c-accent); background-image: linear-gradient(var(--c-accent), var(--c-accent)); background-repeat: no-repeat; background-position: 0 50%; background-size: 100% 100%; padding: 0 0.1em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }`,
+  italic: `.bm-accent { color: var(--c-accent); font-style: italic; }`,
+}[look.accentStyle];
+const KICKER_CSS = {
+  line: `.bm-kicker-deco { flex: 0 0 auto; width: 9cqmin; height: 0.35cqmin; background: var(--c-primary); transform-origin: left center; }`,
+  dot: `.bm-kicker-deco { flex: 0 0 auto; width: 1.5cqmin; height: 1.5cqmin; border-radius: 50%; background: var(--c-primary); }`,
+  none: `.bm-kicker-deco { display: none; }`,
+}[look.kicker];
+const CARD_CSS = {
+  filled: `.bm-card { background: var(--c-surface); border: var(--stroke) solid var(--c-border); border-radius: var(--radius-lg); }`,
+  outline: `.bm-card { background: transparent; border: calc(var(--stroke) * 1.6) solid var(--c-border); border-radius: var(--radius-lg); }`,
+  none: `.bm-card { background: transparent; border: 0; border-radius: 0; }`,
+}[look.cards];
+const upper = look.headlineCase === "uppercase";
+const lookCss = `/* ===== look: ${look.summary} ===== */
+:root {
+  --look-items: ${centered ? "center" : "flex-start"};
+  --look-text-align: ${centered ? "center" : "left"};
+  --look-origin: ${centered ? "center center" : "left center"};
+  --look-statement-items: ${look.statementAlign === "center" ? "center" : "flex-start"};
+  --look-statement-text-align: ${look.statementAlign === "center" ? "center" : "left"};
+  --look-space: ${space};
+}
+.bm-frame { --look: "${look.background} ${look.align} ${look.accentStyle} ${look.textReveal}"; }
+/* fondo de marca: .bm-bg = textura del look · .is-hero = apertura/cierre (más intensa) · .is-plain = solo color */
+.bm-bg { position: absolute; inset: 0; background: var(--c-background); overflow: hidden; }
+.bm-bg::before, .bm-bg::after { content: ""; position: absolute; pointer-events: none; }
+${BG_CSS}
+.bm-bg.is-plain::before, .bm-bg.is-plain::after, .bm-bg.solid::before, .bm-bg.solid::after { display: none; }
+/* caja de titulares */
+${upper ? `/* las citas quedan en caja normal: una cita en mayúsculas grita y se lee peor */
+.bm-hero, .bm-h1, .bm-h2:not(blockquote) { text-transform: uppercase; letter-spacing: ${T.display.trackingUpper || "-0.01em"}; line-height: ${T.display.lineHeightUpper || 1}; }` : ""}
+/* acento (*palabra*): ${look.accentStyle} */
+${ACCENT_CSS}
+/* decoración del kicker: ${look.kicker} */
+${KICKER_CSS}
+/* tarjetas: ${look.cards} */
+${CARD_CSS}
+`;
+
 const tokensCss = `/* ${cfg.meta.name} — tokens de marca para motion (GENERADO por scripts/brand-apply.mjs — no editar a mano) */
-/* Fuente: brand/brand.config.json v${cfg.meta.version} */
-${fontFaces.map((f) => `@font-face { font-family: "${f.family}"; src: url("fonts/${f.file}") format("woff2"); font-weight: ${f.weight}; font-style: normal; font-display: block;${f.ext ? " unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;" : ""} }`).join("\n")}
+/* Fuente: brands/${cfg.meta.slug}/brand.config.json v${cfg.meta.version} · look: ${look.summary} */
+${fontFaces.map((f) => `@font-face { font-family: "${f.family}"; src: url("fonts/${f.file}") format("woff2"); font-weight: ${f.weight}; font-style: ${f.italic ? "italic" : "normal"}; font-display: block;${f.ext ? " unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;" : ""} }`).join("\n")}
 
 :root {
   /* color */
@@ -306,10 +470,6 @@ ${Object.entries(S).filter(([k, v]) => typeof v === "number" && !k.endsWith("Mul
 }
 .bm-safe { position: absolute; top: var(--safe-top); bottom: var(--safe-bottom); left: var(--safe-x); right: var(--safe-right); }
 
-/* fondos */
-.bm-bg { position: absolute; inset: 0; background: var(--c-background); }
-.bm-bg.grid { background-image: linear-gradient(${hexA(C.text, gridOpacity)} 1px, transparent 1px), linear-gradient(90deg, ${hexA(C.text, gridOpacity)} 1px, transparent 1px); background-size: 6cqmin 6cqmin; background-position: center; }
-.bm-bg.glow::after { content: ""; position: absolute; inset: -20%; background: radial-gradient(40% 35% at 70% 30%, ${hexA(g1, 0.18 * glowK)}, transparent 70%), radial-gradient(35% 30% at 25% 80%, ${hexA(g2, 0.12 * glowK)}, transparent 70%); }
 
 /* tipografía */
 .bm-hero, .bm-h1, .bm-h2, .bm-h3 { font-family: var(--font-display); font-weight: var(--w-display); letter-spacing: var(--track-display); line-height: var(--lh-display); }
@@ -323,21 +483,20 @@ ${Object.entries(S).filter(([k, v]) => typeof v === "number" && !k.endsWith("Mul
 .bm-kicker { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: 0.14em; ${T.rules?.kickerUppercase ? "text-transform: uppercase;" : ""} color: var(--c-primary); }
 .bm-code { font-family: var(--font-mono); font-size: var(--fs-code); line-height: var(--lh-mono); font-variant-ligatures: none; }
 .bm-muted { color: var(--c-text-muted); }
-.bm-accent { color: var(--c-accent); }
 .bm-primary { color: var(--c-primary); }
 .bm-num { font-variant-numeric: tabular-nums; }
 
 /* máscaras para reveals por línea/palabra: animar el hijo con yPercent */
-.bm-line { display: block; overflow: hidden; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.bm-line { display: block; overflow: ${look.textReveal === "mask" ? "hidden" : "visible"}; padding-bottom: 0.08em; margin-bottom: -0.08em; }
 .bm-line > span { display: inline-block; }
 .bm-word { display: inline-block; white-space: pre; }
 
 /* componentes */
-.bm-card { background: var(--c-surface); border: var(--stroke) solid var(--c-border); border-radius: var(--radius-lg); }
 .bm-chip { display: inline-flex; align-items: center; gap: 1cqmin; padding: 0.8cqmin 1.8cqmin; border-radius: 999px; background: var(--c-surface-alt); font-family: var(--font-mono); font-size: var(--fs-label); color: var(--c-text); }
 .bm-rule { height: var(--stroke); background: var(--c-border); }
 .bm-logo svg, .bm-logo img { display: block; height: 100%; width: auto; }
-`;
+
+${lookCss}`;
 
 // ---------- tokens.js ----------
 const brandJs = {
@@ -348,6 +507,7 @@ const brandJs = {
   fonts: { display: T.display.family, body: T.body.family, mono: T.mono.family },
   motion: cfg.motion,
   captions: cfg.captions,
+  look: look,
   logo: { ...logoMap, svgMark: inlineMark, svgPrimary: inlineLogo },
 };
 const tokensJs = `/* ${cfg.meta.name} — tokens JS para GSAP (GENERADO por scripts/brand-apply.mjs — no editar a mano)
@@ -407,6 +567,19 @@ const tokensJs = `/* ${cfg.meta.name} — tokens JS para GSAP (GENERADO por scri
 })();
 `;
 
+// ---------- descripción del look (va a brand-rules, MOTION.md, frame.md y el board) ----------
+const LOOK_DOC = [
+  ["background", `Fondo: **${look.background}** — los bloques usan \`.bm-bg\` (textura del look), \`.bm-bg.is-hero\` en aperturas y cierres, \`.bm-bg.is-plain\` cuando la escena necesita silencio visual.`],
+  ["align", `Composición: **${look.align === "center" ? "centrada" : "alineada al inicio (izquierda)"}** (\`var(--look-items)\` / \`var(--look-text-align)\`); afirmaciones (kinetic-statement): **${look.statementAlign}**, tamaño ${look.statementSize}.`],
+  ["headlineCase", `Titulares: **${look.headlineCase === "uppercase" ? "MAYÚSCULAS" : "caja normal"}**.`],
+  ["accentStyle", `Acento (\`*palabra*\`): **${look.accentStyle}** (\`.bm-accent\`; se anima con \`BM.accentIn\`).`],
+  ["textReveal", `Entrada de texto: **${look.textReveal}** (\`BM.revealLines\` / \`BM.revealWords\` la aplican solos).`],
+  ["kicker", `Kicker: decoración **${look.kicker}** (\`.bm-kicker-deco\`, \`BM.decoIn\`).`],
+  ["cards", `Tarjetas (\`.bm-card\`: pasos, comparaciones): **${look.cards}**.`],
+  ["density", `Densidad: **${look.density}** (\`var(--look-space)\` = ${space} multiplica los espacios de los bloques).`],
+];
+const lookRules = LOOK_DOC.map(([, d]) => `- ${d}`).join("\n");
+
 // ---------- frame.md (spec de diseño que leen las skills de HyperFrames) ----------
 const yamlColors = colorEntries.map(([k, v]) => `  ${kebab(k)}: "${v}"`).join("\n");
 const typoLine = (name, role, size, weight, extra = "") =>
@@ -415,7 +588,7 @@ const frameMd = `---
 version: 1
 name: ${cfg.meta.name} — Frame (capa de video)
 description: >
-  Sistema de diseño a escala de frame para ${cfg.meta.name}. Generado desde brand/brand.config.json
+  Sistema de diseño a escala de frame para ${cfg.meta.name}. Generado desde brands/${cfg.meta.slug}/brand.config.json
   (v${cfg.meta.version}). Los átomos (hex, familias, pesos, motion tokens) son sagrados; la composición es libre.
 unit: el frame — ${cfg.formats.map((f) => `${f.width}×${f.height} (${f.id})`).join(", ")}
 principle: átomos sagrados · composición libre · los números salen del guion verificado
@@ -439,6 +612,9 @@ spacing:
   safe-square: "${sm.square}%"
   safe-feed: "${sm.feed ?? sm.square}%"
 ${Object.entries(L.radius || {}).filter(([k]) => k !== "unit").map(([k, v]) => `  radius-${k}: "${v}cqmin"`).join("\n")}
+
+look:
+${Object.entries(look).filter(([k]) => k !== "summary").map(([k, v]) => `  ${k}: ${v}`).join("\n")}
 
 motion:
   personality: ${cfg.motion.personality}
@@ -501,9 +677,9 @@ ${(cfg.logo?.dont || []).map((d) => `- ✗ Logo: ${d}`).join("\n")}
 `;
 
 // ---------- brand-rules.md (lo que lee Claude vía CLAUDE.md) ----------
-const brandRules = `# Reglas de marca — ${cfg.meta.name} (GENERADO desde brand/brand.config.json v${cfg.meta.version})
+const brandRules = `# Reglas de marca — ${cfg.meta.name} (\`brands/${cfg.meta.slug}\`, GENERADO desde brand.config.json v${cfg.meta.version})
 
-> No edites este archivo: editá \`brand/brand.config.json\` y corré \`npm run brand\`.
+> No edites este archivo: editá \`brands/${cfg.meta.slug}/brand.config.json\` (o usá /marca) y corré \`npm run brand -- ${cfg.meta.slug}\`. Dirección de arte en prosa: \`brands/${cfg.meta.slug}/LOOK.md\`.
 
 ## Identidad y voz
 - Misión: ${cfg.identity?.mission || "—"}
@@ -522,6 +698,10 @@ const brandRules = `# Reglas de marca — ${cfg.meta.name} (GENERADO desde brand
 - Máximo ${T.rules?.maxWordsPerLine ?? 7} palabras por línea, ${T.rules?.maxLinesPerFrame ?? 3} líneas por frame, nada menor a ${T.rules?.minSizePx1080 ?? 28}px en 1080p.
 - Contenido dentro de \`.bm-safe\` (márgenes seguros por formato, incluye zonas de UI de Reels/Shorts/TikTok en vertical).
 
+## Look (lo que hace distinta a esta marca)
+${look.summary}. No lo pises escena por escena: si una pieza necesita otro look, es otra marca o un cambio de marca aprobado.
+${lookRules}
+
 ## Motion
 - Personalidad: **${cfg.motion.personality}**.
 ${(cfg.motion.principles || []).map((p) => `- ${p}`).join("\n")}
@@ -534,7 +714,7 @@ ${Object.keys(cfg.motion.easings).map((k) => `  - \`${k}\` (${cfg.motion.easings
 - Prohibido: ${(cfg.motion.forbidden || []).join("; ")}.
 
 ## Logo
-- Usar \`BRAND.logo.svgMark\` / \`svgPrimary\` (inline) o \`brand/logo/*\`. Alto mínimo ${cfg.logo?.minHeightPx1080 ?? 40}px en 1080p, aire libre = ${cfg.logo?.clearSpaceRatio ?? 0.5}× la altura.
+- Usar \`BRAND.logo.svgMark\` / \`svgPrimary\` (inline) o \`brands/${cfg.meta.slug}/logo/*\`. Alto mínimo ${cfg.logo?.minHeightPx1080 ?? 40}px en 1080p, aire libre = ${cfg.logo?.clearSpaceRatio ?? 0.5}× la altura.
 - No: ${(cfg.logo?.dont || []).join(", ")}.
 
 ## Audio y captions
@@ -588,6 +768,7 @@ table{border-collapse:collapse;font-size:14px}td,th{border:1px solid ${C.border 
 .logo{height:64px;display:flex;gap:32px;align-items:center}.logo svg{height:64px;width:auto}
 </style></head><body>
 <h1>${cfg.meta.name}</h1><div style="color:${C.textMuted}">${cfg.identity?.tagline || ""} · v${cfg.meta.version}</div>
+<h2>Look</h2><div style="font-size:20px;margin-bottom:10px">${look.summary}</div><div style="display:flex;flex-wrap:wrap;gap:8px;font:13px var(--font-mono)">${Object.entries(look).filter(([k]) => k !== "summary").map(([k, v]) => `<span style="border:1px solid ${C.border || "#333"};border-radius:999px;padding:4px 10px">${k}: ${v}</span>`).join("")}</div>
 <h2>Logo</h2><div class="logo">${inlineMark}${inlineLogo}</div>
 <h2>Color</h2><div class="grid">${colorEntries.map(([k, v]) => `<div class="sw"><div style="background:${v}"></div><div>${k}<br>${v}</div></div>`).join("")}</div>
 <h2>Contraste</h2><table><tr><th>Par</th><th>Colores</th><th>Ratio</th><th>Mínimo</th><th>Estado</th></tr>${contrastRows.map((r) => "<tr>" + r.split("|").slice(1, -1).map((c) => `<td>${c.replace(/`/g, "")}</td>`).join("") + "</tr>").join("")}</table>
@@ -605,8 +786,12 @@ const contrastMd = `# Reporte de contraste — ${cfg.meta.name}\n\n${contrastChe
 // ---------- MOTION.md + brand.md en la raíz (convención del pack charlie947/motion-graphics-skills) ----------
 const motionMd = `# MOTION.md — ${cfg.meta.name}
 
-> GENERADO desde brand/brand.config.json v${cfg.meta.version} por \`npm run brand\`. No editar a mano.
+> GENERADO desde \`brands/${cfg.meta.slug}/brand.config.json\` v${cfg.meta.version} por \`npm run brand -- ${cfg.meta.slug}\`. No editar a mano. Leé también \`brands/${cfg.meta.slug}/LOOK.md\` (qué hace distinta a esta marca).
 > Lo leen: este kit, las skills de HyperFrames (vía frame.md) y packs como charlie947/motion-graphics-skills.
+
+## 0. Look
+${look.summary}.
+${lookRules}
 
 ## 1. Colores y para qué sirve cada uno
 ${colorEntries.filter(([k]) => !k.includes(".")).map(([k, v]) => `- \`${v}\` **${k}**`).join("\n")}
@@ -631,7 +816,7 @@ ${colorEntries.filter(([k]) => !k.includes(".")).map(([k, v]) => `- \`${v}\` **$
 ${Object.entries(cfg.motion.easings).map(([k, v]) => `- \`${k}\` cubic-bezier(${v.join(", ")}) — ${(cfg.motion.easingNotes || {})[k] || ""}`).join("\n")}
 
 ## 5. Textura y acabado
-- Fondo: ${L.background?.style || "solid"} (grilla al ${Math.round((L.background?.gridOpacity ?? 0.06) * 100)}% de opacidad). Esquinas: radios ${Object.entries(L.radius || {}).filter(([k]) => k !== "unit").map(([k, v]) => `${k} ${v}cqmin`).join(", ")}.
+- Fondo: ${look.background} (grilla al ${Math.round((L.background?.gridOpacity ?? 0.06) * 100)}% de opacidad cuando aplica). Esquinas: radios ${Object.entries(L.radius || {}).filter(([k]) => k !== "unit").map(([k, v]) => `${k} ${v}cqmin`).join(", ")}.
 - Sin sombras pesadas, sin glow decorativo, sin gradientes que no sean de marca.
 
 ## 6. Lo que nuestro motion nunca hace
@@ -646,7 +831,7 @@ ${(cfg.motion.transitions?.forbidden || []).map((f) => `- Transición: ${f}`).jo
 `;
 const brandMd = `# Brand — ${cfg.meta.name}
 
-> GENERADO desde brand/brand.config.json. No editar a mano.
+> GENERADO desde \`brands/${cfg.meta.slug}/brand.config.json\`. No editar a mano.
 
 ## Nombre y qué hacemos
 ${cfg.meta.name}: ${cfg.identity?.tagline || ""}. ${cfg.identity?.mission || ""}
@@ -669,8 +854,9 @@ ${cfg.identity?.voice?.tone || ""} (${cfg.identity?.voice?.language || "es"}, ${
 ${[...(cfg.identity?.voice?.dont || []), ...(cfg.logo?.dont || []).map((d) => `logo: ${d}`)].map((d) => `- ${d}`).join("\n")}
 `;
 // MOTION.md / brand.md en la raíz solo para la marca activa; una prueba con --out los deja dentro de --out
-writeFileSync(join(DEFAULT_OUT ? ROOT : OUT, "MOTION.md"), motionMd);
-writeFileSync(join(DEFAULT_OUT ? ROOT : OUT, "brand.md"), brandMd);
+// MOTION.md / brand.md de la marca viven en su dist/; los de la raíz son un índice (writeIndex)
+writeFileSync(join(OUT, "MOTION.md"), motionMd);
+writeFileSync(join(OUT, "brand.md"), brandMd);
 
 writeFileSync(join(OUT, "tokens.css"), tokensCss);
 writeFileSync(join(OUT, "tokens.js"), tokensJs);
@@ -684,4 +870,5 @@ writeFileSync(join(OUT, "brand.json"), JSON.stringify(cfg, null, 2));
 console.log(`✓ Marca "${cfg.meta.name}" v${cfg.meta.version} aplicada → ${OUT.replace(ROOT + "/", "")}/`);
 console.log(`  fuentes: ${fontFiles.length} · logos: ${Object.keys(logoMap).length} · colores: ${colorEntries.length} · contraste: ${contrastChecked - contrastFailed}/${contrastChecked} pares OK`);
 report();
-console.log(`  Siguiente: npm run new -- <slug-del-video>   (o re-aplicar a un proyecto existente: npm run build:roots -- <proyecto>)`);
+if (SLUG) writeIndex();
+console.log(`  Siguiente: npm run new -- <slug-del-video> --brand ${cfg.meta.slug}   (proyectos existentes de esta marca: npm run build:roots -- <proyecto> --rebrand)`);

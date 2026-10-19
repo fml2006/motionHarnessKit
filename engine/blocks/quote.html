@@ -25,17 +25,17 @@
     <template>
       <style>
         #root { position: absolute; inset: 0; container-type: size; }
-        #root .qt { display: flex; flex-direction: column; justify-content: center; gap: 4cqmin; }
+        #root .qt { display: flex; flex-direction: column; justify-content: center; align-items: var(--look-items); text-align: var(--look-text-align); gap: calc(4cqmin * var(--look-space)); }
         #root .qt-mark { font-family: var(--font-display); font-weight: var(--w-display); font-size: calc(var(--fs-hero) * 1.4); line-height: 0.6; color: var(--c-primary); height: 0.45em; }
         #root .qt-text { max-width: 80cqw; }
         #root .qt-attr { display: flex; align-items: center; gap: 2.4cqmin; }
-        #root .qt-rule { width: 6cqmin; height: var(--stroke); background: var(--c-text-muted); transform-origin: left center; }
+        #root .qt-rule { width: 6cqmin; height: var(--stroke); background: var(--c-text-muted); transform-origin: var(--look-origin); }
         #root .qt-author { font-weight: 600; font-size: var(--fs-body); }
         @container (orientation: portrait) { #root .qt-text { max-width: 100%; } }
       </style>
       <div id="root" data-composition-id="__ID__">
         <div class="bm-frame">
-          <div class="bm-bg grid"></div>
+          <div class="bm-bg"></div>
           <div class="bm-safe qt">
             <div class="qt-mark">“</div>
             <blockquote class="bm-h2 qt-text"></blockquote>

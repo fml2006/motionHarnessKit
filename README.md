@@ -4,7 +4,7 @@
 
 Lo que muestran los tutoriales ("pedile a Opus un video y sale un MP4") es real, pero sin harness da resultados genéricos, irrepetibles y sin control de calidad. Este kit convierte esa capacidad en un proceso de equipo:
 
-- **Marca como código:** un solo `brand/brand.config.json` → tokens CSS/JS, `frame.md` (HyperFrames), `MOTION.md` (packs de skills), theme de Remotion, brand board y reporte de contraste WCAG.
+- **Estudio multimarca, marca como código:** cada marca vive en `brands/<marca>/` (un `brand.config.json` → tokens CSS/JS, `frame.md`, `MOTION.md`, theme de Remotion, brand board y contraste WCAG) con su **look** propio (fondo, alineación, caja, forma del acento, cómo entra el texto, kicker, tarjetas, densidad), su `LOOK.md` y sus **bloques firma**. Los mismos 13 bloques se ven distintos en cada marca; cada pieza usa UNA (`scenes.json → brand`).
 - **13 bloques de marca** parametrizables (títulos, datos, código, terminal, gráficos, pasos, comparaciones, citas, lower thirds, logo, cierre) que se adaptan solos a **16:9, 9:16, 1:1 y 4:5**.
 - **Pipeline con gates humanos** (brief → guion → storyboard → animatic → build → revisión → entrega) con plantillas, 7 skills propias (`/marca`, `/brief`, `/guion`, `/storyboard`, `/producir`, `/revisar`, `/entregar`), 8 subagentes por rol y las 12 skills oficiales de HyperFrames fijadas a un commit (los workflows end-to-end solo corren si un humano los invoca).
 - **Gates que frenan de verdad:** placeholders y cifras sin claim firmado bloquean el render final; lint/check por exit code; QA con FAIL corta el script; la marca de cada pieza queda bloqueada (`brandLock`).
@@ -35,12 +35,13 @@ npm install                 # versiones exactas (hyperframes 0.8.174, gsap 3.14.
 npm run setup               # una vez por máquina: apaga la telemetría de HyperFrames también fuera de Claude Code
 npm run doctor              # verifica entorno, marca, skills y privacidad
 npm run selftest            # prueba de punta a punta: render → loudness → master → QA en un proyecto temporal
-npm run brand               # genera brand/dist + MOTION.md desde brand.config.json
+npm run brand               # genera brands/<marca>/dist + índices para todas las marcas
+npm run brand:list          # las marcas del estudio, su look y sus bloques firma
 npm run frames -- _galeria-bloques            # ver los 13 bloques con tu marca (PNG + contact sheet)
 npm run new -- mi-primer-video --type explainer
 ```
 
-Después, en Claude Code dentro de esta carpeta: `/marca` (una vez), y por cada pieza `/brief` → `/guion` → `/storyboard` → `/producir` → `/revisar` → `/entregar`.
+Después, en Claude Code dentro de esta carpeta: `/marca` (una vez por marca), y por cada pieza `/brief` → `/guion` → `/storyboard` → `/producir` → `/revisar` → `/entregar`.
 
 ## Flujo diario: quién hace qué
 
@@ -60,37 +61,44 @@ Después, en Claude Code dentro de esta carpeta: `/marca` (una vez), y por cada 
 | Subir / publicar | **Humano** (nunca el agente) | según `delivery/delivery-checklist.md` | G15 · productor |
 | Registrar horas | **Cada persona** | `review/HORAS.csv` | Métrica horas por minuto terminado |
 
-## Setear tu marca
+## Setear tu marca (o tus marcas)
 
-1. **Con Claude:** `/marca` hace una entrevista en dos tandas, pide hex reales, fuentes con licencia, SVG del logo y 3-5 referencias, y completa el JSON.
-2. **A mano:** editá `brand/brand.config.json` (tiene `$schema` para autocompletar) y corré `npm run brand`. Si el JSON tiene errores o contraste insuficiente, el comando lo dice.
-3. **Fuentes:** `"source": "fontsource"` + `"package": "@fontsource/<familia>"` (OFL), o `"source": "local"` + archivos en `brand/fonts/` y `"files": {"400": "Mi-Regular.woff2"}`. **Confirmá que la licencia cubra video.**
-4. **Logo:** SVG en `brand/logo/`. Para animarlo por partes marcá `<g data-part="mark">` y `<g data-part="wordmark">`. Sin logo todavía: `npm run brand:logo` genera un placeholder.
-5. **Proyectos existentes y `brandLock`:** cada pieza queda atada a la versión de marca con la que se aprobó (`scenes.json → brandLock`: nombre, versión y hash de `brand/dist`). Si cambiás la marca, `build:roots` y `render` se frenan para no cambiarle la identidad en silencio a una pieza ya aprobada. Para aplicar la marca nueva a una pieza puntual, con aprobación del director de arte: `npm run build:roots -- <proyecto> --rebrand` (queda anotado en `review/CHANGELOG.md`).
-6. **Varias marcas o clientes:** un repo (o una rama) por marca. `brand-apply --config` cambia la marca de todo el repo; `brandLock` protege los re-renders, pero no reemplaza separar clientes.
+El kit es un **estudio multimarca**: `brands/<marca>/` por marca, y cada pieza elige una con `--brand`. Trae tres de ejemplo bien distintas para que se vea la diferencia: `tumarca` (oscura técnica, default), `northline` (editorial clara) y `pulso` (social energética). `npm run brand:compare -- _galeria-bloques --brands tumarca,northline,pulso` las pone lado a lado sobre la misma pieza (`projects/_galeria-bloques/review/compare/`).
 
-Demo de rebranding: `brand/examples/editorial-claro.json` es otra marca completa (clara, serif, motion más pausado). `node scripts/brand-apply.mjs --config brand/examples/editorial-claro.json` + `npm run build:roots -- <proyecto> --rebrand` y la misma pieza cambia de identidad sin tocar una escena. Volvé con `npm run brand` + `--rebrand` otra vez (o con `git checkout` de `scenes.json`).
+1. **Marca nueva:** `npm run brand:new -- <slug> --from <la más parecida> --name "Nombre"` (carpeta, logo placeholder, LOOK.md plantilla, aplicada). `--default` la vuelve la marca de las piezas nuevas (`brands/brands.json`).
+2. **Con Claude:** `/marca <slug>` hace la entrevista (hex reales, fuentes con licencia, SVG del logo, 3-5 referencias y de qué marca del estudio se tiene que diferenciar), decide el `look`, escribe `LOOK.md`, propone los bloques firma y te muestra la comparación con las otras marcas.
+3. **A mano:** editá `brands/<slug>/brand.config.json` (`$schema` con autocompletado, incluido `look`) y corré `npm run brand -- <slug>`. Si el JSON tiene errores o contraste insuficiente (incluidos los pares que agrega el look: texto sobre el gradiente, texto sobre el resaltado), el comando lo dice.
+4. **Lo que hace distinta a una marca** (no solo el color): `look.background` (`grid` · `glow` · `grid+glow` · `flat` · `paper` · `gradient`), `align` / `statementAlign` (`start` · `center`), `headlineCase` (`none` · `uppercase`), `accentStyle` (`color` · `underline` · `highlight` · `italic`), `textReveal` (`mask` · `fade` · `rise` · `blur`), `kicker`, `cards`, `density`; el motion (duraciones, curvas, stagger, transición por defecto); y los **bloques firma** en `brands/<slug>/blocks/` (mismo nombre que un bloque del engine → lo reemplaza solo para esa marca; nombre propio → exclusivo de la marca).
+5. **Fuentes:** `"source": "fontsource"` + `"package": "@fontsource/<familia>"` (OFL; agregá el paquete con versión exacta), o `"source": "local"` + archivos en `brands/<slug>/fonts/` y `"files": {"400": "Mi-Regular.woff2"}`. Itálica real con `"italic": true`. **Confirmá que la licencia cubra video.**
+6. **Logo:** SVG en `brands/<slug>/logo/`. Para animarlo por partes marcá `<g data-part="mark">` y `<g data-part="wordmark">`. Sin logo todavía: `npm run brand:logo -- --brand <slug> --mark bracket|pulse|ring`.
+7. **Piezas existentes y `brandLock`:** cada pieza guarda su marca y la versión con la que se aprobó (`scenes.json → brand` + `brandLock`: marca, nombre, versión y hash de `brands/<marca>/dist`). Si cambiás esa marca, `build:roots` y `render` se frenan para no cambiarle la identidad en silencio a una pieza aprobada. Aceptar la versión nueva: `npm run build:roots -- <proyecto> --rebrand`. Pasar una pieza a otra marca: `--brand <otra> --rebrand`. Las dos cosas quedan en `review/CHANGELOG.md`.
+8. **Clientes con confidencialidad:** las marcas conviven en un repo; si un cliente exige que su material no comparta repo con otros, un clon por cliente (el kit es el mismo).
 
 ## Estructura
 
 ```
-brand/
-  brand.config.json        ← fuente única de verdad (identidad, color, tipografía, logo, motion, layout, formatos, audio, captions, legal)
-  brand.schema.json        ← autocompletado/validación en el editor
-  logo/ fonts/ references/ (frames de referencia del motion) examples/
-  dist/                    ← GENERADO: tokens.css, tokens.js, frame.md, brand-rules.md, remotion-theme.ts, brand-board.html, contrast-report.md, fonts/, logo/, vendor/
+brands/
+  brands.json              ← marca default de las piezas nuevas
+  brand.schema.json        ← autocompletado/validación en el editor (incluye look)
+  INDEX.md                 ← GENERADO: tabla de marcas, look y bloques firma (lo importa CLAUDE.md)
+  <marca>/
+    brand.config.json      ← fuente única de verdad de esa marca (identidad, color, tipografía, logo, motion, look, layout, formatos, audio, captions, legal)
+    LOOK.md                ← dirección de arte en prosa: qué la hace distinta, movimientos firma, sí/no
+    blocks/                ← bloques firma (override de un bloque del engine o exclusivos de la marca)
+    logo/ fonts/ references/
+    dist/                  ← GENERADO: tokens.css, tokens.js, frame.md, brand-rules.md, MOTION.md, brand.md, remotion-theme.ts, brand-board.html, contrast-report.md, fonts/, logo/, vendor/
 engine/
-  blocks/*.html            ← 13 bloques de marca (sub-composiciones HyperFrames) + README (catálogo generado)
+  blocks/*.html            ← 13 bloques comunes que leen tokens y look de la marca de la pieza + README (catálogo generado, con los bloques firma de cada marca)
   runtime/bm-motion.js     ← helpers de motion que leen los tokens (BM.revealLines, countUp, typeText…)
 projects/
-  _galeria-bloques/        ← todos los bloques, para revisar la marca
+  _galeria-bloques/        ← todos los bloques, para revisar una marca o compararlas (review/compare/)
   2026-10-19_ejemplo-servidor-mcp/   ← EJEMPLO de referencia (brief, claims, guion, storyboard, scenes.json, renders, QA, changelog); ver su README para lo que cubre y lo que no
   <fecha>_<slug>/          ← tus piezas (npm run new)
 templates/                 ← brief (con confidencialidad), guion 2 columnas, storyboard ejecutable, shot list, review, anti-slop (28 puntos), QA, legal, entrega, naming y versionado, RACI, procedencia, horas
 delivery/specs.json        ← specs 2026 por plataforma (YouTube, Shorts, Reels, TikTok, LinkedIn, Instagram feed, X, evento, broadcast EBU) con su objetivo de loudness
-scripts/                   ← brand-apply, new-project, build-roots, frames, render, deliver, qa, loudnorm, master, doctor, selftest, blocks-catalog, placeholder-logo, install-hf-skills + patch-hf-skills
+scripts/                   ← brand-apply, brand-new, brand-list, brand-compare, new-project, build-roots, frames, render, deliver, qa, loudnorm, master, doctor, selftest, blocks-catalog, placeholder-logo, install-hf-skills + patch-hf-skills
 .claude/                   ← settings (permisos + hook), skills (7 propias + 12 de HyperFrames fijadas y parcheadas), agents (8), hooks
-CLAUDE.md · MOTION.md · brand.md
+CLAUDE.md · MOTION.md · brand.md (índices del estudio: apuntan a brands/<marca>/)
 docs/                      ← GUIA.md + research (7 informes) + imágenes
 ```
 
@@ -103,7 +111,7 @@ projects/2026-10-19_mi-video/
   scenes.json                                                     ← plan de escenas ejecutable (bloque + vars + duración + claims) + brandLock
   captions.srt                                                    ← opcional: captions quemados en vertical / 4:5
   comp/                                                           ← proyecto HyperFrames maestro (16:9, o 9:16 en piezas social)
-    index.html            (GENERADO)   compositions/<escena>.html (tuyo)   brand/ (sincronizado)   assets/
+    index.html            (GENERADO)   compositions/<escena>.html (tuyo)   brand/ (sincronizado desde brands/<marca>/dist)   assets/
   formats/portrait|square|feed/                                   ← variantes GENERADAS desde el maestro
   renders/<slug>_<formato>_v###.mp4                               ← versión interna de render (fuera de git)
   review/ (frames, R1.md, CHANGELOG.md, HORAS.csv)   qa/   PROVENANCE.md
@@ -127,9 +135,12 @@ projects/2026-10-19_mi-video/
 | `npm run setup` | Una vez por máquina (`doctor --fix`): `hyperframes telemetry disable` y chequeo de privacidad |
 | `npm run doctor` | Chequea Node, ffmpeg, Chrome, HyperFrames fijado, marca, skills y privacidad |
 | `npm run selftest` | Prueba de punta a punta de la cadena de render y entrega en un proyecto temporal |
-| `npm run brand` / `brand:check` | Genera / valida la marca (contraste WCAG, easings, campos) |
-| `npm run new -- <slug> --type <t>` | Nueva pieza: `explainer`, `launch`, `social`, `tutorial`, `data`, `overlay` |
-| `npm run build:roots -- <p> [--reset <id>] [--strict] [--rebrand]` | `scenes.json` → `comp/` + `formats/`, avisos de lectura; `--strict` = gate de contenido (placeholders, claims, tokens, captions) |
+| `npm run brand [-- <marca>]` / `brand:check` | Genera / valida las marcas (contraste WCAG incluido el del look, easings, campos); sin marca: todas |
+| `npm run brand:new -- <slug> [--from <marca>] [--name …] [--default]` | Marca nueva en `brands/<slug>/` (logo placeholder, LOOK.md, aplicada) |
+| `npm run brand:list` | Marcas del estudio: look, bloques firma y piezas que usan cada una |
+| `npm run brand:compare -- <p> [--brands a,b,c] [--format portrait]` | La misma pieza con varias marcas, lado a lado (`review/compare/compare-<formato>.png`); no toca el proyecto |
+| `npm run new -- <slug> [--brand <marca>] --type <t>` | Nueva pieza: `explainer`, `launch`, `social`, `tutorial`, `data`, `overlay`, atada a la marca |
+| `npm run build:roots -- <p> [--reset <id>\|all] [--strict] [--rebrand] [--brand <otra>]` | `scenes.json` → `comp/` + `formats/`, avisos de lectura; `--strict` = gate de contenido (placeholders, claims, tokens, captions) |
 | `npm run frames -- <p> [--format portrait]` | Frame clave por escena + contact sheet (styleframes reales) |
 | `npm run render -- <p> [--formats …] [--quality draft\|standard\|high] [--alpha] [--docker]` | Build → lint/check (por exit code) → render versionado por formato → QA; sale con error si algo falla. `high` usa `--strict` |
 | `npm run deliver -- <p> --platform youtube,reels[,linkedin=square] [--lufs -16]` | Entrega: render intermedio ProRes 4444 → mezcla PCM → loudness en dos pasadas → `*_ARCHIVE.mov` (ProRes 422 HQ + PCM 24) + `*_DELIVERY.mp4` → re-medición → QA por plataforma |
@@ -157,7 +168,7 @@ Lo que **tiene que sumar la organización** para un uso enterprise:
 
 ## Decisiones de diseño (y por qué)
 
-- **HyperFrames como motor del kit, aunque el research recomendó Remotion.** El informe comparativo (`docs/research/03-remotion-y-comparativa.md`) recomendó **Remotion como motor primario** para un equipo de contenido tech (maduro desde 2021, Lambda distribuido probado, plantillas tipadas, skills oficiales para Claude Code; el costo de licencia es marginal para una empresa) y HyperFrames como secundario (pre-1.0, roadmap controlado por HeyGen, telemetría activada por defecto, y "sin camino de vuelta" hacia Remotion). El kit eligió HyperFrames igual, como decisión explícita y revisable, porque es el flujo exacto del video que replica, es Apache-2.0 sin costo por seat (Remotion exige Company License desde 4 personas), es HTML/CSS (lo dominan diseñadores web) y trae tooling pensado para agentes (lint, check, snapshot, skills). **Contras asumidos:** pre-1.0 con releases diarios (versión exacta fijada), telemetría por defecto (apagada y mitigada), depende de GSAP (licencia propia, no OSI). **Si tu equipo elige Remotion, del kit se lleva** la marca como código (`brand/brand.config.json` → `brand/dist/remotion-theme.ts`), las plantillas, skills de preproducción, subagentes, `qa.mjs`, `loudnorm`/`master` y `delivery/specs.json`; **se pierden** los 13 bloques, `build:roots`, `frames`, `render`, `deliver` (la parte de render) y los gates de lint/check, que son específicos de HyperFrames.
+- **HyperFrames como motor del kit, aunque el research recomendó Remotion.** El informe comparativo (`docs/research/03-remotion-y-comparativa.md`) recomendó **Remotion como motor primario** para un equipo de contenido tech (maduro desde 2021, Lambda distribuido probado, plantillas tipadas, skills oficiales para Claude Code; el costo de licencia es marginal para una empresa) y HyperFrames como secundario (pre-1.0, roadmap controlado por HeyGen, telemetría activada por defecto, y "sin camino de vuelta" hacia Remotion). El kit eligió HyperFrames igual, como decisión explícita y revisable, porque es el flujo exacto del video que replica, es Apache-2.0 sin costo por seat (Remotion exige Company License desde 4 personas), es HTML/CSS (lo dominan diseñadores web) y trae tooling pensado para agentes (lint, check, snapshot, skills). **Contras asumidos:** pre-1.0 con releases diarios (versión exacta fijada), telemetría por defecto (apagada y mitigada), depende de GSAP (licencia propia, no OSI). **Si tu equipo elige Remotion, del kit se lleva** la marca como código (`brands/<marca>/brand.config.json` → `brands/<marca>/dist/remotion-theme.ts`), las plantillas, skills de preproducción, subagentes, `qa.mjs`, `loudnorm`/`master` y `delivery/specs.json`; **se pierden** los 13 bloques, `build:roots`, `frames`, `render`, `deliver` (la parte de render) y los gates de lint/check, que son específicos de HyperFrames.
 - **Tamaños en `cqmin` + container queries:** una escena escrita una vez funciona en 16:9, 9:16, 4:5 y 1:1; el vertical escala la tipografía ×1,22 (×1,1 en 4:5) y respeta la safe zone universal de Reels/TikTok/Shorts.
 - **Bloques que se copian, no librería opaca:** la escena arranca desde un bloque probado y después es editable por el agente o el motion designer.
 - **Determinismo y offline:** GSAP, fuentes y logo se vendorizan en cada proyecto; nada se baja en el render.
@@ -174,11 +185,12 @@ Lo que **tiene que sumar la organización** para un uso enterprise:
 - El gate de claims mira los bloques de cifras y las escenas que declaran `claims`; una cifra escrita en un bloque de texto o una escena custom depende de la revisión humana.
 - Reproducibilidad exacta entre máquinas solo con `--docker`; sin Docker, Chrome y ffmpeg locales pueden dar diferencias mínimas (la versión queda registrada en cada QA).
 - Los bloques cubren el 80 % de un explainer tech; looks de autor, 3D o personajes requieren escenas custom (o After Effects/Blender).
-- La marca por defecto (`TuMarca`) es un placeholder neutro: Inter/Space Grotesk son elecciones seguras, no distintivas.
+- Las marcas de ejemplo (`tumarca`, `northline`, `pulso`) son placeholders: sus logos son generados y sus looks son demostraciones. Reemplazalas por las tuyas con `/marca`.
+- El look cubre fondo, alineación, caja, acento, reveal, kicker, tarjetas y densidad; una composición radicalmente distinta (layouts propios) se resuelve con bloques firma de la marca.
 
 ## Licencias de terceros
 
-HyperFrames (Apache-2.0) · GSAP 3.14 (GSAP Standard "No Charge" License, no OSI, con cláusula que excluye productos que compiten con Webflow — revisala con Legal) · Inter, Space Grotesk, JetBrains Mono, Newsreader, IBM Plex (SIL OFL 1.1 vía @fontsource). Formato `frame.md` y contrato de theme: HyperFrames. Convención `MOTION.md`/`brand.md`: compatible con `charlie947/motion-graphics-skills` (MIT).
+HyperFrames (Apache-2.0) · GSAP 3.14 (GSAP Standard "No Charge" License, no OSI, con cláusula que excluye productos que compiten con Webflow — revisala con Legal) · Inter, Space Grotesk, JetBrains Mono, Newsreader, IBM Plex, Bricolage Grotesque (SIL OFL 1.1 vía @fontsource). Formato `frame.md` y contrato de theme: HyperFrames. Convención `MOTION.md`/`brand.md`: compatible con `charlie947/motion-graphics-skills` (MIT).
 
 ## Orquestador `/pieza`
 

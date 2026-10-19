@@ -1,0 +1,206 @@
+/* Northline — tokens de marca para motion (GENERADO por scripts/brand-apply.mjs — no editar a mano) */
+/* Fuente: brands/northline/brand.config.json v1.1.0 · look: Editorial clara: papel con filete de página, composición centrada y simétrica, serif con acento en itálica terracota, texto que aparece por fundido lento. */
+@font-face { font-family: "Newsreader"; src: url("fonts/newsreader-500.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: block; }
+@font-face { font-family: "Newsreader"; src: url("fonts/newsreader-ext-500.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: block; unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Newsreader"; src: url("fonts/newsreader-500-italic.woff2") format("woff2"); font-weight: 500; font-style: italic; font-display: block; }
+@font-face { font-family: "Newsreader"; src: url("fonts/newsreader-ext-500-italic.woff2") format("woff2"); font-weight: 500; font-style: italic; font-display: block; unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Newsreader"; src: url("fonts/newsreader-600.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: block; }
+@font-face { font-family: "Newsreader"; src: url("fonts/newsreader-ext-600.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: block; unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Newsreader"; src: url("fonts/newsreader-600-italic.woff2") format("woff2"); font-weight: 600; font-style: italic; font-display: block; }
+@font-face { font-family: "Newsreader"; src: url("fonts/newsreader-ext-600-italic.woff2") format("woff2"); font-weight: 600; font-style: italic; font-display: block; unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "IBM Plex Sans"; src: url("fonts/ibm-plex-sans-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: "IBM Plex Sans"; src: url("fonts/ibm-plex-sans-ext-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "IBM Plex Sans"; src: url("fonts/ibm-plex-sans-500.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: block; }
+@font-face { font-family: "IBM Plex Sans"; src: url("fonts/ibm-plex-sans-ext-500.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: block; unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "IBM Plex Sans"; src: url("fonts/ibm-plex-sans-600.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: block; }
+@font-face { font-family: "IBM Plex Sans"; src: url("fonts/ibm-plex-sans-ext-600.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: block; unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "IBM Plex Mono"; src: url("fonts/ibm-plex-mono-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: "IBM Plex Mono"; src: url("fonts/ibm-plex-mono-ext-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "IBM Plex Mono"; src: url("fonts/ibm-plex-mono-500.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: block; }
+@font-face { font-family: "IBM Plex Mono"; src: url("fonts/ibm-plex-mono-ext-500.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: block; unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+:root {
+  /* color */
+  --c-background: #F6F1E8;
+  --c-surface: #ECE4D6;
+  --c-surface-alt: #E2D7C5;
+  --c-border: #CDBFA9;
+  --c-text: #1B1A17;
+  --c-text-muted: #5B554B;
+  --c-primary: #1F3A5F;
+  --c-secondary: #2F6B4F;
+  --c-accent: #B4532A;
+  --c-danger: #A33A2C;
+  --c-success: #2F6B4F;
+  --c-on-primary: #F6F1E8;
+  --c-code-background: #1E2328;
+  --c-code-text: #EDE6D9;
+  --c-code-comment: #ABA59A;
+  --c-code-keyword: #E39A72;
+  --c-code-string: #9CC9A8;
+  --c-code-number: #E8C07A;
+  --c-code-function: #A9C1E8;
+  --c-data-viz-0: #1F3A5F;
+  --c-data-viz-1: #B4532A;
+  --c-data-viz-2: #2F6B4F;
+  --c-data-viz-3: #8A6D3B;
+  --c-data-viz-4: #6B4E71;
+  --c-data-viz-5: #7A7568;
+  --c-gradients-hero-0: #1F3A5F;
+  --c-gradients-hero-1: #2F6B4F;
+  --c-on-accent: #F6F1E8;
+  /* tipografía */
+  --font-display: "Newsreader", Georgia, serif;
+  --font-body: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --track-display: -0.015em;
+  --track-body: 0;
+  --lh-display: 1.05;
+  --lh-body: 1.3;
+  --lh-mono: 1.5;
+  --w-display: 600;
+  --w-display-light: 500;
+  /* escala (en cqmin: % del lado corto del frame) */
+  --fs-hero: 13cqmin;
+  --fs-h1: 9cqmin;
+  --fs-h2: 6.4cqmin;
+  --fs-h3: 4.8cqmin;
+  --fs-body: 3.7cqmin;
+  --fs-caption: 3.3cqmin;
+  --fs-label: 2.6cqmin;
+  --fs-code: 3cqmin;
+  /* motion */
+  --dur-instant: 100ms;
+  --dur-micro: 150ms;
+  --dur-short: 250ms;
+  --dur-enter: 650ms;
+  --dur-exit: 420ms;
+  --dur-emphasis: 1000ms;
+  --dur-scene: 400ms;
+  --dur-long: 1500ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-enter: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --ease-exit: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+  --ease-emphasized: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-move: cubic-bezier(0.645, 0.045, 0.355, 1);
+  --ease-camera: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-linear: cubic-bezier(0, 0, 1, 1);
+  --ease-expressive: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* layout */
+  --radius-sm: 0.8cqmin;
+  --radius-md: 1.5cqmin;
+  --radius-lg: 2.5cqmin;
+  --stroke: 0.25cqmin;
+  /* chrome de ventanas de código/terminal: deriva de la paleta de código, no de la UI (funciona en marcas claras y oscuras) */
+  --c-code-line: color-mix(in srgb, var(--c-code-text) 14%, transparent);
+  --c-code-chrome: color-mix(in srgb, var(--c-code-text) 55%, var(--c-code-background));
+  --safe-x: 6cqw;
+  --safe-top: 6cqh;
+  --safe-bottom: 6cqh;
+  --safe-right: 6cqw;
+}
+
+/* Contrato de theme de HyperFrames (themes/CONTRACT.md, 18 tokens): los bloques y componentes del catálogo
+   oficial (npx hyperframes add …) consumen estas variables, así que heredan la marca sin tocarlos. */
+:root {
+  --bg: #F6F1E8;
+  --fg: #1B1A17;
+  --muted: #5B554B;
+  --surface: #ECE4D6;
+  --border: #CDBFA9;
+  --brand: #1F3A5F;
+  --accent: #B4532A;
+  --accent-2: #2F6B4F;
+  --radius: var(--radius-md, 1.5cqmin);
+  --space-1: 1.2cqmin;
+  --space-2: 2.4cqmin;
+  --space-3: 4cqmin;
+  --dur-beat: 0.65s;
+  --ease-emphasis: cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* Cada escena es un contenedor "frame": las unidades cq* y las container queries se resuelven contra él. */
+.bm-frame { position: absolute; inset: 0; overflow: hidden; container: frame / size; background: var(--c-background); color: var(--c-text); font-family: var(--font-body); }
+.bm-frame.is-transparent { background: transparent; }
+/* 9:16 (aspect < 0,7): zonas de UI de Reels/Shorts/TikTok + tipografía ×portraitMultiplier */
+@container frame (aspect-ratio < 0.7) {
+  .bm-safe { --safe-x: 8cqw; --safe-top: 14cqh; --safe-bottom: 35cqh; --safe-right: 14cqw;
+    --fs-hero: 15.86cqmin;
+    --fs-h1: 10.98cqmin;
+    --fs-h2: 7.81cqmin;
+    --fs-h3: 5.86cqmin;
+    --fs-body: 4.51cqmin;
+    --fs-caption: 4.03cqmin;
+    --fs-label: 3.17cqmin;
+    --fs-code: 3.66cqmin;
+  }
+}
+/* 4:5 feed (0,7 ≤ aspect ≤ 0,85): sin UI encima, márgenes de feed + tipografía ×feedMultiplier */
+@container frame (aspect-ratio >= 0.7) and (aspect-ratio <= 0.85) {
+  .bm-safe { --safe-x: 7cqw; --safe-top: 7cqh; --safe-bottom: 7cqh; --safe-right: 7cqw;
+    --fs-hero: 14.3cqmin;
+    --fs-h1: 9.9cqmin;
+    --fs-h2: 7.04cqmin;
+    --fs-h3: 5.28cqmin;
+    --fs-body: 4.07cqmin;
+    --fs-caption: 3.63cqmin;
+    --fs-label: 2.86cqmin;
+    --fs-code: 3.3cqmin;
+  }
+}
+@container frame (aspect-ratio > 0.85) and (aspect-ratio < 1.2) {
+  .bm-safe { --safe-x: 7cqw; --safe-top: 7cqh; --safe-bottom: 7cqh; --safe-right: 7cqw; }
+}
+.bm-safe { position: absolute; top: var(--safe-top); bottom: var(--safe-bottom); left: var(--safe-x); right: var(--safe-right); }
+
+
+/* tipografía */
+.bm-hero, .bm-h1, .bm-h2, .bm-h3 { font-family: var(--font-display); font-weight: var(--w-display); letter-spacing: var(--track-display); line-height: var(--lh-display); }
+.bm-hero { font-size: var(--fs-hero); }
+.bm-h1 { font-size: var(--fs-h1); }
+.bm-h2 { font-size: var(--fs-h2); }
+.bm-h3 { font-size: var(--fs-h3); }
+.bm-body { font-size: var(--fs-body); line-height: var(--lh-body); letter-spacing: var(--track-body); }
+.bm-caption { font-size: var(--fs-caption); line-height: 1.25; }
+.bm-label { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-text-muted); }
+.bm-kicker { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-primary); }
+.bm-code { font-family: var(--font-mono); font-size: var(--fs-code); line-height: var(--lh-mono); font-variant-ligatures: none; }
+.bm-muted { color: var(--c-text-muted); }
+.bm-primary { color: var(--c-primary); }
+.bm-num { font-variant-numeric: tabular-nums; }
+
+/* máscaras para reveals por línea/palabra: animar el hijo con yPercent */
+.bm-line { display: block; overflow: visible; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.bm-line > span { display: inline-block; }
+.bm-word { display: inline-block; white-space: pre; }
+
+/* componentes */
+.bm-chip { display: inline-flex; align-items: center; gap: 1cqmin; padding: 0.8cqmin 1.8cqmin; border-radius: 999px; background: var(--c-surface-alt); font-family: var(--font-mono); font-size: var(--fs-label); color: var(--c-text); }
+.bm-rule { height: var(--stroke); background: var(--c-border); }
+.bm-logo svg, .bm-logo img { display: block; height: 100%; width: auto; }
+
+/* ===== look: Editorial clara: papel con filete de página, composición centrada y simétrica, serif con acento en itálica terracota, texto que aparece por fundido lento. ===== */
+:root {
+  --look-items: center;
+  --look-text-align: center;
+  --look-origin: center center;
+  --look-statement-items: center;
+  --look-statement-text-align: center;
+  --look-space: 1.3;
+}
+.bm-frame { --look: "paper center italic fade"; }
+/* fondo de marca: .bm-bg = textura del look · .is-hero = apertura/cierre (más intensa) · .is-plain = solo color */
+.bm-bg { position: absolute; inset: 0; background: var(--c-background); overflow: hidden; }
+.bm-bg::before, .bm-bg::after { content: ""; position: absolute; pointer-events: none; }
+.bm-bg::before { inset: 0; background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'320'%20height%3D'320'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'0.85'%20numOctaves%3D'2'%20seed%3D'7'%20stitchTiles%3D'stitch'%2F%3E%3CfeColorMatrix%20values%3D'0%200%200%200%200.25%200%200%200%200%200.2%200%200%200%200%200.15%200%200%200%200.55%200'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%23n)'%2F%3E%3C%2Fsvg%3E"); background-size: 34cqmin 34cqmin; opacity: 0.03; mix-blend-mode: multiply; }
+.bm-bg::after { inset: 3cqmin; border: var(--stroke) solid rgba(205, 191, 169, 0.9); }
+.bm-bg.is-hero::after, .bm-bg.glow::after { inset: 3cqmin; border-width: calc(var(--stroke) * 2); box-shadow: inset 0 0 0 1.2cqmin rgba(246, 241, 232, 1), inset 0 0 0 calc(1.2cqmin + var(--stroke)) rgba(205, 191, 169, 0.9); }
+.bm-bg.is-plain::before, .bm-bg.is-plain::after, .bm-bg.solid::before, .bm-bg.solid::after { display: none; }
+/* caja de titulares */
+
+/* acento (*palabra*): italic */
+.bm-accent { color: var(--c-accent); font-style: italic; }
+/* decoración del kicker: none */
+.bm-kicker-deco { display: none; }
+/* tarjetas: outline */
+.bm-card { background: transparent; border: calc(var(--stroke) * 1.6) solid var(--c-border); border-radius: var(--radius-lg); }

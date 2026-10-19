@@ -12,7 +12,7 @@ Idea central en una frase, estructura por beats con % de duración, tono, y **3 
 
 ## 2. Guion a dos columnas (`templates/guion-dos-columnas.md`)
 Delegá al subagente `guionista` y verificá:
-- Presupuesto: **palabras netas de VO = duración objetivo (s) × 2,2** (≈ 132 ppm; 60 s ≈ 130 palabras). La fuente única es `brand/brand.config.json` → `audio.voice.wordsPerSecond`; si la marca define otro valor, usá ese. Apuntá a 5–10 % menos para pausas.
+- Presupuesto: **palabras netas de VO = duración objetivo (s) × 2,2** (≈ 132 ppm; 60 s ≈ 130 palabras). La fuente única es `brands/<marca>/brand.config.json` → `audio.voice.wordsPerSecond`; si la marca define otro valor, usá ese. Apuntá a 5–10 % menos para pausas.
 - Columna VIDEO por bloque de `engine/blocks/README.md` (o "custom" justificado), con texto en pantalla LITERAL (≤ 7 palabras/línea) y el anclaje a la palabra de VO que lo dispara.
 - Cada cifra con `[C-00X]` existente; sin claim → `[COMPLETAR CLAIM]`.
 - Hook entendible sin sonido en ≤ 3-5 s. Un CTA.

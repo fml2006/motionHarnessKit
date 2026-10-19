@@ -1,0 +1,65 @@
+<!doctype html>
+<!--
+  bm-block: pulso-impacto
+  Uso: FIRMA EXCLUSIVA de Pulso: hook de social a pantalla llena. 2-4 palabras gigantes en mayúsculas, una por línea, que suben de a una; la palabra de acento queda resaltada en lima.
+  Duración sugerida: 2.5-3.5 s (es un golpe, no un párrafo).
+  Solo existe para la marca pulso: otra marca que lo pida falla en el build.
+  Texto: una palabra (o dos cortas) por línea, separadas con "|"; marcá UNA con *asteriscos*. El tamaño se ajusta a la línea más larga.
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"kicker","type":"string","label":"Kicker (opcional)","default":"","maxLength":28},
+    {"id":"words","type":"string","label":"Palabras (una por línea con |, acento con *)","default":"⟦COMPLETAR|*HOOK*⟧","maxLength":60},
+    {"id":"exit","type":"enum","label":"Salida","default":"none","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":3,"min":1,"max":10,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>pulso-impacto</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; }
+        #root .pi { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 2.4cqmin; }
+        #root .pi-kicker { display: flex; align-items: center; gap: 1.6cqmin; }
+        /* tamaño: el mayor entre el hero de la marca y lo que entra a lo ancho según la línea más larga */
+        #root .pi-words { font-family: var(--font-display); font-weight: var(--w-display); text-transform: uppercase; line-height: 0.98; letter-spacing: -0.03em; font-size: min(calc(var(--fs-hero) * 1.9), calc(88cqw / (var(--pi-chars, 8) * 0.62))); }
+        #root .pi-words .bm-line { padding-bottom: 0.04em; }
+      </style>
+      <div id="root" data-composition-id="__ID__">
+        <div class="bm-frame">
+          <div class="bm-bg is-hero"></div>
+          <div class="bm-safe pi">
+            <div class="pi-kicker"><span class="bm-kicker-deco"></span><span class="bm-kicker pi-kicker-text"></span></div>
+            <div class="pi-words"></div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ kicker: "", words: "", exit: "none", dur: 3 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          var k = q(".pi-kicker");
+          if (v.kicker) q(".pi-kicker-text").textContent = v.kicker; else k.remove();
+          var box = q(".pi-words");
+          var raw = String(v.words).split("|").map(function (s) { return s.replace(/\*/g, "").trim(); });
+          box.style.setProperty("--pi-chars", Math.max(4, raw.reduce(function (m, s) { return Math.max(m, s.length); }, 0)));
+          var lines = BM.lines(box, v.words);
+          var tl = gsap.timeline({ paused: true });
+          if (k.isConnected) {
+            BM.decoIn(tl, q(".pi-kicker .bm-kicker-deco"), 0.05);
+            BM.fadeUp(tl, q(".pi-kicker-text"), 0.1, { yPercent: 40 });
+          }
+          // palabra por palabra, con golpe: más stagger que un titular para que cada una se lea sola
+          BM.revealLines(tl, lines, 0.15, { stagger: BRAND.stagger("lines") * 2.2 });
+          BM.exit(tl, q(".pi"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
+          window.__timelines["__ID__"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

@@ -1,57 +1,91 @@
 #!/usr/bin/env node
 // build-roots: scenes.json → comp/ (proyecto HyperFrames maestro) + formats/<id>/ (variantes derivadas)
 //
-//   node scripts/build-roots.mjs <proyecto> [--reset <sceneId>] [--only-brand] [--strict] [--rebrand]
+//   node scripts/build-roots.mjs <proyecto> [--reset <sceneId>|all] [--only-brand] [--strict] [--rebrand] [--brand <marca>]
 //
 // Reglas:
+//   - La pieza usa UNA marca del estudio: scenes.json → "brand" (brands/<marca>/). Sin "brand": la default, con aviso.
 //   - comp/index.html y formats/** se REGENERAN siempre: no se editan a mano.
-//   - comp/compositions/<sceneId>.html se crea UNA vez desde engine/blocks/<block>.html y después es tuyo
-//     (el agente lo puede personalizar). --reset <sceneId> lo vuelve a copiar desde el bloque.
-//   - comp/brand/ se sincroniza desde brand/dist/ en cada build, PERO solo si coincide con el brandLock del
-//     proyecto (scenes.json → brandLock). Si la marca cambió, el build se frena: --rebrand lo acepta a conciencia.
+//   - comp/compositions/<sceneId>.html se crea UNA vez desde el bloque y después es tuyo. El bloque se resuelve
+//     brands/<marca>/blocks/<block>.html (firma de la marca) > engine/blocks/<block>.html. --reset <id>|all lo re-copia.
+//   - comp/brand/ se sincroniza desde brands/<marca>/dist/ en cada build, PERO solo si coincide con el brandLock del
+//     proyecto (scenes.json → brandLock: marca + versión + hash). Si la marca cambió, el build se frena: --rebrand lo
+//     acepta a conciencia. Cambiar la pieza a otra marca: --brand <otra> --rebrand (queda en review/CHANGELOG.md).
 //   - Gates de contenido (placeholders, cifras sin claim verificada, valores sueltos fuera de tokens, captions):
 //     WARN en un build normal; FAIL con --strict (render final / entrega).
 import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync, copyFileSync, appendFileSync } from "node:fs";
 import { join } from "node:path";
 import { ROOT, copyDir, readJson, loadBrand, resolveProject, esc, escAttrSingle } from "./lib/common.mjs";
 import { TRANSITIONS, transitionOf, timeline, compositionDefaults, compositionBodyText, findPlaceholder, loadClaims, claimProblem, NUMERIC_BLOCKS, brandFingerprint, parseCaptions, captionWarnings, tokenLint } from "./lib/plan.mjs";
+import { defaultBrand, brandExists, listBrands, distDir, resolveBlock } from "./lib/brands.mjs";
 
 const args = process.argv.slice(2);
-const projectDir = resolveProject(args.find((a) => !a.startsWith("--") && args[args.indexOf(a) - 1] !== "--reset"));
+const VALUE_FLAGS = ["--reset", "--brand"];
+const projectDir = resolveProject(args.find((a, i) => !a.startsWith("--") && !VALUE_FLAGS.includes(args[i - 1])));
 const resetId = args.includes("--reset") ? args[args.indexOf("--reset") + 1] : null;
 const onlyBrand = args.includes("--only-brand");
 const strict = args.includes("--strict");
 const rebrand = args.includes("--rebrand");
+const brandArg = args.includes("--brand") ? args[args.indexOf("--brand") + 1] : null;
 const rel = (p) => p.replace(ROOT + "/", "");
 
-const brand = loadBrand();
 const planPath = join(projectDir, "scenes.json");
 const plan = readJson(planPath);
 const comp = join(projectDir, "comp");
 const isDemo = plan.purpose === "demo";
+const savePlan = () => writeFileSync(planPath, JSON.stringify(plan, null, 2) + "\n");
+const changelog = (line) => {
+  mkdirSync(join(projectDir, "review"), { recursive: true });
+  appendFileSync(join(projectDir, "review", "CHANGELOG.md"), `- ${new Date().toISOString().slice(0, 16).replace("T", " ")} · ${line}\n`);
+};
 
-// 0) brandLock: un proyecto queda atado a la versión de marca con la que se aprobó
-const current = brandFingerprint(join(ROOT, "brand", "dist"), brand);
+// 0) marca de la pieza
+if (brandArg && brandArg !== plan.brand) {
+  if (!brandExists(brandArg)) {
+    console.error(`✗ La marca "${brandArg}" no existe. Marcas del estudio: ${listBrands().join(", ")}`);
+    process.exit(1);
+  }
+  if (plan.brand && !rebrand) {
+    console.error(`✗ Esta pieza es de la marca "${plan.brand}". Cambiarla a "${brandArg}" es un rebrand: agregá --rebrand (queda en review/CHANGELOG.md).`);
+    process.exit(1);
+  }
+  if (plan.brand) changelog(`CAMBIO DE MARCA · ${plan.brand} → ${brandArg} (build:roots --brand ${brandArg} --rebrand)`);
+  plan.brand = brandArg;
+  savePlan();
+}
+if (!plan.brand) {
+  plan.brand = defaultBrand();
+  savePlan();
+  console.log(`  ⚠ scenes.json no declaraba "brand": la pieza queda con la marca default "${plan.brand}" (cambiala con --brand <marca> --rebrand).`);
+}
+const slug = plan.brand;
+if (!brandExists(slug)) {
+  console.error(`✗ scenes.json → brand = "${slug}", que no existe en brands/. Marcas: ${listBrands().join(", ")}`);
+  process.exit(1);
+}
+const brand = loadBrand(slug);
+const DIST = distDir(slug);
+
+// brandLock: la pieza queda atada a la marca y versión con la que se aprobó
+const current = brandFingerprint(DIST, brand);
 const lock = plan.brandLock;
-const lockStr = (l) => `${l.name} v${l.version} #${l.hash}`;
+const lockStr = (l) => `${l.slug ? l.slug + " · " : ""}${l.name} v${l.version} #${l.hash}`;
 if (!lock) {
   plan.brandLock = current;
-  writeFileSync(planPath, JSON.stringify(plan, null, 2) + "\n");
+  savePlan();
   console.log(`  ⚠ El proyecto no tenía brandLock: queda atado a ${lockStr(current)} (scenes.json → brandLock).`);
-} else if (lock.hash !== current.hash) {
+} else if (lock.hash !== current.hash || (lock.slug && lock.slug !== current.slug)) {
   if (!rebrand) {
     console.error(`✗ La marca cambió desde que se bloqueó este proyecto.`);
     console.error(`    proyecto: ${lockStr(lock)}`);
-    console.error(`    actual:   ${lockStr(current)}  (brand/dist)`);
+    console.error(`    actual:   ${lockStr(current)}  (brands/${slug}/dist)`);
     console.error(`  Si el cambio de marca es intencional para ESTA pieza: npm run build:roots -- ${rel(projectDir)} --rebrand`);
-    console.error(`  Si no: restaurá la marca del proyecto (git checkout brand/brand.config.json && npm run brand) o trabajá en otro clon.`);
+    console.error(`  Si no: restaurá la marca (git checkout brands/${slug}/ && npm run brand -- ${slug}) o trabajá en otro clon.`);
     process.exit(1);
   }
   plan.brandLock = current;
-  writeFileSync(planPath, JSON.stringify(plan, null, 2) + "\n");
-  const log = join(projectDir, "review", "CHANGELOG.md");
-  mkdirSync(join(projectDir, "review"), { recursive: true });
-  appendFileSync(log, `- ${new Date().toISOString().slice(0, 16).replace("T", " ")} · REBRAND · ${lockStr(lock)} → ${lockStr(current)} (build:roots --rebrand)\n`);
+  savePlan();
+  changelog(`REBRAND · ${lockStr(lock)} → ${lockStr(current)} (build:roots --rebrand)`);
   console.log(`  ⚠ Rebrand aceptado: ${lockStr(lock)} → ${lockStr(current)} (anotado en review/CHANGELOG.md)`);
 }
 
@@ -60,9 +94,9 @@ mkdirSync(join(comp, "assets"), { recursive: true });
 
 // 1) marca → comp/brand (+ runtime de motion) y frame.md para las skills de HyperFrames
 rmSync(join(comp, "brand"), { recursive: true, force: true });
-copyDir(join(ROOT, "brand", "dist"), join(comp, "brand"), (s, n) => !["brand-board.html", "remotion-theme.ts", "contrast-report.md", "brand-rules.md", "frame.md"].includes(n));
+copyDir(DIST, join(comp, "brand"), (s, n) => !["brand-board.html", "remotion-theme.ts", "contrast-report.md", "brand-rules.md", "frame.md", "MOTION.md", "brand.md"].includes(n));
 copyFileSync(join(ROOT, "engine", "runtime", "bm-motion.js"), join(comp, "brand", "bm-motion.js"));
-copyFileSync(join(ROOT, "brand", "dist", "frame.md"), join(comp, "frame.md"));
+copyFileSync(join(DIST, "frame.md"), join(comp, "frame.md"));
 if (onlyBrand) {
   console.log(`✓ Marca sincronizada en ${rel(comp)}/brand`);
   process.exit(0);
@@ -74,7 +108,7 @@ const formats = brand.formats;
 const fmtById = Object.fromEntries(formats.map((f) => [f.id, f]));
 const master = fmtById[plan.master || "landscape"] || formats[0];
 const wanted = (plan.formats || [master.id]).filter((id) => {
-  if (!fmtById[id]) errors.push(`Formato desconocido "${id}" (definidos en brand.config.json: ${Object.keys(fmtById).join(", ")})`);
+  if (!fmtById[id]) errors.push(`Formato desconocido "${id}" (definidos en brands/${slug}/brand.config.json: ${Object.keys(fmtById).join(", ")})`);
   return fmtById[id];
 });
 const allowedTr = brand.motion?.transitions?.allowed || Object.keys(TRANSITIONS);
@@ -84,9 +118,12 @@ for (const s of plan.scenes || []) {
   if (ids.has(s.id)) errors.push(`Id de escena duplicado: ${s.id}`);
   ids.add(s.id);
   if (!(s.duration > 0)) errors.push(`Escena ${s.id}: "duration" debe ser > 0`);
-  const blockFile = join(ROOT, "engine", "blocks", `${s.block}.html`);
   const sceneFile = join(comp, "compositions", `${s.id}.html`);
-  if (s.block !== "custom" && !existsSync(blockFile) && !existsSync(sceneFile)) errors.push(`Escena ${s.id}: no existe el bloque "${s.block}" (ver engine/blocks/)`);
+  if (s.block !== "custom") {
+    const rb = resolveBlock(slug, s.block);
+    // un bloque firma de otra marca es error aunque la escena ya exista: la pieza no puede mezclar marcas
+    if (rb.error && (!existsSync(sceneFile) || /firma de la marca/.test(rb.error))) errors.push(`Escena ${s.id}: ${rb.error}`);
+  }
   if (s.block === "custom" && !existsSync(sceneFile)) errors.push(`Escena ${s.id}: block "custom" requiere comp/compositions/${s.id}.html`);
   const tr = transitionOf(s, plan);
   if (!TRANSITIONS[tr]) errors.push(`Escena ${s.id}: transición "${tr}" no implementada en el kit (implementadas: ${Object.keys(TRANSITIONS).join(", ")}). Las demás se hacen en el NLE.`);
@@ -94,6 +131,7 @@ for (const s of plan.scenes || []) {
   if (s.claims && !Array.isArray(s.claims)) errors.push(`Escena ${s.id}: "claims" tiene que ser una lista de IDs, p. ej. ["C-001"]`);
 }
 if (errors.length) {
+  console.error(`✗ El plan de "${plan.title || plan.slug}" (marca ${slug}) tiene ${errors.length} error(es):`);
   errors.forEach((e) => console.error("  ✗ " + e));
   process.exit(1);
 }
@@ -103,8 +141,8 @@ const created = [];
 for (const s of plan.scenes) {
   const sceneFile = join(comp, "compositions", `${s.id}.html`);
   if (s.block === "custom") continue;
-  if (!existsSync(sceneFile) || resetId === s.id) {
-    const src = readFileSync(join(ROOT, "engine", "blocks", `${s.block}.html`), "utf8");
+  if (!existsSync(sceneFile) || resetId === s.id || resetId === "all") {
+    const src = readFileSync(resolveBlock(slug, s.block).path, "utf8");
     writeFileSync(sceneFile, src.replaceAll("__ID__", s.id));
     created.push(s.id);
   }

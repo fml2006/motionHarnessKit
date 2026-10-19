@@ -78,7 +78,7 @@
 - Referencias **no** (link + por qué): …
 
 ## 9. Mandatorios de marca
-- Design spec: `brand/brand.config.json` (versión `meta.version`) → `MOTION.md` / `brand/dist/frame.md` + guía de marca del cliente (link + versión)
+- Design spec: `brands/<marca>/brand.config.json` (versión `meta.version`) → `brands/<marca>/dist/MOTION.md` + `brands/<marca>/LOOK.md` / `brands/<marca>/dist/frame.md` + guía de marca del cliente (link + versión)
 - Logo: versión, área de respeto, tamaño mínimo, fondos permitidos
 - Paleta y tipografías (con licencia para render a video)
 - End card / sting / música de marca (si existe)

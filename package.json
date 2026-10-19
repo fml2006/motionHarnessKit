@@ -1,6 +1,6 @@
 {
   "name": "motion-harness-kit",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "description": "Kit harness para producir motion graphics con IA (Claude Code + HyperFrames) con branding configurable",
@@ -9,7 +9,10 @@
   },
   "scripts": {
     "brand": "node scripts/brand-apply.mjs",
-    "brand:check": "node scripts/brand-apply.mjs --check",
+    "brand:check": "node scripts/brand-apply.mjs --all --check",
+    "brand:new": "node scripts/brand-new.mjs",
+    "brand:list": "node scripts/brand-list.mjs",
+    "brand:compare": "node scripts/brand-compare.mjs",
     "brand:logo": "node scripts/placeholder-logo.mjs",
     "new": "node scripts/new-project.mjs",
     "build:roots": "node scripts/build-roots.mjs",
@@ -25,6 +28,7 @@
     "pipeline": "node scripts/pipeline.mjs"
   },
   "devDependencies": {
+    "@fontsource/bricolage-grotesque": "5.3.0",
     "@fontsource/ibm-plex-mono": "5.3.0",
     "@fontsource/ibm-plex-sans": "5.3.0",
     "@fontsource/inter": "5.3.0",

@@ -27,7 +27,7 @@
     <template>
       <style>
         #root { position: absolute; inset: 0; container-type: size; }
-        #root .tm { display: flex; flex-direction: column; justify-content: center; gap: 4cqmin; }
+        #root .tm { display: flex; flex-direction: column; justify-content: center; gap: calc(4cqmin * var(--look-space)); }
         #root .tm-win { background: var(--c-code-background); border: var(--stroke) solid var(--c-code-line); border-radius: var(--radius-md); overflow: hidden; }
         #root .tm-bar { display: flex; align-items: center; gap: 1.2cqmin; padding: 1.6cqmin 2.2cqmin; border-bottom: var(--stroke) solid var(--c-code-line); }
         #root .tm-dot { width: 1.3cqmin; height: 1.3cqmin; border-radius: 50%; background: var(--c-code-line); }
@@ -44,7 +44,7 @@
       </style>
       <div id="root" data-composition-id="b06-terminal">
         <div class="bm-frame">
-          <div class="bm-bg grid"></div>
+          <div class="bm-bg"></div>
           <div class="bm-safe tm">
             <div class="tm-win">
               <div class="tm-bar"><span class="tm-dot"></span><span class="tm-dot"></span><span class="tm-dot"></span><span class="tm-title"></span></div>
@@ -53,7 +53,7 @@
                 <div class="tm-out"></div>
               </div>
             </div>
-            <p class="bm-h3 tm-cap"></p>
+            <p class="bm-h3 tm-cap" style="text-align: var(--look-text-align)"></p>
           </div>
         </div>
       </div>

@@ -4,7 +4,7 @@
 >
 > Registro obligatorio de todo asset que entra al proyecto (música, SFX, voz, imágenes, footage, logos de terceros, datos). Sin registro, el asset no se publica. Fuente: `docs/research/07-critica-legal-riesgos.md` §6.3.
 >
-> **Política de divulgación de la marca** (`brand/brand.config.json` → `legal.requireDisclosureFor`): se divulga **siempre** que haya voz sintética (TTS o clon, aunque sea genérica), personas o lugares realistas generados, o imágenes de producto simuladas. Es más estricta que el mínimo de YouTube/Meta/TikTok (que solo exigen el toggle para contenido realista): en plataforma se activa el toggle cuando aplica, y el texto `legal.aiDisclosure` va en la descripción o en el end card en todos los casos de la lista.
+> **Política de divulgación de la marca** (`brands/<marca>/brand.config.json` → `legal.requireDisclosureFor`): se divulga **siempre** que haya voz sintética (TTS o clon, aunque sea genérica), personas o lugares realistas generados, o imágenes de producto simuladas. Es más estricta que el mínimo de YouTube/Meta/TikTok (que solo exigen el toggle para contenido realista): en plataforma se activa el toggle cuando aplica, y el texto `legal.aiDisclosure` va en la descripción o en el end card en todos los casos de la lista.
 >
 > **C2PA:** se firma cada `*_DELIVERY.mp4` (y el master si se archiva firmado). El re-encode a H.264 elimina el manifiesto del master, así que firmar solo el master no alcanza.
 

@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readdirSync, statSync, copyFileSync, readFileSyn
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
+import { defaultBrand, brandExists, listBrands } from "./brands.mjs";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -57,10 +58,21 @@ export function readJson(p) {
   return JSON.parse(readFileSync(p, "utf8"));
 }
 
-export function loadBrand() {
-  const p = join(ROOT, "brand", "dist", "brand.json");
+// Marca aplicada (brands/<slug>/dist/brand.json). Sin slug: la default de brands/brands.json.
+// Para un proyecto: loadBrand(projectBrand(plan)) (ver scripts/lib/brands.mjs).
+export function loadBrand(slug) {
+  const s = slug || defaultBrand();
+  if (!s) {
+    console.error("✗ No hay marcas en brands/. Creá una: npm run brand:new -- <slug>");
+    process.exit(1);
+  }
+  if (!brandExists(s)) {
+    console.error(`✗ La marca "${s}" no existe (brands/${s}/brand.config.json). Marcas: ${listBrands().join(", ")}`);
+    process.exit(1);
+  }
+  const p = join(ROOT, "brands", s, "dist", "brand.json");
   if (!existsSync(p)) {
-    console.error("✗ No existe brand/dist/. Corré primero: npm run brand");
+    console.error(`✗ La marca "${s}" no está aplicada (falta brands/${s}/dist/). Corré: npm run brand -- ${s}`);
     process.exit(1);
   }
   return readJson(p);

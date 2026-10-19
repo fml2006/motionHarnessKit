@@ -21,7 +21,7 @@ Una página. El director creativo elige un hook y una dirección; recién ahí s
 |---|---|
 | Pieza / versión | `EXPL01` · `SCR_v02` |
 | Duración objetivo | 90 s |
-| Ritmo de narración | **2,2 palabras/s netas** (≈ 132 ppm, ritmo de TTS con aire) — fuente única: `brand/brand.config.json` → `audio.voice.wordsPerSecond` |
+| Ritmo de narración | **2,2 palabras/s netas** (≈ 132 ppm, ritmo de TTS con aire) — fuente única: `brands/<marca>/brand.config.json` → `audio.voice.wordsPerSecond` |
 | Presupuesto de palabras (neto) | **duración (s) × 2,2** → 90 s ≈ 198 · 60 s ≈ 132 · 30 s ≈ 66 (máximo; apuntá a 5–10 % menos para pausas) |
 | **Conteo actual** | ___ palabras → duración estimada ___ s (palabras ÷ 2,2) + pausas |
 | Duración leída en voz alta (cronometrada) | ___ s (criterio: ±10 % del objetivo) |

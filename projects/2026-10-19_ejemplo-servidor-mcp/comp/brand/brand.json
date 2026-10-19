@@ -1,12 +1,12 @@
 {
-  "$schema": "./brand.schema.json",
+  "$schema": "../brand.schema.json",
   "meta": {
     "name": "TuMarca",
     "slug": "tumarca",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "owner": "Equipo de Contenido",
     "updated": "2026-10-19",
-    "notes": "Marca placeholder. Reemplazá cada valor por el de tu manual de marca y corré `npm run brand`."
+    "notes": "Marca placeholder (default del estudio): oscura y técnica. Reemplazá cada valor por el de tu manual de marca con /marca y corré `npm run brand -- tumarca`."
   },
   "identity": {
     "tagline": "Tecnología explicada con claridad",
@@ -33,6 +33,19 @@
         "Claims de rendimiento sin fuente"
       ]
     }
+  },
+  "look": {
+    "background": "grid+glow",
+    "align": "start",
+    "statementAlign": "center",
+    "statementSize": "h1",
+    "headlineCase": "none",
+    "accentStyle": "color",
+    "textReveal": "mask",
+    "kicker": "line",
+    "cards": "filled",
+    "density": "regular",
+    "summary": "Oscuro técnico: grilla de ingeniería, todo alineado a la izquierda, titulares que suben por máscara y un solo acento ámbar por color."
   },
   "colors": {
     "background": "#0B0F19",
@@ -73,7 +86,8 @@
     "rules": {
       "maxAccentMomentsPerFrame": 1,
       "notes": "El acento (accent) se raciona: una sola vez por frame, para el dato o la palabra clave. Nunca para texto corrido."
-    }
+    },
+    "onAccent": "#0B0F19"
   },
   "typography": {
     "display": {
@@ -142,10 +156,10 @@
     }
   },
   "logo": {
-    "primary": "brand/logo/logo.svg",
-    "mark": "brand/logo/mark.svg",
-    "onDark": "brand/logo/logo.svg",
-    "onLight": "brand/logo/logo-dark.svg",
+    "primary": "logo/logo.svg",
+    "mark": "logo/mark.svg",
+    "onDark": "logo/logo.svg",
+    "onLight": "logo/logo-dark.svg",
     "clearSpaceRatio": 0.5,
     "minHeightPx1080": 40,
     "watermark": {
@@ -343,9 +357,8 @@
       "gutter": 2
     },
     "background": {
-      "style": "subtle-grid",
-      "options": "solid | subtle-grid | gradient-glow",
-      "gridOpacity": 0.06
+      "gridOpacity": 0.06,
+      "comment": "El estilo del fondo se define en look.background (grid | glow | grid+glow | flat | paper | gradient)."
     }
   },
   "formats": [

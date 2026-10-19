@@ -1,0 +1,61 @@
+<!doctype html>
+<!--
+  bm-block: logo-sting
+  Uso: FIRMA de Northline (reemplaza al logo-sting del engine solo para esta marca). "Folio": dos filetes se abren desde el centro, el logo aparece por fundido lento y la bajada entra en itálica, todo centrado.
+  Duración sugerida: 3-3.6 s (Northline respira: no lo apures).
+  Aperturas y cierres de marca. La bajada es opcional y va en la itálica de la display.
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"tagline","type":"string","label":"Bajada (opcional, en itálica)","default":"","maxLength":60},
+    {"id":"exit","type":"enum","label":"Salida","default":"none","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":3.2,"min":1,"max":10,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>logo-sting · northline</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; }
+        #root .nf { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(3.5cqmin * var(--look-space)); }
+        #root .nf-rule { width: 46cqmin; height: var(--stroke); background: var(--c-text); transform-origin: center center; }
+        #root .nf-logo { height: 11cqmin; display: flex; align-items: center; }
+        #root .nf-logo svg { height: 100%; width: auto; display: block; overflow: visible; }
+        #root .nf-tag { font-family: var(--font-display); font-style: italic; font-size: var(--fs-h3); color: var(--c-text-muted); text-align: center; }
+      </style>
+      <div id="root" data-composition-id="__ID__">
+        <div class="bm-frame">
+          <div class="bm-bg is-hero"></div>
+          <div class="bm-safe nf">
+            <div class="nf-rule nf-top"></div>
+            <div class="nf-logo"></div>
+            <div class="nf-tag"></div>
+            <div class="nf-rule nf-bottom"></div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ tagline: "", exit: "none", dur: 3.2 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          var holder = q(".nf-logo");
+          holder.innerHTML = BRAND.logo.svgPrimary || BRAND.logo.svgMark || "";
+          var tag = q(".nf-tag");
+          if (v.tagline) tag.textContent = v.tagline; else tag.remove();
+          var tl = gsap.timeline({ paused: true });
+          // los filetes se abren desde el centro: la página se arma antes de la firma
+          tl.fromTo([q(".nf-top"), q(".nf-bottom")], { scaleX: 0 }, { scaleX: 1, duration: BRAND.dur("long"), ease: BRAND.ease("move"), stagger: BRAND.stagger("lines") }, 0.2);
+          tl.fromTo(holder, { opacity: 0, scale: 0.98 }, { opacity: 1, scale: 1, duration: BRAND.dur("long"), ease: BRAND.ease("standard") }, 0.55);
+          if (tag.isConnected) tl.fromTo(tag, { opacity: 0 }, { opacity: 1, duration: BRAND.dur("emphasis"), ease: BRAND.ease("standard") }, 1.35);
+          BM.exit(tl, q(".nf"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
+          window.__timelines["__ID__"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

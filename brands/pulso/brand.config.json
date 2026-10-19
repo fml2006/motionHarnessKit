@@ -1,0 +1,453 @@
+{
+  "$schema": "../brand.schema.json",
+  "meta": {
+    "name": "Pulso",
+    "slug": "pulso",
+    "version": "1.0.0",
+    "owner": "Equipo de Social",
+    "updated": "2026-10-19",
+    "notes": "Marca de EJEMPLO energética para social: demuestra un tercer estilo con los mismos bloques (gradiente, mayúsculas, resaltado, texto que sube)."
+  },
+  "identity": {
+    "tagline": "Tecnología que se siente",
+    "mission": "Convertir novedades de tecnología en piezas cortas que se entienden en 3 segundos y se comparten.",
+    "audience": "Desarrolladores y early adopters de 18-34, consumo vertical en Reels, TikTok y Shorts.",
+    "personality": [
+      "enérgico",
+      "directo",
+      "optimista",
+      "sin solemnidad"
+    ],
+    "voice": {
+      "language": "es-AR",
+      "register": "vos",
+      "tone": "Corto, con ritmo y una sola idea por pantalla. Cero relleno; el dato manda.",
+      "do": [
+        "Frases de 3-6 palabras",
+        "Un dato fuerte por pieza",
+        "Verbos en presente"
+      ],
+      "dont": [
+        "Emojis en pantalla",
+        "Hype sin dato (\"lo cambia todo\")",
+        "Texto corrido de más de 2 líneas"
+      ]
+    }
+  },
+  "look": {
+    "summary": "Energética para social: gradiente rosa-violeta, titulares enormes en MAYÚSCULAS, el dato resaltado en lima y texto que sube con fuerza.",
+    "background": "gradient",
+    "align": "start",
+    "statementAlign": "start",
+    "statementSize": "hero",
+    "headlineCase": "uppercase",
+    "accentStyle": "highlight",
+    "textReveal": "rise",
+    "kicker": "dot",
+    "cards": "none",
+    "density": "compact"
+  },
+  "colors": {
+    "background": "#120A1C",
+    "surface": "#1E1230",
+    "surfaceAlt": "#2A1A42",
+    "border": "#3D2A5C",
+    "text": "#FFF6FA",
+    "textMuted": "#CDBFDB",
+    "primary": "#FF4F8B",
+    "secondary": "#8B6CFF",
+    "accent": "#E8FF59",
+    "danger": "#FF6B6B",
+    "success": "#3DDC97",
+    "onPrimary": "#160A12",
+    "onAccent": "#120A1C",
+    "code": {
+      "background": "#170D24",
+      "text": "#F2EAF7",
+      "comment": "#A797BD",
+      "keyword": "#FF8DB5",
+      "string": "#C9F27A",
+      "number": "#FFD36B",
+      "function": "#B9A4FF"
+    },
+    "dataViz": [
+      "#FF4F8B",
+      "#8B6CFF",
+      "#E8FF59",
+      "#4FD1FF",
+      "#FF9F43",
+      "#A797BD"
+    ],
+    "gradients": {
+      "hero": [
+        "#FF4F8B",
+        "#8B6CFF"
+      ]
+    },
+    "rules": {
+      "maxAccentMomentsPerFrame": 1,
+      "notes": "El lima (accent) es el resaltado del dato o la palabra clave: una vez por frame. Rosa y violeta son estructura y fondo."
+    }
+  },
+  "typography": {
+    "display": {
+      "family": "Bricolage Grotesque",
+      "fallback": "ui-sans-serif, system-ui, sans-serif",
+      "weights": [
+        600,
+        800
+      ],
+      "source": "fontsource",
+      "package": "@fontsource/bricolage-grotesque",
+      "license": "OFL-1.1",
+      "tracking": "-0.035em",
+      "lineHeight": 1.02,
+      "case": "uppercase",
+      "trackingUpper": "-0.02em",
+      "lineHeightUpper": 1.0
+    },
+    "body": {
+      "family": "Inter",
+      "fallback": "ui-sans-serif, system-ui, sans-serif",
+      "weights": [
+        400,
+        500,
+        600,
+        700
+      ],
+      "source": "fontsource",
+      "package": "@fontsource/inter",
+      "license": "OFL-1.1",
+      "tracking": "-0.01em",
+      "lineHeight": 1.3,
+      "case": "sentence"
+    },
+    "mono": {
+      "family": "JetBrains Mono",
+      "fallback": "ui-monospace, monospace",
+      "weights": [
+        400,
+        500
+      ],
+      "source": "fontsource",
+      "package": "@fontsource/jetbrains-mono",
+      "license": "OFL-1.1",
+      "tracking": "0",
+      "lineHeight": 1.5,
+      "case": "as-is"
+    },
+    "scale": {
+      "unit": "cqmin",
+      "comment": "Pulso ya parte de una escala grande y sus titulares van en MAYÚSCULAS (más anchas): no se agranda en 9:16 ni en 4:5.",
+      "hero": 15,
+      "h1": 10.5,
+      "h2": 7.2,
+      "h3": 5,
+      "body": 3.9,
+      "caption": 3.4,
+      "label": 2.6,
+      "code": 3,
+      "portraitMultiplier": 1.0,
+      "feedMultiplier": 1.0
+    },
+    "rules": {
+      "maxWordsPerLine": 7,
+      "maxLinesPerFrame": 3,
+      "minSizePx1080": 28,
+      "kickerUppercase": true
+    }
+  },
+  "logo": {
+    "primary": "logo/logo.svg",
+    "mark": "logo/mark.svg",
+    "onDark": "logo/logo.svg",
+    "onLight": "logo/logo-dark.svg",
+    "clearSpaceRatio": 0.5,
+    "minHeightPx1080": 40,
+    "watermark": {
+      "enabled": false,
+      "position": "bottom-right",
+      "opacity": 0.6
+    },
+    "sting": {
+      "style": "mark-pop-then-highlight-sweep",
+      "durationMs": 1800
+    },
+    "dont": [
+      "deformar",
+      "rotar",
+      "cambiar colores fuera de la paleta",
+      "efectos glow o bevel"
+    ],
+    "placeholderMark": "pulse"
+  },
+  "motion": {
+    "personality": "expressive",
+    "personalityOptions": "productive = preciso y sobrio (B2B, tech) | balanced | expressive = enérgico (social, lanzamientos)",
+    "principles": [
+      "El movimiento empuja: cada beat entra con decisión y deja el dato quieto para leerlo.",
+      "Una cosa a la vez: el ojo sigue un solo foco por beat; el resto queda quieto.",
+      "Nunca arrancar en t=0: primer movimiento a los 150-300 ms de iniciada la escena.",
+      "Entradas decididas, salidas discretas: las salidas duran ~65% de las entradas y aceleran.",
+      "Holds generosos: el texto queda en pantalla al menos max(1,5 s; 0,8 s + 0,35 s por palabra; caracteres / 15).",
+      "Dirección consistente: lo nuevo entra de derecha/abajo, lo que se va sale a izquierda/arriba.",
+      "Máximo 2 tweens con el mismo easing por escena; la escena más lenta dura ~3x la más rápida."
+    ],
+    "durations": {
+      "instant": 80,
+      "micro": 120,
+      "short": 200,
+      "enter": 420,
+      "exit": 260,
+      "emphasis": 650,
+      "scene": 350,
+      "long": 1000
+    },
+    "easings": {
+      "standard": [
+        0.2,
+        0,
+        0,
+        1
+      ],
+      "enter": [
+        0.22,
+        1,
+        0.36,
+        1
+      ],
+      "exit": [
+        0.55,
+        0.055,
+        0.675,
+        0.19
+      ],
+      "emphasized": [
+        0.16,
+        1,
+        0.3,
+        1
+      ],
+      "move": [
+        0.645,
+        0.045,
+        0.355,
+        1
+      ],
+      "camera": [
+        0.77,
+        0,
+        0.175,
+        1
+      ],
+      "linear": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "expressive": [
+        0.34,
+        1.56,
+        0.64,
+        1
+      ]
+    },
+    "stagger": {
+      "letters": 20,
+      "words": 55,
+      "lines": 90,
+      "items": 50
+    },
+    "staggerGroupMaxMs": 450,
+    "staggerComment": "Un grupo escalonado no supera staggerGroupMaxMs: BRAND.stagger(nombre, n) devuelve min(valor, staggerGroupMaxMs / n).",
+    "distance": {
+      "small": 1.5,
+      "medium": 4,
+      "large": 10,
+      "unit": "cqmin"
+    },
+    "reading": {
+      "secondsPerWord": 0.35,
+      "baseMs": 800,
+      "minHoldMs": 1500,
+      "charsPerSecond": 15,
+      "comment": "hold = max(minHold; base + 0,35 s × palabras; caracteres / 15). Sumá +20 % si el texto es técnico (código, cifras, nombres propios)."
+    },
+    "transitions": {
+      "default": "push",
+      "allowed": [
+        "cut",
+        "crossfade",
+        "push",
+        "mask-wipe"
+      ],
+      "comment": "Solo las transiciones implementadas en build:roots. Una transición fuera de esta lista hace fallar el build (nunca cae a corte en silencio).",
+      "manualInNLE": [
+        "zoom-through",
+        "match-cut"
+      ],
+      "manualComment": "Permitidas por la marca pero no automatizadas: se resuelven en el editor (NLE) o como escena custom.",
+      "forbidden": [
+        "spin",
+        "star-wipe",
+        "glitch aleatorio",
+        "page-curl",
+        "flash blanco > 3 por segundo"
+      ]
+    },
+    "forbidden": [
+      "Bounce/elastic en texto (la energía sale del ritmo, no del rebote)",
+      "Emojis o stickers animados",
+      "Más de un resaltado por frame",
+      "Glow, partículas o lens flares de relleno",
+      "Movimiento continuo detrás de texto que se está leyendo"
+    ],
+    "easingNotes": {
+      "standard": "Reposicionar algo visible (Material 3 standard)",
+      "enter": "Entrada por defecto, rápida y decidida (= expo-ish out), sin rebote",
+      "exit": "Salida por defecto, acelera (= power2.in)",
+      "emphasized": "Golpe de entrada para titulares y el dato (más corto y seco que productive)",
+      "move": "Movimientos simétricos y push entre escenas (= power2.inOut)",
+      "camera": "Zoom/paneo de cámara virtual (= power3.inOut), 1-2 s",
+      "linear": "Tipeo, progreso, scroll constante",
+      "expressive": "RESTRINGIDO: overshoot ~10%. Solo registro lúdico aprobado; nunca datos, logos ni texto"
+    }
+  },
+  "layout": {
+    "safeMarginPct": {
+      "landscape": 6,
+      "portrait": 8,
+      "square": 7,
+      "feed": 7
+    },
+    "platformSafeZones": {
+      "universal-9x16": {
+        "topPct": 14,
+        "bottomPct": 35,
+        "rightPct": 14,
+        "leftPct": 6,
+        "comment": "Peor caso combinado Reels/TikTok/Shorts. Usar por defecto si la pieza va a varias plataformas."
+      },
+      "shorts-9x16": {
+        "topPct": 12,
+        "bottomPct": 22,
+        "rightPct": 14,
+        "leftPct": 6
+      },
+      "reels-9x16": {
+        "topPct": 14,
+        "bottomPct": 35,
+        "rightPct": 12,
+        "leftPct": 6
+      },
+      "tiktok-9x16": {
+        "topPct": 12,
+        "bottomPct": 30,
+        "rightPct": 16,
+        "leftPct": 6
+      }
+    },
+    "radius": {
+      "sm": 1.6,
+      "md": 3,
+      "lg": 5,
+      "unit": "cqmin"
+    },
+    "stroke": 0.25,
+    "grid": {
+      "columns": 12,
+      "gutter": 2
+    },
+    "background": {
+      "gridOpacity": 0.05,
+      "comment": "El estilo del fondo se define en look.background."
+    }
+  },
+  "formats": [
+    {
+      "id": "landscape",
+      "label": "YouTube / web 16:9",
+      "width": 1920,
+      "height": 1080,
+      "fps": 30
+    },
+    {
+      "id": "portrait",
+      "label": "Shorts / Reels / TikTok 9:16",
+      "width": 1080,
+      "height": 1920,
+      "fps": 30,
+      "safeZone": "universal-9x16"
+    },
+    {
+      "id": "feed",
+      "label": "Feed 4:5 (LinkedIn / Instagram)",
+      "width": 1080,
+      "height": 1350,
+      "fps": 30
+    },
+    {
+      "id": "square",
+      "label": "Feed 1:1",
+      "width": 1080,
+      "height": 1080,
+      "fps": 30
+    }
+  ],
+  "audio": {
+    "loudness": {
+      "integratedLUFS": -14,
+      "truePeakDBTP": -1
+    },
+    "music": {
+      "policy": "Solo librerías con licencia comercial registrada (ID de licencia en el ledger del proyecto). Nada de música generada por IA en piezas de cliente sin aprobación legal.",
+      "moods": [
+        "electrónica minimal",
+        "pulso constante 100-120 BPM",
+        "sin voces"
+      ],
+      "duckUnderVoiceDb": -12
+    },
+    "sfx": {
+      "style": "Sutiles y funcionales: clicks de UI, whooshes cortos, hits graves solo en el dato clave.",
+      "maxPerScene": 3
+    },
+    "voice": {
+      "provider": "",
+      "voiceId": "",
+      "synthetic": false,
+      "wordsPerSecond": 2.2,
+      "comment": "Palabras netas de VO = duración (s) × 2,2 (≈130 para 60 s). Lo usan /guion, el guionista y el storyboard.",
+      "consentOnFile": false
+    }
+  },
+  "captions": {
+    "enabled": true,
+    "file": "captions.srt",
+    "burnIn": [
+      "portrait",
+      "feed"
+    ],
+    "burnInComment": "Si existe captions.srt|.vtt en el proyecto, build:roots los quema en estos formatos. En el resto se entregan como archivo (sidecar).",
+    "style": "rail",
+    "maxCharsPerLine": 38,
+    "maxLines": 2,
+    "minDurationMs": 1000,
+    "maxCharsPerSecond": 17,
+    "position": "bottom",
+    "highlightActiveWord": false
+  },
+  "legal": {
+    "aiDisclosure": "Este video incluye elementos generados o asistidos por IA.",
+    "disclosurePolicy": "Más estricta que el mínimo de las plataformas: se divulga SIEMPRE que haya voz sintética (TTS genérica o clon), además de personas o lugares realistas generados e imágenes de producto simuladas.",
+    "requireDisclosureFor": [
+      "voz sintética (TTS genérica o clon)",
+      "personas o lugares realistas generados",
+      "imágenes de producto simuladas"
+    ],
+    "thirdPartyLogos": "Solo con permiso o en uso nominativo (referencia factual); nunca sugerir patrocinio.",
+    "fontsLicensedForVideo": true,
+    "musicLicenseRequired": true
+  }
+}

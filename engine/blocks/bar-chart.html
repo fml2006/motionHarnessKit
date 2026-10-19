@@ -28,7 +28,8 @@
     <template>
       <style>
         #root { position: absolute; inset: 0; container-type: size; }
-        #root .bc { display: flex; flex-direction: column; justify-content: center; gap: 4.5cqmin; }
+        #root .bc { display: flex; flex-direction: column; justify-content: center; gap: calc(4.5cqmin * var(--look-space)); }
+        #root .bc-title, #root .bc-src { text-align: var(--look-text-align); }
         #root .bc-rows { display: flex; flex-direction: column; gap: 3cqmin; }
         #root .bc-row { display: grid; grid-template-columns: 30cqw 1fr; align-items: center; gap: 3cqmin; }
         #root .bc-label { font-size: var(--fs-body); color: var(--c-text-muted); }
@@ -44,7 +45,7 @@
       </style>
       <div id="root" data-composition-id="__ID__">
         <div class="bm-frame">
-          <div class="bm-bg grid"></div>
+          <div class="bm-bg"></div>
           <div class="bm-safe bc">
             <h3 class="bm-h2 bc-title"></h3>
             <div class="bc-rows"></div>

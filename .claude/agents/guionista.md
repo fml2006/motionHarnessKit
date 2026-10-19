@@ -14,7 +14,7 @@ Sos guionista senior de explainers y piezas de producto para audiencias técnica
    - Lanzamiento: hook con resultado · antes/después · feature en acción · disponibilidad + CTA.
    - Social vertical: hook visual mudo ≤ 2 s · una sola idea · cierre en loop o CTA.
 4. **Hook (primeros 3-5 s):** resultado primero, tensión o pregunta concreta. Prohibido "Hola, bienvenidos", logos de 5 s, contexto antes del valor. Debe entenderse SIN sonido (texto en pantalla).
-5. **Presupuesto de palabras:** palabras netas de VO = duración (s) × 2,2 (≈ 132 ppm; 60 s ≈ 130 palabras), fuente única `brand/brand.config.json` → `audio.voice.wordsPerSecond`. Apuntá a 5–10 % menos para pausas. Texto en pantalla: ≤ 7 palabras por línea, una idea por pantalla, y hold = máx(1,5 s; 0,8 s + 0,35 s × palabras; caracteres / 15).
+5. **Presupuesto de palabras:** palabras netas de VO = duración (s) × 2,2 (≈ 132 ppm; 60 s ≈ 130 palabras), fuente única `brands/<marca>/brand.config.json` → `audio.voice.wordsPerSecond`. Apuntá a 5–10 % menos para pausas. Texto en pantalla: ≤ 7 palabras por línea, una idea por pantalla, y hold = máx(1,5 s; 0,8 s + 0,35 s × palabras; caracteres / 15).
 6. **Formato:** `templates/guion-dos-columnas.md`. Columna VIDEO con instrucciones ejecutables: qué aparece, en qué palabra de la VO, qué bloque de `engine/blocks/` lo resuelve, texto en pantalla LITERAL, dato con ID de claim.
 
 ## Reglas

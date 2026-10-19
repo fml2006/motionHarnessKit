@@ -1,21 +1,27 @@
 #!/usr/bin/env node
-// Genera un logo placeholder (isotipo geométrico + wordmark contorneado) desde brand.config.json.
-// Útil hasta tener los SVG oficiales. Uso: node scripts/placeholder-logo.mjs [--config <json>] [--out <dir>] [--keep-mark]
+// Genera un logo placeholder (isotipo geométrico + wordmark contorneado con la fuente display de la marca).
+// Útil hasta tener los SVG oficiales: el sting y el cierre animan <g data-part="mark"> y <g data-part="wordmark">.
+//   node scripts/placeholder-logo.mjs --brand <marca> [--mark bracket|pulse|ring] [--upper] [--keep-mark]
+//   node scripts/placeholder-logo.mjs --config <json> --out <dir> [...]   (ad hoc)
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as fontkit from "fontkit";
+import { defaultBrand, configPath, brandDir } from "./lib/brands.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const argv = process.argv.slice(2);
 const argOf = (n, d) => (argv.includes(n) ? argv[argv.indexOf(n) + 1] : d);
-const cfg = JSON.parse(readFileSync(join(ROOT, argOf("--config", "brand/brand.config.json")), "utf8"));
-const OUTDIR = join(ROOT, argOf("--out", "brand/logo"));
+const slug = argOf("--brand", argv.includes("--config") ? null : defaultBrand());
+const cfg = JSON.parse(readFileSync(slug ? configPath(slug) : join(ROOT, argOf("--config")), "utf8"));
+const OUTDIR = slug ? join(brandDir(slug), "logo") : join(ROOT, argOf("--out"));
 const KEEP_MARK = argv.includes("--keep-mark");
+const STYLE = argOf("--mark", cfg.logo?.placeholderMark || "bracket");
+const UPPER = argv.includes("--upper") || cfg.look?.headlineCase === "uppercase";
 const C = cfg.colors;
-const slug = cfg.typography.display.package.split("/").pop();
+const fslug = cfg.typography.display.package.split("/").pop();
 const w = Math.max(...cfg.typography.display.weights);
-const font = fontkit.openSync(join(ROOT, "node_modules", cfg.typography.display.package, "files", `${slug}-latin-${w}-normal.woff2`));
+const font = fontkit.openSync(join(ROOT, "node_modules", cfg.typography.display.package, "files", `${fslug}-latin-${w}-normal.woff2`));
 
 function outline(text, size) {
   const run = font.layout(text);
@@ -31,15 +37,31 @@ function outline(text, size) {
   return { d: paths.join(" "), width: x, ascent: font.ascent * scale, capHeight: (font.capHeight || font.ascent * 0.7) * scale };
 }
 
-// isotipo: cuadrado redondeado + "corchete" de código + punto de acento (ajustá a tu marca)
+const on = C.onPrimary || C.background;
+// isotipos: cambian la silueta de la marca (no solo el color)
+const MARKS = {
+  // cuadrado redondeado + corchete de código + punto de acento (técnico)
+  bracket: (s) => `<rect x="0" y="0" width="${s}" height="${s}" rx="${s * 0.24}" fill="${C.primary}"/>
+  <path d="M${s * 0.42} ${s * 0.3} L${s * 0.26} ${s * 0.5} L${s * 0.42} ${s * 0.7}" fill="none" stroke="${on}" stroke-width="${s * 0.09}" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="${s * 0.66}" cy="${s * 0.62}" r="${s * 0.09}" fill="${C.accent}"/>`,
+  // círculo + línea de pulso (energético)
+  pulse: (s) => `<circle cx="${s / 2}" cy="${s / 2}" r="${s / 2}" fill="${C.primary}"/>
+  <path d="M${s * 0.14} ${s * 0.54} H${s * 0.34} L${s * 0.43} ${s * 0.3} L${s * 0.56} ${s * 0.74} L${s * 0.65} ${s * 0.46} H${s * 0.86}" fill="none" stroke="${on}" stroke-width="${s * 0.085}" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="${s * 0.86}" cy="${s * 0.46}" r="${s * 0.075}" fill="${C.accent}"/>`,
+  // anillo con punto (sobrio)
+  ring: (s) => `<circle cx="${s / 2}" cy="${s / 2}" r="${s * 0.42}" fill="none" stroke="${C.primary}" stroke-width="${s * 0.12}"/>
+  <circle cx="${s / 2}" cy="${s / 2}" r="${s * 0.13}" fill="${C.accent}"/>`,
+};
+if (!MARKS[STYLE]) {
+  console.error(`✗ --mark "${STYLE}" no existe (${Object.keys(MARKS).join(" | ")})`);
+  process.exit(1);
+}
 const mark = (s = 120) => `<g data-part="mark">
-  <rect x="0" y="0" width="${s}" height="${s}" rx="${s * 0.24}" fill="${C.primary}"/>
-  <path d="M${s * 0.42} ${s * 0.3} L${s * 0.26} ${s * 0.5} L${s * 0.42} ${s * 0.7}" fill="none" stroke="${C.onPrimary || C.background}" stroke-width="${s * 0.09}" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="${s * 0.66}" cy="${s * 0.62}" r="${s * 0.09}" fill="${C.accent}"/>
+  ${MARKS[STYLE](s)}
 </g>`;
 
 const size = 96;
-const word = outline(cfg.meta.name, size);
+const word = outline(UPPER ? cfg.meta.name.toUpperCase() : cfg.meta.name, size);
 const markSize = 120;
 const gap = 36;
 const W = Math.ceil(markSize + gap + word.width + 4);
@@ -65,4 +87,4 @@ if (KEEP_MARK) {
   writeFileSync(join(OUTDIR, "logo.svg"), logo(C.text));
   writeFileSync(join(OUTDIR, "logo-dark.svg"), logo(C.background));
 }
-console.log(`✓ Logo placeholder generado en ${OUTDIR.replace(ROOT + "/", "")}/ (${W}×${H}). Reemplazalo por el SVG oficial.`);
+console.log(`✓ Logo placeholder (${STYLE}${UPPER ? ", mayúsculas" : ""}) en ${OUTDIR.replace(ROOT + "/", "")}/ (${W}×${H}). Reemplazalo por el SVG oficial.`);

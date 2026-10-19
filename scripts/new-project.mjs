@@ -1,21 +1,30 @@
 #!/usr/bin/env node
 // new-project: crea la carpeta de una pieza con preproducción, plan de escenas y composición con la marca aplicada.
 //   node scripts/new-project.mjs <slug> [--title "Título"] [--type explainer|launch|social|tutorial|data|overlay]
-//                                [--formats landscape,portrait,feed,square] [--date 2026-10-19]
+//                                [--brand <marca>] [--formats landscape,portrait,feed,square] [--date 2026-10-19]
+//                                [--mode completo|express]
+// --brand: una marca de brands/ (default: brands/brands.json). La pieza queda atada a ella (scenes.json → brand + brandLock).
+// --mode: modo del orquestador /pieza (si existe scripts/pipeline.mjs): completo (default) o express (social → express).
 import { existsSync, mkdirSync, writeFileSync, copyFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { ROOT, slugify, loadBrand } from "./lib/common.mjs";
 import { NUMERIC_BLOCKS, brandFingerprint } from "./lib/plan.mjs";
+import { defaultBrand, brandExists, listBrands, distDir } from "./lib/brands.mjs";
 
 const args = process.argv.slice(2);
 const val = (n, d) => (args.includes(n) ? args[args.indexOf(n) + 1] : d);
-const raw = args.find((a, i) => !a.startsWith("--") && !["--title", "--type", "--formats", "--date"].includes(args[i - 1]));
+const raw = args.find((a, i) => !a.startsWith("--") && !["--title", "--type", "--formats", "--date", "--brand", "--mode"].includes(args[i - 1]));
 if (!raw) {
-  console.error('Uso: npm run new -- <slug> [--title "Título"] [--type explainer|launch|social|tutorial|data|overlay] [--formats landscape,portrait,feed,square]');
+  console.error('Uso: npm run new -- <slug> [--brand <marca>] [--title "Título"] [--type explainer|launch|social|tutorial|data|overlay] [--formats landscape,portrait,feed,square] [--mode completo|express]');
   process.exit(1);
 }
-const brand = loadBrand();
+const brandSlug = val("--brand", defaultBrand());
+if (!brandExists(brandSlug)) {
+  console.error(`✗ La marca "${brandSlug}" no existe. Marcas del estudio: ${listBrands().join(", ") || "ninguna"} (crear: npm run brand:new -- <slug>)`);
+  process.exit(1);
+}
+const brand = loadBrand(brandSlug);
 const slug = slugify(raw);
 const title = val("--title", raw);
 const type = val("--type", "explainer");
@@ -98,6 +107,7 @@ const plan = {
   title,
   slug,
   type,
+  brand: brandSlug,
   purpose: "production",
   date,
   // social se piensa vertical-first: el maestro es 9:16 y el resto se deriva
@@ -110,8 +120,8 @@ const plan = {
     music: { src: "", volume: 0.25 },
   },
   scenes: starter.map(([id, block, duration, vars, notes]) => ({ id, block, duration, ...(NUMERIC_BLOCKS.includes(block) ? { claims: [] } : {}), vars, notes })),
-  // la pieza queda atada a esta versión de la marca: si brand/ cambia, build:roots frena (salvo --rebrand)
-  brandLock: brandFingerprint(join(ROOT, "brand", "dist"), brand),
+  // la pieza queda atada a esta marca y versión: si brands/<marca>/ cambia, build:roots frena (salvo --rebrand)
+  brandLock: brandFingerprint(distDir(brandSlug), brand),
 };
 writeFileSync(join(dir, "scenes.json"), JSON.stringify(plan, null, 2) + "\n");
 
@@ -119,7 +129,9 @@ writeFileSync(
   join(dir, "README.md"),
   `# ${title}
 
-Tipo: **${type}** · Formatos: ${formats.join(", ")} · Creado: ${date} · Marca: ${brand.meta.name} v${brand.meta.version} (bloqueada en \`scenes.json → brandLock\`)
+Tipo: **${type}** · Formatos: ${formats.join(", ")} · Creado: ${date} · Marca: **${brand.meta.name}** (\`${brandSlug}\`) v${brand.meta.version} (bloqueada en \`scenes.json → brand + brandLock\`)
+
+Look de la marca: ${brand.look?.summary || "—"} → leé \`brands/${brandSlug}/LOOK.md\` y \`brands/${brandSlug}/dist/MOTION.md\` antes de diseñar.
 
 Horas reales por rol y gate: \`review/HORAS.csv\` (se cargan a medida que se trabaja; sin estimar a posteriori).
 
@@ -158,5 +170,13 @@ cd projects/${date}_${slug}/comp && npx hyperframes preview   # Studio para ajus
 
 const b = spawnSync(process.execPath, [join(ROOT, "scripts", "build-roots.mjs"), dir], { stdio: "inherit" });
 if (b.status !== 0) process.exit(b.status || 1);
+// estado del orquestador (/pieza), si el kit lo trae
+const pipeline = join(ROOT, "scripts", "pipeline.mjs");
+if (existsSync(pipeline)) {
+  const mode = val("--mode", type === "social" ? "express" : "completo");
+  const p = spawnSync(process.execPath, [pipeline, "init", dir, "--mode", mode], { stdio: "inherit" });
+  if (p.status !== 0) console.error("  ⚠ pipeline init falló: el proyecto existe, pero /pieza no tiene estado (corré node scripts/pipeline.mjs init " + dir + ")");
+}
 console.log(`\n✓ Proyecto creado: projects/${date}_${slug}/`);
-console.log("  Próximo paso en Claude Code: /brief (o completá 00_brief.md a mano)");
+console.log(`  Marca: ${brand.meta.name} (${brandSlug}) · look: ${brand.look?.summary || "—"}`);
+console.log(existsSync(pipeline) ? `  Próximo paso en Claude Code: /pieza ${date}_${slug} (orquestador) o /brief para ir fase por fase` : "  Próximo paso en Claude Code: /brief (o completá 00_brief.md a mano)");

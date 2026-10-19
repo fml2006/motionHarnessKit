@@ -1,22 +1,27 @@
 # motion-harness-kit — reglas de la casa para Claude Code
 
-Este repo es el harness de producción de motion graphics del equipo: Claude Code + HyperFrames (HTML/GSAP → MP4 determinista) + un sistema de marca configurable + un pipeline de producción con gates humanos. Vos (Claude) operás dentro de ese pipeline: **construís rápido, pero las decisiones de mensaje, datos, gusto final y publicación son humanas.**
+Este repo es el harness de producción de motion graphics del equipo: Claude Code + HyperFrames (HTML/GSAP → MP4 determinista) + un estudio multimarca (cada marca con colores, tipografía, motion, look y bloques firma propios) + un pipeline de producción con gates humanos. Vos (Claude) operás dentro de ese pipeline: **construís rápido, pero las decisiones de mensaje, datos, gusto final y publicación son humanas.**
 
-Antes de diseñar, generar o animar cualquier cosa, leé `MOTION.md` completo. Cada color, fuente, timing y valor de motion sale de ahí (y de los tokens en `brand/dist/`). El archivo fija el look, no la ambición: cuando te pidan ir a fondo, andá a fondo. Si algo que te piden no está cubierto, preguntá en vez de elegir por tu cuenta. Al terminar, revisá tus propios frames contra `MOTION.md` y `templates/anti-slop-review.md`, corregí lo que falle y recién ahí mostralo.
+Antes de diseñar, generar o animar cualquier cosa, leé la marca de la pieza (`scenes.json → "brand"`): `brands/<marca>/LOOK.md` (qué la hace distinta) y `brands/<marca>/dist/MOTION.md` completos. Cada color, fuente, timing, valor de motion y rasgo de look sale de ahí (y de los tokens en `brands/<marca>/dist/`). Nunca mezcles tokens, referencias ni bloques firma de dos marcas en una pieza. El archivo fija el look, no la ambición: cuando te pidan ir a fondo, andá a fondo. Si algo que te piden no está cubierto, preguntá en vez de elegir por tu cuenta. Al terminar, revisá tus propios frames contra el `MOTION.md` y el `LOOK.md` de la marca y `templates/anti-slop-review.md`, corregí lo que falle y recién ahí mostralo.
 
-@brand/dist/brand-rules.md
+@brands/INDEX.md
+
+Reglas completas de cada marca: `brands/<marca>/dist/brand-rules.md` (leé la de la pieza antes de tocarla).
 
 ## Mapa del repo
 
 | Ruta | Qué es | ¿Se edita? |
 |---|---|---|
-| `brand/brand.config.json` | Fuente única de verdad de la marca | Sí (con `/marca`), luego `npm run brand` |
-| `brand/references/` | Frames de referencia del motion de la marca (los usa `/marca`) | Sí |
-| `brand/dist/**`, `MOTION.md`, `brand.md` | Generados por `npm run brand` | **No** |
-| `engine/blocks/*.html` | Bloques de marca (sub-composiciones parametrizables) | Solo para mejorar el bloque para todos los proyectos |
+| `brands/<marca>/brand.config.json` | Fuente única de verdad de ESA marca (incluye `look`) | Sí (con `/marca <marca>`), luego `npm run brand -- <marca>` |
+| `brands/<marca>/LOOK.md` | Dirección de arte en prosa: qué la hace distinta, movimientos firma, sí/no | Sí (con `/marca`) |
+| `brands/<marca>/blocks/*.html` | Bloques firma: mismo nombre que uno del engine = lo reemplaza solo para esa marca; nombre propio = exclusivo | Sí (director de arte) |
+| `brands/brands.json` | Marca default de las piezas nuevas | Sí |
+| `brands/<marca>/references/` | Frames de referencia del motion de la marca (los usa `/marca`) | Sí |
+| `brands/<marca>/dist/**`, `brands/INDEX.md`, `MOTION.md`, `brand.md` (índices de la raíz) | Generados por `npm run brand` | **No** |
+| `engine/blocks/*.html` | Bloques comunes (sub-composiciones que leen tokens y look de la marca de la pieza) | Solo para mejorar el bloque para TODAS las marcas (verificá con `brand:compare`) |
 | `engine/runtime/bm-motion.js` | Helpers de motion que leen los tokens (`BM.*`) | Con cuidado: afecta todo |
 | `projects/<fecha>_<slug>/` | Una pieza: preproducción, `scenes.json`, `comp/`, renders, QA, entrega | Sí |
-| `projects/*/scenes.json` | Plan de escenas ejecutable (spec del storyboard) + `brandLock` | Sí (salvo `brandLock`: lo escribe `build:roots`) |
+| `projects/*/scenes.json` | Plan de escenas ejecutable (spec del storyboard) + `brand` + `brandLock` | Sí (salvo `brandLock`, que escribe `build:roots`; cambiar `brand` = `--brand <otra> --rebrand`) |
 | `projects/*/comp/compositions/<id>.html` | Escena concreta (copiada del bloque, después es libre) | Sí |
 | `projects/*/comp/index.html`, `projects/*/formats/**` | Generados por `npm run build:roots` | **No** |
 | `projects/*/review/HORAS.csv` | Horas por persona, rol y gate (métrica "horas por minuto terminado") | Sí, cada rol carga las suyas |
@@ -28,7 +33,7 @@ Antes de diseñar, generar o animar cualquier cosa, leé `MOTION.md` completo. C
 
 | Gate | Fase | Skill | Artefacto | Aprueba (humano) |
 |---|---|---|---|---|
-| — | Setup de marca | `/marca` | `brand/brand.config.json` + brand board | Director de arte |
+| — | Setup de marca (una vez por marca) | `/marca` | `brands/<marca>/brand.config.json` + LOOK.md + bloques firma + board + `brand:compare` | Director de arte |
 | G0-G1 | Brief + investigación | `/brief` | `00_brief.md` (incluye §11b confidencialidad), `research/claims.csv` | Productor (+ SME firma claims) |
 | G2-G3 | Treatment + guion | `/guion` | `01_guion.md` (dos columnas) | Director creativo |
 | G4-G5 | Styleframes + storyboard | `/storyboard` | `02_storyboard.md`, `scenes.json`, `review/frames-*` | Director creativo |
@@ -45,12 +50,12 @@ Están en `.claude/skills/` con el lock `HYPERFRAMES_SKILLS.lock.json` y un parc
 | Skill | Rol | Auto-invocable | Riesgo / regla |
 |---|---|---|---|
 | `hyperframes-core` | Contrato de composición (timing, sub-composiciones, variables, determinismo) | Sí | Referencia técnica; manda sobre cualquier otra fuente para el contrato |
-| `hyperframes-animation` | Reglas de motion, blueprints, adapters (GSAP) | Sí | Los valores de marca salen de `MOTION.md`, no de sus defaults |
+| `hyperframes-animation` | Reglas de motion, blueprints, adapters (GSAP) | Sí | Los valores de marca salen del `MOTION.md` de la marca de la pieza, no de sus defaults |
 | `hyperframes-keyframes` | Cámara, zooms, máscaras, morphs seek-safe | Sí | Ídem |
-| `hyperframes-creative` | Dirección creativa genérica (paletas, tipografía, narración) | Sí | **La marca la define `brand.config.json`**: no adoptes paletas ni fuentes propuestas por la skill |
+| `hyperframes-creative` | Dirección creativa genérica (paletas, tipografía, narración) | Sí | **La marca la define `brands/<marca>/brand.config.json` + `LOOK.md`**: no adoptes paletas, fuentes ni estilos propuestos por la skill |
 | `hyperframes-cli` | lint, check, snapshot, preview, render, docs | Sí | `feedback`, `publish`, `cloud`, `lambda`, `cloudrun`, `auth`, `upgrade`, `skills` están denegados |
 | `hyperframes-registry` | Buscar e instalar bloques del registry | Sí | `hyperframes add` pide permiso; registrar en `PROVENANCE.md` todo bloque instalado |
-| `hyperframes-audio` | Mezcla de audio ya colocado en la composición | Sí | Loudness final según `brand.config audio.loudness` |
+| `hyperframes-audio` | Mezcla de audio ya colocado en la composición | Sí | Loudness final según `audio.loudness` de la marca |
 | `hyperframes` | Entry point "obligatorio" de HyperFrames | **No** | Se saltea `/brief` y los gates: solo con pedido explícito |
 | `motion-graphics` | Workflow de piezas cortas de motion | **No** | Ídem; no usa los bloques de marca |
 | `general-video` | Workflow de piezas largas / multi-escena | **No** | Ídem |
@@ -60,17 +65,17 @@ Están en `.claude/skills/` con el lock `HYPERFRAMES_SKILLS.lock.json` y un parc
 ## Reglas no negociables
 
 1. **No inventar.** Ningún número, claim, cita, salida de terminal, código o UI sale de tu imaginación. Todo dato en pantalla tiene fuente en `research/claims.csv` o en un archivo del proyecto, y la escena lo declara en `"claims": ["C-00X"]` de `scenes.json`. Si falta, poné `COMPLETAR` y avisá. Los bloques traen defaults visiblemente vacíos (`COMPLETAR`), nunca cifras de ejemplo: `build:roots --strict` (que usan el render final y la entrega) falla si queda un placeholder, si un bloque de cifras (`stat-hit`, `bar-chart`) no declara `claims`, o si una escena cita un claim que no está en `ok` y firmado por el SME. El gate no lee el sentido del texto: una cifra metida en un `kinetic-statement` o en una escena custom también necesita su `claims`, y eso lo controlás vos y el `investigador`.
-2. **Solo tokens de marca.** Colores con `var(--c-*)` / `BRAND.color()`, tipografía con las clases `.bm-*`, duraciones/easings con `BRAND.dur()` / `BRAND.ease()`. Nada de hex, fuentes o curvas sueltas (el build avisa y `--strict` lo frena). Si la marca no cubre algo, preguntá.
-3. **No editar archivos generados** (`brand/dist/**`, `MOTION.md`, `brand.md`, `comp/index.html`, `formats/**`). Editá la fuente y regenerá.
+2. **Solo tokens de marca.** Colores con `var(--c-*)` / `BRAND.color()`, tipografía con las clases `.bm-*`, duraciones/easings con `BRAND.dur()` / `BRAND.ease()`. Nada de hex, fuentes o curvas sueltas (el build avisa y `--strict` lo frena). El look (fondo `.bm-bg`/`.is-hero`/`.is-plain`, alineación `var(--look-*)`, acento `BM.accentIn`, reveal `BM.revealLines`, kicker `.bm-kicker-deco`, tarjetas `.bm-card`) también es token: no lo pises escena por escena. Si la marca no cubre algo, preguntá.
+3. **No editar archivos generados** (`brands/<marca>/dist/**`, `brands/INDEX.md`, `MOTION.md`, `brand.md`, `comp/index.html`, `formats/**`). Editá la fuente y regenerá.
 4. **Escenas = contrato HyperFrames.** Partí de un bloque de `engine/blocks/` (catálogo en `engine/blocks/README.md`). Si hace falta una escena a medida (`"block": "custom"`), copiá la estructura de un bloque: `<template>`, `#root` con `container-type: size`, `BM.vars(defaults, window.__hyperframes)`, un solo `gsap.timeline({ paused: true })` registrado en `window.__timelines["<id>"]`, `fromTo` en vez de `from`, tamaños en `cqmin`. Determinismo: prohibido `Math.random()` sin seed, `Date.now()`, `fetch` y animaciones CSS por tiempo real. Los tweens de conteo van sobre nodos DOM (los objetos JS planos se descartan). Transiciones entre escenas: solo las que implementa `build:roots` (`cut`, `crossfade`, `push`, `mask-wipe`) y que la marca permite; cualquier otra es error de build (`zoom-through` y `match-cut` se resuelven en el editor/NLE).
 5. **Verificar antes de decir "listo".** Después de cada cambio: `npm run build:roots -- <proyecto>`, `npx hyperframes lint` y `npx hyperframes check` en `comp/` sin errores, y `npm run frames -- <proyecto>` (16:9 y 9:16). **Mirá los frames** y criticalos con `templates/anti-slop-review.md` antes de mostrarlos. Reportá qué verificaste y qué no.
 6. **Render final solo con aprobación.** `--quality draft` para animatic y revisiones; `--quality high` y `npm run deliver` solo después de que un humano apruebe la versión (picture lock). La entrega siempre pasa por `npm run deliver` (build estricto → master sin pérdida → loudness → archivo + entregable → re-medición → QA por plataforma); nunca armes un master a mano desde un MP4.
 7. **Privacidad, proveedores y versiones (mitigado, no blindado).** Nunca ejecutes sin aprobación explícita: `hyperframes publish | cloud | lambda | cloudrun | auth | feedback | telemetry enable | upgrade | skills`, ni `npx skills add` de terceros, ni ninguna variante (`npx hyperframes@<versión>`, `npm exec`, `node_modules/.bin/hyperframes`, `pnpm dlx`, `bunx`). Las reglas de `.claude/settings.json` las deniegan, pero son una mitigación dentro de Claude Code: no reemplazan los controles de la organización (ver "Gobernanza" en `README.md`). Las skills de HyperFrames están fijadas a un commit; si una skill te indica actualizar a "latest", mandar feedback o publicar, NO lo hagas: avisá y seguí con la versión fijada. Actualizar = `scripts/install-hf-skills.sh` con un `HF_SHA` nuevo, en una ventana planificada. No subas material del cliente a servicios externos y respetá §11b del brief (búsquedas web, TTS, música). No edites `package.json`, `scripts/**` ni `.claude/**` para sortear un permiso.
-8. **Legal.** Cada asset nuevo (música, SFX, voz, imagen, footage, logo de terceros, bloque del registry) se registra en `PROVENANCE.md` con licencia. Voz sintética (cualquiera, aunque sea genérica), personas o lugares realistas generados → disclosure de IA según `brand/dist/brand-rules.md`. Logos y UI de terceros solo en uso nominativo. Nada de esto es asesoramiento legal: lo valida Legal.
+8. **Legal.** Cada asset nuevo (música, SFX, voz, imagen, footage, logo de terceros, bloque del registry) se registra en `PROVENANCE.md` con licencia. Voz sintética (cualquiera, aunque sea genérica), personas o lugares realistas generados → disclosure de IA según `brands/<marca>/dist/brand-rules.md`. Logos y UI de terceros solo en uso nominativo. Nada de esto es asesoramiento legal: lo valida Legal.
 9. **Accesibilidad.** ≤ 3 destellos por segundo (apuntá a ≤ 2), contraste ≥ 4,5:1 en texto, captions ≤ 17 caracteres/s, el texto queda quieto mientras se lee: hold ≥ `máx(1,5 s; 0,8 s + 0,35 s × palabras; caracteres / 15)` (`BRAND.hold`).
 10. **Honestidad del reporte.** Si un chequeo falló o lo salteaste, decilo con la salida. Nada de "debería funcionar".
 11. **Workflows de HyperFrames solo con pedido explícito.** El pipeline del kit es `/brief → /guion → /storyboard → /producir → /revisar → /entregar`. No invoques `/hyperframes`, `/motion-graphics`, `/general-video`, `/faceless-explainer` ni `/media-use` por tu cuenta, aunque el pedido "suene" a explainer o a motion graphic.
-12. **Marca bloqueada por proyecto.** `scenes.json → brandLock` ata la pieza a la versión de marca con la que se aprobó; si `brand/dist` cambió, `build:roots` se frena. Usá `--rebrand` solo si el director de arte aprobó cambiar la marca de ESA pieza (queda en `review/CHANGELOG.md`). Para clientes con marcas distintas: un repo (o una rama) por marca.
+12. **Una marca por pieza, bloqueada.** `scenes.json → brand` elige la marca y `brandLock` (marca + versión + hash) la ata a la versión con la que se aprobó; si `brands/<marca>/dist` cambió, `build:roots` se frena. Usá `--rebrand` solo si el director de arte aprobó cambiar la marca de ESA pieza; pasarla a otra marca es `--brand <otra> --rebrand` (las dos cosas quedan en `review/CHANGELOG.md`). Un bloque firma de otra marca es error de build. Las marcas conviven en el mismo repo; separá repos solo por confidencialidad de clientes.
 
 ## Comandos
 
@@ -78,11 +83,15 @@ Están en `.claude/skills/` con el lock `HYPERFRAMES_SKILLS.lock.json` y un parc
 npm run setup                                    # una vez por máquina: telemetría de HyperFrames apagada (también fuera de Claude Code)
 npm run doctor                                   # entorno OK (Node, ffmpeg, Chrome, versiones, skills, privacidad)
 npm run selftest                                 # prueba de punta a punta de la cadena render → loudness → master → QA
-npm run brand                                    # brand.config.json → brand/dist + MOTION.md
-npm run new -- <slug> --type explainer           # nueva pieza (explainer|launch|social|tutorial|data|overlay)
+npm run brand [-- <marca>]                       # brands/<marca>/brand.config.json → brands/<marca>/dist + índices (sin marca: todas)
+npm run brand:list                               # marcas del estudio, su look, bloques firma y piezas que las usan
+npm run brand:new -- <slug> --from <marca>       # marca nueva (después: /marca <slug>)
+npm run brand:compare -- <proyecto> --brands a,b [--format portrait]   # la misma pieza con varias marcas, lado a lado
+npm run new -- <slug> --brand <marca> --type explainer   # nueva pieza (explainer|launch|social|tutorial|data|overlay)
 npm run build:roots -- <proyecto>                # scenes.json → comp/ + formats/ (re-sincroniza la marca si coincide con brandLock)
 npm run build:roots -- <proyecto> --strict       # gate de contenido: placeholders, claims, tokens, captions → FAIL
-npm run build:roots -- <proyecto> --rebrand      # aceptar a conciencia una marca nueva para esta pieza
+npm run build:roots -- <proyecto> --rebrand      # aceptar a conciencia una versión nueva de la marca para esta pieza
+npm run build:roots -- <proyecto> --brand <otra> --rebrand   # pasar la pieza a otra marca
 npm run build:roots -- <proyecto> --reset <id>   # re-copiar una escena desde su bloque
 npm run frames -- <proyecto> [--format portrait] # frame clave por escena + contact sheet
 npm run render -- <proyecto> --quality draft     # render versionado + QA automático (falla si el QA falla)
@@ -91,7 +100,7 @@ npm run qa -- <proyecto|video> --platform <p>    # QA técnico de un archivo sue
 cd projects/<p>/comp && npx hyperframes preview  # Studio (ajuste fino visual)
 ```
 
-Formatos disponibles (definidos en `brand.config.json → formats`): `landscape` 16:9, `portrait` 9:16, `square` 1:1 y `feed` 4:5 (LinkedIn/Instagram feed). Captions quemados: `captions.srt` (o `.vtt`) opcional en la raíz del proyecto; `build:roots` los quema en los formatos de `brand.config captions.burnIn` (por defecto `portrait` y `feed`) y los valida contra las reglas de captions (caracteres/línea, caracteres/s, duración mínima). Los captions los revisa un humano (G11).
+Formatos disponibles (definidos en `brands/<marca>/brand.config.json → formats`): `landscape` 16:9, `portrait` 9:16, `square` 1:1 y `feed` 4:5 (LinkedIn/Instagram feed). Captions quemados: `captions.srt` (o `.vtt`) opcional en la raíz del proyecto; `build:roots` los quema en los formatos de `brand.config captions.burnIn` (por defecto `portrait` y `feed`) y los valida contra las reglas de captions (caracteres/línea, caracteres/s, duración mínima). Los captions los revisa un humano (G11).
 
 ## Cómo traducir feedback humano
 

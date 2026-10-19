@@ -3,6 +3,7 @@
 //   node scripts/doctor.mjs          diagnóstico (no cambia nada)
 //   node scripts/doctor.mjs --fix    = npm run setup: apaga la telemetría de HyperFrames en la config del usuario
 //                                    y descarga el Chrome fijado si falta. Correrlo una vez por máquina.
+import { listBrands, defaultBrand } from "./lib/brands.mjs";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -71,14 +72,22 @@ process.env.HYPERFRAMES_NO_TELEMETRY || process.env.DO_NOT_TRACK
   ? ok("Variables de entorno", "HYPERFRAMES_NO_TELEMETRY/DO_NOT_TRACK presentes en esta shell")
   : warn("Variables de entorno", "esta shell no tiene HYPERFRAMES_NO_TELEMETRY=1 (recomendado en el perfil de cada máquina: export HYPERFRAMES_NO_TELEMETRY=1 DO_NOT_TRACK=1)");
 
-existsSync(join(ROOT, "brand", "dist", "tokens.css")) ? ok("Marca", "brand/dist/ generado") : bad("Marca", "corré npm run brand");
-const chk = spawnSync(process.execPath, [join(ROOT, "scripts", "brand-apply.mjs"), "--check"], { encoding: "utf8" });
-chk.status === 0 ? ok("brand.config.json", (chk.stdout || "").trim().split("\n")[0]) : bad("brand.config.json", (chk.stderr || chk.stdout).trim());
-const cfg = JSON.parse(readFileSync(join(ROOT, "brand", "brand.config.json"), "utf8"));
-cfg.meta?.name === "TuMarca" ? warn("Identidad", "sigue la marca placeholder 'TuMarca': corré /marca en Claude Code") : ok("Identidad", cfg.meta?.name);
-for (const r of ["display", "body", "mono"]) {
-  const ty = cfg.typography?.[r];
-  if (ty && !ty.license) warn(`Fuente ${r}`, `${ty.family}: declará la licencia (typography.${r}.license) y confirmá que cubre video`);
+// marcas del estudio (brands/<slug>/): cada una aplicada, válida, con contraste OK y licencias de fuentes declaradas
+const brands = listBrands();
+const def = defaultBrand();
+brands.length ? ok("Marcas", `${brands.length} en brands/ (${brands.join(", ")}) · default ${def}`) : bad("Marcas", "no hay marcas en brands/: npm run brand:new -- <slug>");
+for (const b of brands) {
+  if (!existsSync(join(ROOT, "brands", b, "dist", "tokens.css"))) { bad(`Marca ${b}`, `sin aplicar: npm run brand -- ${b}`); continue; }
+  const chk = spawnSync(process.execPath, [join(ROOT, "scripts", "brand-apply.mjs"), "--brand", b, "--check"], { encoding: "utf8" });
+  if (chk.status !== 0) { bad(`Marca ${b}`, (chk.stderr || chk.stdout).trim().split("\n").slice(-3).join(" · ")); continue; }
+  const cfg = JSON.parse(readFileSync(join(ROOT, "brands", b, "brand.config.json"), "utf8"));
+  const line = (chk.stdout || "").trim().split("\n")[0].replace(/^✓ /, "");
+  existsSync(join(ROOT, "brands", b, "LOOK.md")) ? ok(`Marca ${b}`, line) : warn(`Marca ${b}`, `${line} · falta brands/${b}/LOOK.md (dirección de arte): /marca ${b}`);
+  if (cfg.meta?.name === "TuMarca") warn(`Identidad ${b}`, "sigue la marca placeholder 'TuMarca': corré /marca en Claude Code");
+  for (const r of ["display", "body", "mono"]) {
+    const ty = cfg.typography?.[r];
+    if (ty && !ty.license) warn(`Fuente ${r} (${b})`, `${ty.family}: declará la licencia (typography.${r}.license) y confirmá que cubre video`);
+  }
 }
 
 const skillsDir = join(ROOT, ".claude", "skills");

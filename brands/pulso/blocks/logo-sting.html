@@ -1,0 +1,70 @@
+<!doctype html>
+<!--
+  bm-block: logo-sting
+  Uso: FIRMA de Pulso (reemplaza al logo-sting del engine solo para esta marca). "Pop": el isotipo entra con un golpe seco (sin rebote), una banda lima barre detrás del wordmark y la bajada sube en mayúsculas.
+  Duración sugerida: 1.8-2.4 s (Pulso es rápida).
+  Aperturas y cierres de marca en social. Un solo resaltado por frame: la banda del wordmark ES el acento de esta escena.
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"tagline","type":"string","label":"Bajada (opcional, mayúsculas)","default":"","maxLength":40},
+    {"id":"exit","type":"enum","label":"Salida","default":"none","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":2.2,"min":1,"max":10,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>logo-sting · pulso</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; }
+        #root .pp { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 3cqmin; }
+        #root .pp-logo { position: relative; height: 15cqmin; display: flex; align-items: center; }
+        #root .pp-band { position: absolute; top: 8%; bottom: 8%; left: 30%; right: -3cqmin; background: var(--c-accent); border-radius: var(--radius-sm); transform-origin: left center; }
+        #root .pp-logo svg { position: relative; height: 100%; width: auto; display: block; overflow: visible; }
+        #root .pp-tag { font-family: var(--font-display); font-weight: var(--w-display); text-transform: uppercase; letter-spacing: 0.02em; font-size: var(--fs-h3); color: var(--c-text); }
+      </style>
+      <div id="root" data-composition-id="__ID__">
+        <div class="bm-frame">
+          <div class="bm-bg is-hero"></div>
+          <div class="bm-safe pp">
+            <div class="pp-logo"><div class="pp-band"></div></div>
+            <div class="pp-tag"></div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ tagline: "", exit: "none", dur: 2.2 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          var holder = q(".pp-logo");
+          holder.insertAdjacentHTML("beforeend", BRAND.logo.svgPrimary || BRAND.logo.svgMark || "");
+          var svg = holder.querySelector("svg");
+          var tag = q(".pp-tag");
+          if (v.tagline) tag.textContent = v.tagline; else tag.remove();
+          var tl = gsap.timeline({ paused: true });
+          if (svg) {
+            var mark = svg.querySelector('[data-part="mark"]');
+            var wordGroup = svg.querySelector('[data-part="wordmark"]');
+            var word = wordGroup ? wordGroup.firstElementChild : null;
+            if (mark) tl.fromTo(mark, { scale: 0.4, opacity: 0, transformOrigin: "50% 50%" }, { scale: 1, opacity: 1, duration: BRAND.dur("enter"), ease: BRAND.ease("emphasized") }, 0.1);
+            // la banda lima barre y el wordmark queda escrito sobre ella (el texto pasa a onAccent)
+            tl.fromTo(q(".pp-band"), { scaleX: 0 }, { scaleX: 1, duration: BRAND.dur("enter"), ease: BRAND.ease("emphasized") }, 0.3);
+            if (word) {
+              tl.fromTo(word, { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: BRAND.dur("enter"), ease: BRAND.ease("enter") }, 0.35);
+              tl.fromTo(word, { fill: BRAND.color("text") }, { fill: BRAND.color("onAccent"), duration: BRAND.dur("short"), ease: BRAND.ease("standard") }, 0.45);
+            }
+            if (!mark && !word) tl.fromTo(svg, { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: BRAND.dur("enter"), ease: BRAND.ease("emphasized") }, 0.1);
+          } else q(".pp-band").remove();
+          if (tag.isConnected) BM.fadeUp(tl, tag, 0.8, { yPercent: 40 });
+          BM.exit(tl, q(".pp"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
+          window.__timelines["__ID__"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

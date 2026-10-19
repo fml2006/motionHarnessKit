@@ -25,9 +25,10 @@
     <template>
       <style>
         #root { position: absolute; inset: 0; container-type: size; }
-        #root .sc { display: flex; flex-direction: column; justify-content: center; gap: 5cqmin; }
+        #root .sc { display: flex; flex-direction: column; justify-content: center; gap: calc(5cqmin * var(--look-space)); }
+        #root .sc-title { text-align: var(--look-text-align); }
         #root .sc-cols { display: grid; grid-template-columns: 1fr var(--stroke) 1fr; gap: 6cqmin; }
-        #root .sc-col { display: flex; flex-direction: column; gap: 2.6cqmin; }
+        #root .sc-col { display: flex; flex-direction: column; gap: calc(2.6cqmin * var(--look-space)); padding: 3cqmin; }
         #root .sc-head { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-text-muted); }
         #root .sc-col.is-right .sc-head { color: var(--c-primary); }
         #root .sc-item { display: flex; gap: 2cqmin; align-items: baseline; font-size: var(--fs-body); line-height: 1.25; color: var(--c-text-muted); }
@@ -42,13 +43,13 @@
       </style>
       <div id="root" data-composition-id="b09-compare">
         <div class="bm-frame">
-          <div class="bm-bg grid"></div>
+          <div class="bm-bg"></div>
           <div class="bm-safe sc">
             <h3 class="bm-h2 sc-title"></h3>
             <div class="sc-cols">
-              <div class="sc-col is-left"><div class="sc-head"></div></div>
+              <div class="sc-col bm-card is-left"><div class="sc-head"></div></div>
               <div class="sc-div"></div>
-              <div class="sc-col is-right"><div class="sc-head"></div></div>
+              <div class="sc-col bm-card is-right"><div class="sc-head"></div></div>
             </div>
           </div>
         </div>

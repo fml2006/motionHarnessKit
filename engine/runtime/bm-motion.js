@@ -6,8 +6,10 @@
      BM.vars(defaults)                     variables de la instancia (defaults + data-variable-values del host)
      BM.lines(el, text)                    arma líneas enmascaradas desde "línea 1|línea 2" → [span]
      BM.words(el, text, accentWord?)       arma palabras → [span]; marca la palabra de acento
-     BM.revealLines(tl, spans, at)         reveal por línea desde abajo (máscara)
-     BM.revealWords(tl, spans, at)         reveal por palabra
+     BM.revealLines(tl, spans, at)         reveal por línea según BRAND.look.textReveal (mask | fade | rise | blur)
+     BM.revealWords(tl, spans, at)         reveal por palabra (mismo look)
+     BM.accentIn(tl, els, at)              anima el acento según BRAND.look.accentStyle (color | underline | highlight | italic)
+     BM.decoIn(tl, el, at)                 entrada de la decoración del kicker (.bm-kicker-deco) según BRAND.look.kicker
      BM.fadeUp(tl, targets, at, opts)      entrada sobria (opacidad + desplazamiento corto)
      BM.exit(tl, targets, at, mode)        salida: "fade" | "up" | "none"
      BM.countUp(tl, el, to, at, opts)      conteo numérico (from, decimals, prefix, suffix, locale, dur)
@@ -21,6 +23,8 @@
   "use strict";
   var B = window.BRAND;
   if (!B) throw new Error("bm-motion.js: falta window.BRAND (cargá brand/tokens.js antes)");
+  // el look de la marca decide CÓMO entra el texto, cómo se ve el acento y la decoración del kicker
+  var LOOK = B.look || { textReveal: "mask", accentStyle: "color", kicker: "line" };
 
   function esc(t) {
     return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) {
@@ -62,7 +66,15 @@
 
   // *texto* entre asteriscos = momento de acento (máx. 1 por frame según la marca)
   function accentMarkup(s) {
-    return esc(s).replace(/\*([^*]+)\*/g, '<em class="bm-accent" style="font-style:normal">$1</em>');
+    // el texto plano va en su propio span: así cada tramo se mide contra SU fondo (el acento resaltado tiene el suyo)
+    return String(s)
+      .split(/(\*[^*]+\*)/)
+      .filter(function (part) { return part !== ""; })
+      .map(function (part) {
+        var m = part.match(/^\*([^*]+)\*$/);
+        return m ? '<em class="bm-accent">' + esc(m[1]) + "</em>" : '<span class="bm-plain">' + esc(part) + "</span>";
+      })
+      .join("");
   }
 
   function words(el, text, accentWord) {
@@ -111,37 +123,100 @@
     return false;
   }
 
+  // estados de entrada por look (el "to" siempre vuelve a opacidad 1 y posición 0)
+  function revealFrom(mode, kind) {
+    if (mode === "fade") return { opacity: 0 };
+    if (mode === "rise") return { opacity: 0, yPercent: kind === "words" ? 70 : 55 };
+    if (mode === "blur") return { opacity: 0, yPercent: 10, filter: "blur(0.28em)" };
+    return kind === "words" ? { opacity: 0, yPercent: 35 } : { yPercent: 110 }; // mask
+  }
+  function revealTo(mode, kind) {
+    if (mode === "fade") return { opacity: 1 };
+    if (mode === "blur") return { opacity: 1, yPercent: 0, filter: "blur(0em)" };
+    if (mode === "rise") return { opacity: 1, yPercent: 0 };
+    return kind === "words" ? { opacity: 1, yPercent: 0 } : { yPercent: 0 };
+  }
+  function revealDur(mode, kind) {
+    var base = kind === "words" ? B.dur("short") * 1.6 : B.dur("enter") * 1.3;
+    return mode === "fade" ? base * 1.35 : mode === "blur" ? base * 1.15 : base;
+  }
+  function revealEase(mode, kind) {
+    if (mode === "fade") return "standard";
+    if (mode === "blur") return "enter";
+    return kind === "words" && mode === "mask" ? "enter" : "emphasized";
+  }
+
   function revealLines(tl, spans, at, opts) {
     if (empty(spans)) return tl;
     opts = opts || {};
-    tl.fromTo(
-      spans,
-      { yPercent: 110 },
-      { yPercent: 0, duration: opts.duration || B.dur("enter") * 1.3, ease: B.ease(opts.ease || "emphasized"), stagger: opts.stagger != null ? opts.stagger : B.stagger("lines") },
-      at
-    );
+    var mode = opts.mode || LOOK.textReveal || "mask";
+    var d = opts.duration || revealDur(mode, "lines");
+    var st = opts.stagger != null ? opts.stagger : B.stagger("lines") * (mode === "fade" ? 1.4 : 1);
+    var to = revealTo(mode, "lines");
+    to.duration = d;
+    to.ease = B.ease(opts.ease || revealEase(mode, "lines"));
+    to.stagger = st;
+    tl.fromTo(spans, revealFrom(mode, "lines"), to, at);
+    // el acento con forma (subrayado / resaltado) se dibuja cuando su línea ya llegó
+    if (opts.accent !== false && (LOOK.accentStyle === "underline" || LOOK.accentStyle === "highlight")) {
+      Array.prototype.forEach.call(spans, function (sp, i) {
+        var acc = sp.querySelectorAll ? sp.querySelectorAll(".bm-accent") : [];
+        if (acc.length) accentIn(tl, acc, at + i * st + d * 0.7);
+      });
+    }
     return tl;
   }
 
   function revealWords(tl, spans, at, opts) {
     if (empty(spans)) return tl;
     opts = opts || {};
-    tl.fromTo(
-      spans,
-      { opacity: 0, yPercent: 35 },
-      { opacity: 1, yPercent: 0, duration: opts.duration || B.dur("short") * 1.6, ease: B.ease(opts.ease || "enter"), stagger: opts.stagger != null ? opts.stagger : B.stagger("words") },
-      at
-    );
+    var mode = opts.mode || LOOK.textReveal || "mask";
+    var to = revealTo(mode, "words");
+    to.duration = opts.duration || revealDur(mode, "words");
+    to.ease = B.ease(opts.ease || revealEase(mode, "words"));
+    to.stagger = opts.stagger != null ? opts.stagger : B.stagger("words");
+    tl.fromTo(spans, revealFrom(mode, "words"), to, at);
+    return tl;
+  }
+
+  // acento según la marca: color (vira al acento), underline (se dibuja la línea), highlight (se pinta la banda),
+  // italic (la itálica ya está; vira al color de acento). Seek-safe: todo fromTo.
+  function accentIn(tl, els, at, opts) {
+    if (empty(els)) return tl;
+    opts = opts || {};
+    var style = opts.style || LOOK.accentStyle || "color";
+    var d = opts.duration || (style === "color" || style === "italic" ? B.dur("short") : B.dur("enter"));
+    if (style === "underline") {
+      tl.fromTo(els, { backgroundSize: "0% 0.1em" }, { backgroundSize: "100% 0.1em", duration: d, ease: B.ease("emphasized") }, at);
+    } else if (style === "highlight") {
+      // la banda barre (background-image) y al llegar queda como background-color: el estado final es inequívoco
+      // para el chequeo de contraste (que no lee gradientes) y para cualquier lector
+      tl.fromTo(els, { backgroundSize: "0% 100%", backgroundColor: "rgba(0,0,0,0)", color: B.color("text") }, { backgroundSize: "100% 100%", color: B.color("onAccent") || B.color("background"), duration: d, ease: B.ease("emphasized") }, at);
+      tl.set(els, { backgroundColor: B.color("accent") }, at + d);
+    } else {
+      tl.fromTo(els, { color: B.color("text") }, { color: B.color("accent"), duration: d, ease: B.ease("standard") }, at);
+    }
+    return tl;
+  }
+
+  // decoración del kicker: línea que se dibuja, punto que aparece, o nada
+  function decoIn(tl, el, at, opts) {
+    if (empty(el) || LOOK.kicker === "none") return tl;
+    opts = opts || {};
+    if (LOOK.kicker === "dot") tl.fromTo(el, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: opts.duration || B.dur("short"), ease: B.ease("enter") }, at);
+    else drawLine(tl, el, at, "x", { duration: opts.duration || B.dur("enter") });
     return tl;
   }
 
   function fadeUp(tl, targets, at, opts) {
     if (empty(targets)) return tl;
     opts = opts || {};
+    // la distancia también es del look: fundido casi sin desplazamiento, "rise" con más recorrido
+    var k = LOOK.textReveal === "fade" ? 0.3 : LOOK.textReveal === "rise" ? 1.5 : 1;
     tl.fromTo(
       targets,
-      { opacity: 0, yPercent: opts.yPercent != null ? opts.yPercent : 20 },
-      { opacity: 1, yPercent: 0, duration: opts.duration || B.dur("enter"), ease: B.ease(opts.ease || "enter"), stagger: opts.stagger || 0 },
+      { opacity: 0, yPercent: (opts.yPercent != null ? opts.yPercent : 20) * k },
+      { opacity: 1, yPercent: 0, duration: opts.duration || B.dur("enter") * (LOOK.textReveal === "fade" ? 1.25 : 1), ease: B.ease(opts.ease || "enter"), stagger: opts.stagger || 0 },
       at
     );
     return tl;
@@ -223,7 +298,8 @@
 
   window.BM = {
     PLACEHOLDER: PLACEHOLDER,
-    vars: vars, lines: lines, words: words, revealLines: revealLines, revealWords: revealWords,
+    look: LOOK,
+    vars: vars, lines: lines, words: words, revealLines: revealLines, revealWords: revealWords, accentIn: accentIn, decoIn: decoIn,
     fadeUp: fadeUp, exit: exit, empty: empty, countUp: countUp, typeText: typeText, drawLine: drawLine,
     highlightCode: highlightCode, esc: esc, fmt: fmt, accentMarkup: accentMarkup,
   };

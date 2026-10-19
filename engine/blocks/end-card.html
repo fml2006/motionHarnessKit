@@ -22,15 +22,17 @@
     <template>
       <style>
         #root { position: absolute; inset: 0; container-type: size; }
-        #root .ec { display: flex; flex-direction: column; justify-content: center; gap: 4cqmin; }
+        #root .ec { display: flex; flex-direction: column; justify-content: center; align-items: var(--look-items); text-align: var(--look-text-align); gap: calc(4cqmin * var(--look-space)); }
         #root .ec-logo { height: 6cqmin; }
         #root .ec-logo svg { height: 100%; width: auto; display: block; }
-        #root .ec-chip { align-self: flex-start; font-size: var(--fs-body); padding: 1.4cqmin 3cqmin; background: var(--c-primary); color: var(--c-on-primary); font-weight: 600; }
-        #root .ec-note { position: absolute; left: 0; right: 0; bottom: 0; }
+        #root .ec-chip { font-size: var(--fs-body); padding: 1.4cqmin 3cqmin; background: var(--c-primary); color: var(--c-on-primary); font-weight: 600; }
+        #root .ec-note { position: absolute; left: 0; right: 0; bottom: 0; text-align: var(--look-text-align); }
+        /* con nota al pie, el bloque central no puede bajar hasta ella (CTAs largos o en mayúsculas en 9:16) */
+        #root .ec.has-note { padding-bottom: calc(var(--fs-label) * 3.2); }
       </style>
       <div id="root" data-composition-id="__ID__">
         <div class="bm-frame">
-          <div class="bm-bg grid glow"></div>
+          <div class="bm-bg is-hero"></div>
           <div class="bm-safe ec">
             <div class="ec-logo bm-logo"></div>
             <h2 class="bm-h1 ec-cta"></h2>
@@ -49,12 +51,12 @@
           var lines = BM.lines(q(".ec-cta"), v.cta);
           q(".ec-chip").textContent = v.link;
           var note = q(".ec-note");
-          if (v.note) note.textContent = v.note; else note.remove();
+          if (v.note) { note.textContent = v.note; q(".ec").classList.add("has-note"); } else note.remove();
           var tl = gsap.timeline({ paused: true });
           BM.fadeUp(tl, logo, 0.1, { yPercent: 30 });
           BM.revealLines(tl, lines, 0.3);
           var after = 0.3 + BRAND.dur("enter") + (lines.length - 1) * BRAND.stagger("lines");
-          tl.fromTo(q(".ec-chip"), { opacity: 0, scale: 0.92, transformOrigin: "0% 50%" }, { opacity: 1, scale: 1, duration: BRAND.dur("enter"), ease: BRAND.ease("enter") }, after);
+          tl.fromTo(q(".ec-chip"), { opacity: 0, scale: 0.92, transformOrigin: BM.look.align === "center" ? "50% 50%" : "0% 50%" }, { opacity: 1, scale: 1, duration: BRAND.dur("enter"), ease: BRAND.ease("enter") }, after);
           if (note.isConnected) tl.fromTo(note, { opacity: 0 }, { opacity: 1, duration: BRAND.dur("short") }, after + 0.4);
           BM.exit(tl, q(".ec"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
           window.__timelines["__ID__"] = tl;

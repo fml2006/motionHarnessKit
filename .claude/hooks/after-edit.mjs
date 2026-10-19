@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Hook PostToolUse: valida automáticamente lo que Claude acaba de editar.
-//  - brand.config.json      → validación de marca (contraste, easings, campos)
+//  - brands/<marca>/brand.config.json → validación + regeneración de ESA marca (contraste, easings, look)
 //  - scenes.json            → rebuild de raíces del proyecto
 //  - comp/compositions/*.html → lint de HyperFrames del proyecto
 //  - archivos generados     → aviso de que se pisan en el próximo build
@@ -30,16 +30,18 @@ const note = (msg) => {
   process.exit(0);
 };
 
-if (rel === "brand/brand.config.json") {
-  const r = run(process.execPath, ["scripts/brand-apply.mjs", "--check"]);
-  if (r.status !== 0) fail(`brand.config.json inválido:\n${r.stderr || r.stdout}`);
-  const g = run(process.execPath, ["scripts/brand-apply.mjs"]);
-  if (g.status !== 0) fail(`npm run brand falló:\n${g.stderr || g.stdout}`);
-  note(`Marca regenerada automáticamente (brand/dist, MOTION.md, brand.md).\n${g.stdout}${g.stderr || ""}\nPara aplicarla a un proyecto existente: npm run build:roots -- <proyecto>`);
+const bcfg = rel.match(/^brands\/([^/]+)\/brand\.config\.json$/);
+if (bcfg) {
+  const slug = bcfg[1];
+  const r = run(process.execPath, ["scripts/brand-apply.mjs", slug, "--check"]);
+  if (r.status !== 0) fail(`brands/${slug}/brand.config.json inválido:\n${r.stderr || r.stdout}`);
+  const g = run(process.execPath, ["scripts/brand-apply.mjs", slug]);
+  if (g.status !== 0) fail(`npm run brand -- ${slug} falló:\n${g.stderr || g.stdout}`);
+  note(`Marca "${slug}" regenerada automáticamente (brands/${slug}/dist + índices).\n${g.stdout}${g.stderr || ""}\nLas piezas de esta marca quedan frenadas por brandLock hasta aceptar el cambio: npm run build:roots -- <proyecto> --rebrand (solo si el director de arte lo aprobó). Para ver el efecto: npm run brand:compare -- _galeria-bloques --brands ${slug}`);
 }
 
-const gen = rel.match(/^projects\/[^/]+\/(formats\/|comp\/index\.html$)/) || rel.startsWith("brand/dist/") || rel === "MOTION.md" || rel === "brand.md";
-if (gen) fail(`${rel} es un archivo GENERADO: tu cambio se pierde en el próximo build. Editá la fuente (scenes.json, comp/compositions/*.html o brand/brand.config.json) y regenerá.`);
+const gen = rel.match(/^projects\/[^/]+\/(formats\/|comp\/index\.html$)/) || /^brands\/[^/]+\/dist\//.test(rel) || rel === "brands/INDEX.md" || rel === "MOTION.md" || rel === "brand.md";
+if (gen) fail(`${rel} es un archivo GENERADO: tu cambio se pierde en el próximo build. Editá la fuente (scenes.json, comp/compositions/*.html o brands/<marca>/brand.config.json) y regenerá.`);
 
 const proj = rel.match(/^projects\/([^/]+)\//);
 if (!proj) process.exit(0);

@@ -6,13 +6,14 @@ import { existsSync, mkdirSync, readdirSync, renameSync, rmSync } from "node:fs"
 import { join } from "node:path";
 import { readJson, resolveProject, runHf, loadBrand } from "./lib/common.mjs";
 import { timeline } from "./lib/plan.mjs";
+import { projectBrand } from "./lib/brands.mjs";
 
 const args = process.argv.slice(2);
 const projectDir = resolveProject(args.find((a, i) => !a.startsWith("--") && !["--format", "--at"].includes(args[i - 1])));
 const fmtId = args.includes("--format") ? args[args.indexOf("--format") + 1] : null;
 const mode = args.includes("--at") ? args[args.indexOf("--at") + 1] : "end";
-const brand = loadBrand();
 const plan = readJson(join(projectDir, "scenes.json"));
+const brand = loadBrand(projectBrand(plan));
 const master = plan.master || "landscape";
 const fid = fmtId || master;
 const dir = fid === master ? join(projectDir, "comp") : join(projectDir, "formats", fid);
@@ -32,7 +33,8 @@ for (const { scene: s, start, duration: d } of timeline(plan, fid, brand).items)
 const out = join(projectDir, "review", `frames-${fid}`);
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
-const r = runHf(["snapshot", dir, "--at", times.join(","), "--no-end", "-o", out], { capture: true });
+// --describe false: snapshot manda los frames a Gemini si hay GEMINI_API_KEY en el entorno; acá nunca (material del cliente)
+const r = runHf(["snapshot", dir, "--at", times.join(","), "--no-end", "--describe", "false", "-o", out], { capture: true });
 if (r.status !== 0) {
   console.error(r.stdout, r.stderr);
   process.exit(r.status || 1);

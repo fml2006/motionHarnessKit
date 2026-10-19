@@ -22,8 +22,9 @@
     <template>
       <style>
         #root { position: absolute; inset: 0; container-type: size; }
-        #root .sf { display: flex; flex-direction: column; justify-content: center; gap: 6cqmin; }
-        #root .sf-row { display: flex; align-items: stretch; }
+        #root .sf { display: flex; flex-direction: column; justify-content: center; gap: calc(6cqmin * var(--look-space)); }
+        #root .sf-title { text-align: var(--look-text-align); }
+        #root .sf-row { display: flex; align-items: stretch; gap: calc(1cqmin * var(--look-space)); }
         #root .sf-step { flex: 1 1 0; display: flex; flex-direction: column; gap: 1.6cqmin; padding: 3cqmin; }
         #root .sf-num { width: 6cqmin; height: 6cqmin; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--c-surface-alt); font-family: var(--font-mono); font-size: var(--fs-label); color: var(--c-primary); }
         #root .sf-step.is-last .sf-num { background: var(--c-primary); color: var(--c-on-primary); }
@@ -39,7 +40,7 @@
       </style>
       <div id="root" data-composition-id="__ID__">
         <div class="bm-frame">
-          <div class="bm-bg grid"></div>
+          <div class="bm-bg"></div>
           <div class="bm-safe sf">
             <h3 class="bm-h2 sf-title"></h3>
             <div class="sf-row"></div>
@@ -60,7 +61,7 @@
           steps.forEach(function (s, i) {
             var parts = s.split(/\s+[—–-]\s+/);
             var el = document.createElement("div");
-            el.className = "sf-step" + (i === steps.length - 1 ? " is-last" : "");
+            el.className = "sf-step bm-card" + (i === steps.length - 1 ? " is-last" : "");
             el.innerHTML = '<div class="sf-num"></div><div class="sf-text"><div class="sf-name"></div><div class="sf-desc"></div></div>';
             el.querySelector(".sf-num").textContent = String(i + 1).padStart(2, "0");
             el.querySelector(".sf-name").textContent = parts[0];

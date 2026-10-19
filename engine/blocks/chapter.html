@@ -22,13 +22,13 @@
     <template>
       <style>
         #root { position: absolute; inset: 0; container-type: size; }
-        #root .ch { display: flex; flex-direction: column; justify-content: center; gap: 2.4cqmin; }
+        #root .ch { display: flex; flex-direction: column; justify-content: center; align-items: var(--look-items); text-align: var(--look-text-align); gap: calc(2.4cqmin * var(--look-space)); }
         #root .ch-num { font-family: var(--font-display); font-weight: var(--w-display); font-size: calc(var(--fs-hero) * 1.4); line-height: 0.9; color: var(--c-primary); letter-spacing: -0.04em; }
-        #root .ch-rule { width: 100%; height: var(--stroke); background: var(--c-border); transform-origin: left center; }
+        #root .ch-rule { width: 100%; height: var(--stroke); background: var(--c-border); transform-origin: var(--look-origin); }
       </style>
       <div id="root" data-composition-id="__ID__">
         <div class="bm-frame">
-          <div class="bm-bg"></div>
+          <div class="bm-bg is-plain"></div>
           <div class="bm-safe ch">
             <div class="bm-kicker ch-kicker"></div>
             <div class="ch-num"></div>

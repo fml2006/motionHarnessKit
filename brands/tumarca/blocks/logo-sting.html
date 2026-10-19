@@ -1,0 +1,86 @@
+<!doctype html>
+<!--
+  bm-block: logo-sting
+  Uso: FIRMA de TuMarca (reemplaza al logo-sting del engine solo para esta marca). "Escaneo": dos líneas de la grilla barren el cuadro, el isotipo se revela con una línea de escaneo y el wordmark entra desde la izquierda; la bajada se tipea en mono.
+  Duración sugerida: 2.4-3 s.
+  Aperturas y cierres de marca. Sin tagline si la pieza ya abre con un título fuerte.
+  Usa <g data-part="mark"> y <g data-part="wordmark"> del SVG del logo; sin eso anima el logo entero.
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"tagline","type":"string","label":"Bajada (opcional, se tipea)","default":"","maxLength":60},
+    {"id":"exit","type":"enum","label":"Salida","default":"none","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":2.6,"min":1,"max":10,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>logo-sting · tumarca</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; }
+        #root .ts-h, #root .ts-v { position: absolute; background: var(--c-primary); opacity: 0.55; }
+        #root .ts-h { left: 0; right: 0; top: 50%; height: var(--stroke); transform-origin: left center; }
+        #root .ts-v { top: 0; bottom: 0; left: 30%; width: var(--stroke); transform-origin: center top; }
+        #root .ts { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3.5cqmin; }
+        #root .ts-logo { position: relative; height: 13cqmin; display: flex; align-items: center; }
+        #root .ts-logo svg { height: 100%; width: auto; display: block; overflow: visible; }
+        #root .ts-scan { position: absolute; left: -2cqmin; right: -2cqmin; top: 0; height: 0.5cqmin; background: var(--c-secondary); opacity: 0; }
+        #root .ts-tag { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: 0.08em; color: var(--c-text-muted); min-height: 1.4em; }
+        #root .ts-caret { display: inline-block; width: 0.55em; height: 1.1em; vertical-align: -0.2em; background: var(--c-secondary); margin-left: 0.15em; }
+      </style>
+      <div id="root" data-composition-id="__ID__">
+        <div class="bm-frame">
+          <div class="bm-bg is-hero"></div>
+          <div class="ts-h"></div>
+          <div class="ts-v"></div>
+          <div class="bm-safe ts">
+            <div class="ts-logo"><div class="ts-scan"></div></div>
+            <div class="ts-tag"><span class="ts-typed"></span><span class="ts-caret"></span></div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ tagline: "", exit: "none", dur: 2.6 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          var holder = q(".ts-logo");
+          holder.insertAdjacentHTML("afterbegin", BRAND.logo.svgPrimary || BRAND.logo.svgMark || "");
+          var svg = holder.querySelector("svg");
+          var tag = q(".ts-tag");
+          var tl = gsap.timeline({ paused: true });
+          // la grilla "mide" el cuadro antes de que aparezca la marca
+          tl.fromTo(q(".ts-h"), { scaleX: 0 }, { scaleX: 1, duration: BRAND.dur("emphasis"), ease: BRAND.ease("move") }, 0.1);
+          tl.fromTo(q(".ts-v"), { scaleY: 0 }, { scaleY: 1, duration: BRAND.dur("emphasis"), ease: BRAND.ease("move") }, 0.2);
+          tl.to([q(".ts-h"), q(".ts-v")], { opacity: 0, duration: BRAND.dur("exit"), ease: BRAND.ease("exit") }, 1.0);
+          if (svg) {
+            var mark = svg.querySelector('[data-part="mark"]');
+            var wordGroup = svg.querySelector('[data-part="wordmark"]');
+            var word = wordGroup ? wordGroup.firstElementChild : null;
+            // escaneo: el logo se revela de arriba hacia abajo con una línea que lo recorre
+            tl.fromTo(svg, { clipPath: "inset(0% 0% 100% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: BRAND.dur("emphasis"), ease: BRAND.ease("standard") }, 0.45);
+            // la línea recorre el alto del logo con transform (y), no con top: seek-safe y sin saltos de píxel
+            var scanH = holder.getBoundingClientRect().height || 13 * BRAND.u(holder);
+            tl.fromTo(q(".ts-scan"), { opacity: 1, y: 0 }, { y: scanH, duration: BRAND.dur("emphasis"), ease: BRAND.ease("standard") }, 0.45);
+            tl.to(q(".ts-scan"), { opacity: 0, duration: BRAND.dur("short"), ease: BRAND.ease("exit") }, 0.45 + BRAND.dur("emphasis"));
+            if (word) tl.fromTo(word, { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: BRAND.dur("enter"), ease: BRAND.ease("enter") }, 0.75);
+            if (mark && !word) tl.fromTo(mark, { opacity: 0 }, { opacity: 1, duration: BRAND.dur("enter"), ease: BRAND.ease("enter") }, 0.45);
+          }
+          var caret = q(".ts-caret");
+          if (v.tagline) {
+            var t0 = 1.2;
+            BM.typeText(tl, q(".ts-typed"), v.tagline, t0, 32);
+            var typed = t0 + String(v.tagline).length / 32;
+            for (var t = typed + 0.4; t < Number(v.dur) - 0.2; t += 0.8) { tl.set(caret, { opacity: 0 }, t); tl.set(caret, { opacity: 1 }, t + 0.4); }
+          } else tag.remove();
+          BM.exit(tl, q(".ts"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
+          window.__timelines["__ID__"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

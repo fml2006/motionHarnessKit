@@ -128,7 +128,7 @@ export function brandFingerprint(distDir, brand) {
     const p = join(distDir, f);
     if (existsSync(p)) h.update(readFileSync(p));
   }
-  return { name: brand.meta?.name, version: brand.meta?.version, hash: h.digest("hex").slice(0, 16) };
+  return { slug: brand.meta?.slug, name: brand.meta?.name, version: brand.meta?.version, hash: h.digest("hex").slice(0, 16) };
 }
 
 // ---------- captions (SRT / VTT) ----------

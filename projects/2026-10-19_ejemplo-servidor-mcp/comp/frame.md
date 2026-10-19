@@ -2,8 +2,8 @@
 version: 1
 name: TuMarca — Frame (capa de video)
 description: >
-  Sistema de diseño a escala de frame para TuMarca. Generado desde brand/brand.config.json
-  (v1.1.0). Los átomos (hex, familias, pesos, motion tokens) son sagrados; la composición es libre.
+  Sistema de diseño a escala de frame para TuMarca. Generado desde brands/tumarca/brand.config.json
+  (v1.2.0). Los átomos (hex, familias, pesos, motion tokens) son sagrados; la composición es libre.
 unit: el frame — 1920×1080 (landscape), 1080×1920 (portrait), 1080×1350 (feed), 1080×1080 (square)
 principle: átomos sagrados · composición libre · los números salen del guion verificado
 
@@ -35,6 +35,7 @@ colors:
   data-viz-5: "#8A96B0"
   gradients-hero-0: "#4C8DFF"
   gradients-hero-1: "#2ED3A7"
+  on-accent: "#0B0F19"
 
 typography:
   hero: { fontFamily: "Space Grotesk", cqmin: 13, weight: 700, lineHeight: 1.02, tracking: "-0.025em" }
@@ -54,6 +55,18 @@ spacing:
   radius-sm: "0.8cqmin"
   radius-md: "1.5cqmin"
   radius-lg: "2.5cqmin"
+
+look:
+  background: grid+glow
+  align: start
+  statementAlign: center
+  statementSize: h1
+  headlineCase: none
+  accentStyle: color
+  textReveal: mask
+  kicker: line
+  cards: filled
+  density: regular
 
 motion:
   personality: productive

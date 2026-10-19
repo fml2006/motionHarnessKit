@@ -120,8 +120,10 @@
     }
   ],
   "brandLock": {
+    "slug": "tumarca",
     "name": "TuMarca",
-    "version": "1.1.0",
-    "hash": "361204c4d0e15797"
-  }
+    "version": "1.2.0",
+    "hash": "7676135603c43ec2"
+  },
+  "brand": "tumarca"
 }

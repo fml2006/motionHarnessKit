@@ -1,6 +1,6 @@
 # Catálogo de bloques de marca
 
-> GENERADO por `node scripts/blocks-catalog.mjs`. Cada bloque es una sub-composición HyperFrames parametrizable que lee los tokens de marca (`brand/dist`) y se adapta sola a 16:9, 9:16, 4:5 y 1:1.
+> GENERADO por `node scripts/blocks-catalog.mjs`. Cada bloque es una sub-composición HyperFrames parametrizable que lee los tokens Y EL LOOK de la marca de la pieza (`brands/<marca>/dist`: fondo, alineación, caja, acento, reveal, kicker, tarjetas, densidad) y se adapta sola a 16:9, 9:16, 4:5 y 1:1. Por eso la MISMA escena se ve distinta en cada marca (`npm run brand:compare -- _galeria-bloques`).
 > Uso: en `scenes.json` → `{ "id": "s03-dato", "block": "stat-hit", "duration": 5, "vars": { ... } }`. La primera vez se copia a `comp/compositions/<id>.html` y desde ahí se puede personalizar.
 > Convenciones de texto: separá líneas con `|`, marcá UNA palabra de acento con `*asteriscos*`, listas con `\n`. Todos aceptan `exit` (none/fade/up) y reciben `dur` automáticamente.
 > **Los bloques no traen contenido, traen estructura.** Todo default es un placeholder visible (`⟦COMPLETAR…⟧`, `⟦A⟧ ficticio`, `⟦—⟧`): si no lo pisás en `scenes.json`, se ve en pantalla y `npm run build:roots -- <proyecto> --strict` frena el render final. Los bloques con cifras (`stat-hit`, `bar-chart`) exigen `"claims": ["C-…"]` con estado `ok` y firma del SME en `research/claims.csv`.
@@ -22,6 +22,30 @@
 | [`title-card`](#title-card) | apertura de la pieza o de una sección. Kicker + titular (1-3 líneas) + bajada. | 3.5-5 s. |
 
 Para ver todos con la marca actual: `npm run frames -- _galeria-bloques` (y `--format portrait` / `--format feed`). La galería es `"purpose": "demo"`: sus escenas con cifras están rotuladas como ficticias y marcadas `"demo": true`, lo único que las exceptúa del gate estricto.
+
+## Bloques firma por marca
+
+Una marca puede tener bloques propios en `brands/<marca>/blocks/`: con el nombre de un bloque del engine lo **reemplaza solo para esa marca** (p. ej. su `logo-sting`); con nombre propio es **exclusivo** (otra marca que lo pida falla en el build con un error claro).
+
+### Northline (`northline`)
+
+| Bloque | Tipo | Para qué | Duración sugerida |
+|---|---|---|---|
+| `logo-sting` | reemplaza al del engine | FIRMA de Northline (reemplaza al logo-sting del engine solo para esta marca). "Folio": dos filetes se abren desde el centro, el logo aparece por fundido lento y la bajada entra en itálica, todo centrado. | 3-3.6 s (Northline respira: no lo apures). |
+| `northline-folio` | exclusivo de la marca | FIRMA EXCLUSIVA de Northline: portada de folio editorial para abrir una pieza o un capítulo. Cabecera con número y fecha entre filetes, titular serif centrado (acento en itálica) y sección al pie. | 4.5-6 s. |
+
+### Pulso (`pulso`)
+
+| Bloque | Tipo | Para qué | Duración sugerida |
+|---|---|---|---|
+| `logo-sting` | reemplaza al del engine | FIRMA de Pulso (reemplaza al logo-sting del engine solo para esta marca). "Pop": el isotipo entra con un golpe seco (sin rebote), una banda lima barre detrás del wordmark y la bajada sube en mayúsculas. | 1.8-2.4 s (Pulso es rápida). |
+| `pulso-impacto` | exclusivo de la marca | FIRMA EXCLUSIVA de Pulso: hook de social a pantalla llena. 2-4 palabras gigantes en mayúsculas, una por línea, que suben de a una; la palabra de acento queda resaltada en lima. | 2.5-3.5 s (es un golpe, no un párrafo). |
+
+### TuMarca (`tumarca`)
+
+| Bloque | Tipo | Para qué | Duración sugerida |
+|---|---|---|---|
+| `logo-sting` | reemplaza al del engine | FIRMA de TuMarca (reemplaza al logo-sting del engine solo para esta marca). "Escaneo": dos líneas de la grilla barren el cuadro, el isotipo se revela con una línea de escaneo y el wordmark entra desde la izquierda; la bajada se tipea en mono. | 2.4-3 s. |
 
 ## Transiciones entre escenas
 
@@ -106,8 +130,8 @@ una afirmación clave, palabra por palabra (hook, tesis, transición de argument
 | Variable | Tipo | Default | Descripción |
 |---|---|---|---|
 | `text` | string | "⟦COMPLETAR: una *idea* por pantalla⟧" | Afirmación (acento con *) |
-| `align` | enum (center / left) | "center" | Alineación |
-| `size` | enum (h1 / hero) | "h1" | Tamaño |
+| `align` | enum (auto / center / left) | "auto" | Alineación |
+| `size` | enum (auto / h1 / hero) | "auto" | Tamaño |
 | `exit` | enum (none / fade / up) | "fade" | Salida |
 | `dur` | number | 4.5 | Duración de la escena (s) |
 
@@ -234,6 +258,6 @@ apertura de la pieza o de una sección. Kicker + titular (1-3 líneas) + bajada.
 | `headline` | string | "⟦COMPLETAR: titular\|con *acento*⟧" | Titular (líneas con |, acento con *) |
 | `subtitle` | string | "⟦COMPLETAR: bajada⟧" | Bajada |
 | `showMark` | boolean | true | Mostrar isotipo |
-| `bg` | enum (grid / glow / solid) | "grid" | Fondo |
+| `bg` | enum (brand / hero / plain) | "brand" | Fondo |
 | `exit` | enum (none / fade / up) | "fade" | Salida |
 | `dur` | number | 4.5 | Duración de la escena (s) |

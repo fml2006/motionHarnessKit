@@ -29,19 +29,19 @@
     <template>
       <style>
         #root { position: absolute; inset: 0; container-type: size; }
-        #root .sh { display: flex; flex-direction: column; justify-content: center; gap: 2.2cqmin; }
+        #root .sh { display: flex; flex-direction: column; justify-content: center; align-items: var(--look-items); text-align: var(--look-text-align); gap: calc(2.2cqmin * var(--look-space)); }
         #root .sh-num { font-family: var(--font-display); font-weight: var(--w-display); font-size: calc(var(--fs-hero) * 1.55); letter-spacing: -0.04em; line-height: 0.9; color: var(--c-accent); font-variant-numeric: tabular-nums; }
-        #root .sh-bar { width: 22cqmin; height: 0.6cqmin; background: var(--c-accent); transform-origin: left center; }
+        #root .sh-bar { width: 22cqmin; height: 0.6cqmin; background: var(--c-accent); transform-origin: var(--look-origin); }
         #root .sh-label { max-width: 70cqw; }
         #root .sh-ctx { max-width: 64cqw; }
-        #root .sh-src { position: absolute; left: 0; bottom: 0; }
+        #root .sh-src { position: absolute; left: 0; right: 0; bottom: 0; text-align: var(--look-text-align); }
         @container (orientation: portrait) {
           #root .sh-label, #root .sh-ctx { max-width: 100%; }
         }
       </style>
       <div id="root" data-composition-id="__ID__">
         <div class="bm-frame">
-          <div class="bm-bg grid"></div>
+          <div class="bm-bg"></div>
           <div class="bm-safe sh">
             <div class="sh-num bm-num"></div>
             <div class="sh-bar"></div>

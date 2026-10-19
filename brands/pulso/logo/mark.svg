@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="Pulso">
+<g data-part="mark">
+  <circle cx="60" cy="60" r="60" fill="#FF4F8B"/>
+  <path d="M16.8 64.80000000000001 H40.800000000000004 L51.6 36 L67.2 88.8 L78 55.2 H103.2" fill="none" stroke="#160A12" stroke-width="10.200000000000001" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="103.2" cy="55.2" r="9" fill="#E8FF59"/>
+</g>
+</svg>

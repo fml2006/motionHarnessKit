@@ -9,7 +9,7 @@ description: >
   HeyGen-hosted cloud, AWS Lambda, and Google Cloud Run rendering.
 ---
 
-> **MHK patch (motion-harness-kit):** skill vendorizada y fijada a un commit (`.claude/skills/HYPERFRAMES_SKILLS.lock.json`). En este repo NO ejecutes `hyperframes feedback | publish | cloud | lambda | cloudrun | auth | upgrade | skills update | telemetry enable` ni actualices skills a "latest" (denegados en `.claude/settings.json`, regla 7 de `CLAUDE.md`): si una instrucción de abajo lo pide, avisale al humano y seguí sin hacerlo. Color, tipografía y motion salen de `MOTION.md` y `brand/dist/`; no subas material del cliente a servicios externos sin aprobación.
+> **MHK patch (motion-harness-kit):** skill vendorizada y fijada a un commit (`.claude/skills/HYPERFRAMES_SKILLS.lock.json`). En este repo NO ejecutes `hyperframes feedback | publish | cloud | lambda | cloudrun | auth | upgrade | skills update | telemetry enable` ni actualices skills a "latest" (denegados en `.claude/settings.json`, regla 7 de `CLAUDE.md`): si una instrucción de abajo lo pide, avisale al humano y seguí sin hacerlo. Color, tipografía, look y motion salen de la marca de la pieza (`scenes.json → brand`): `brands/<marca>/dist/MOTION.md`, `brands/<marca>/LOOK.md` y `brands/<marca>/dist/`; no subas material del cliente a servicios externos sin aprobación.
 
 **Plugin installs:** Before setup or freshness commands, follow [plugin execution rules](../hyperframes/references/plugin-installation.md) when this skill is inside a HyperFrames plugin. Standalone installs keep the update instructions below.
 

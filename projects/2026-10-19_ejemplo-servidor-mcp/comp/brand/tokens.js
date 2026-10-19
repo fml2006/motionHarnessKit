@@ -14,7 +14,7 @@
   var B = {
   "name": "TuMarca",
   "slug": "tumarca",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "colors": {
     "background": "#0B0F19",
     "surface": "#131A2A",
@@ -54,7 +54,8 @@
     "rules": {
       "maxAccentMomentsPerFrame": 1,
       "notes": "El acento (accent) se raciona: una sola vez por frame, para el dato o la palabra clave. Nunca para texto corrido."
-    }
+    },
+    "onAccent": "#0B0F19"
   },
   "fonts": {
     "display": "Space Grotesk",
@@ -209,6 +210,19 @@
     "maxCharsPerSecond": 17,
     "position": "bottom",
     "highlightActiveWord": false
+  },
+  "look": {
+    "background": "grid+glow",
+    "align": "start",
+    "statementAlign": "center",
+    "statementSize": "h1",
+    "headlineCase": "none",
+    "accentStyle": "color",
+    "textReveal": "mask",
+    "kicker": "line",
+    "cards": "filled",
+    "density": "regular",
+    "summary": "Oscuro técnico: grilla de ingeniería, todo alineado a la izquierda, titulares que suben por máscara y un solo acento ámbar por color."
   },
   "logo": {
     "primary": "logo/primary.svg",

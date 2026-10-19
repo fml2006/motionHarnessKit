@@ -1,0 +1,84 @@
+<!doctype html>
+<!--
+  bm-block: northline-folio
+  Uso: FIRMA EXCLUSIVA de Northline: portada de folio editorial para abrir una pieza o un capítulo. Cabecera con número y fecha entre filetes, titular serif centrado (acento en itálica) y sección al pie.
+  Duración sugerida: 4.5-6 s.
+  Solo existe para la marca northline: otra marca que lo pida falla en el build.
+  Texto: separá líneas del titular con "|" y marcá UNA palabra de acento con *asteriscos*.
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"number","type":"string","label":"Número de edición/capítulo (p. ej. N.º 12)","default":"⟦N.º⟧","maxLength":16},
+    {"id":"date","type":"string","label":"Fecha o período","default":"⟦COMPLETAR: fecha⟧","maxLength":24},
+    {"id":"title","type":"string","label":"Titular (líneas con |, acento con *)","default":"⟦COMPLETAR: titular|con *acento*⟧","maxLength":90},
+    {"id":"subtitle","type":"string","label":"Bajada","default":"⟦COMPLETAR: bajada⟧","maxLength":100},
+    {"id":"section","type":"string","label":"Sección (al pie)","default":"⟦COMPLETAR: sección⟧","maxLength":32},
+    {"id":"exit","type":"enum","label":"Salida","default":"fade","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":5,"min":2,"max":30,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>northline-folio</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; }
+        #root .fo { display: flex; flex-direction: column; justify-content: space-between; align-items: stretch; }
+        #root .fo-head, #root .fo-foot { display: flex; flex-direction: column; gap: 1.6cqmin; }
+        #root .fo-meta { display: flex; justify-content: space-between; align-items: baseline; }
+        #root .fo-rule { height: var(--stroke); background: var(--c-text); transform-origin: center center; }
+        #root .fo-rule.is-double { height: calc(var(--stroke) * 3); background: transparent; border-top: var(--stroke) solid var(--c-text); border-bottom: var(--stroke) solid var(--c-text); }
+        #root .fo-num { font-family: var(--font-display); font-weight: var(--w-display); font-size: var(--fs-h3); }
+        #root .fo-body { display: flex; flex-direction: column; align-items: center; text-align: center; gap: calc(3cqmin * var(--look-space)); }
+        #root .fo-title { max-width: 84cqw; }
+        #root .fo-sub { max-width: 64cqw; }
+        #root .fo-foot { align-items: center; }
+        @container (orientation: portrait) { #root .fo-title, #root .fo-sub { max-width: 100%; } }
+      </style>
+      <div id="root" data-composition-id="__ID__">
+        <div class="bm-frame">
+          <div class="bm-bg is-plain"></div>
+          <div class="bm-safe fo">
+            <div class="fo-head">
+              <div class="fo-meta"><span class="fo-num"></span><span class="bm-label fo-date"></span></div>
+              <div class="fo-rule is-double"></div>
+            </div>
+            <div class="fo-body">
+              <h1 class="bm-hero fo-title"></h1>
+              <p class="bm-body bm-muted fo-sub"></p>
+            </div>
+            <div class="fo-foot">
+              <div class="fo-rule"></div>
+              <span class="bm-label fo-section"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ number: "", date: "", title: "", subtitle: "", section: "", exit: "fade", dur: 5 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          q(".fo-num").textContent = v.number;
+          q(".fo-date").textContent = v.date;
+          q(".fo-section").textContent = v.section;
+          var lines = BM.lines(q(".fo-title"), v.title);
+          var sub = q(".fo-sub");
+          if (v.subtitle) sub.textContent = v.subtitle; else sub.remove();
+          var tl = gsap.timeline({ paused: true });
+          // la página se compone de afuera hacia adentro: filetes, cabecera, titular, bajada
+          tl.fromTo(root.querySelectorAll(".fo-rule"), { scaleX: 0 }, { scaleX: 1, duration: BRAND.dur("long"), ease: BRAND.ease("move"), stagger: BRAND.stagger("lines") }, 0.15);
+          tl.fromTo([q(".fo-num"), q(".fo-date"), q(".fo-section")], { opacity: 0 }, { opacity: 1, duration: BRAND.dur("emphasis"), ease: BRAND.ease("standard"), stagger: BRAND.stagger("items", 3) }, 0.45);
+          BM.revealLines(tl, lines, 0.7);
+          var after = 0.7 + BRAND.dur("enter") * 1.6 + (lines.length - 1) * BRAND.stagger("lines") * 1.4;
+          if (sub.isConnected) BM.fadeUp(tl, sub, after, { yPercent: 20 });
+          BM.exit(tl, q(".fo"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
+          window.__timelines["__ID__"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

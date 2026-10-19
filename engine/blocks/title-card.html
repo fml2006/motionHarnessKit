@@ -12,7 +12,7 @@
     {"id":"headline","type":"string","label":"Titular (líneas con |, acento con *)","default":"⟦COMPLETAR: titular|con *acento*⟧","maxLength":90},
     {"id":"subtitle","type":"string","label":"Bajada","default":"⟦COMPLETAR: bajada⟧","maxLength":90},
     {"id":"showMark","type":"boolean","label":"Mostrar isotipo","default":true},
-    {"id":"bg","type":"enum","label":"Fondo","default":"grid","options":[{"value":"grid","label":"Grilla"},{"value":"glow","label":"Glow"},{"value":"solid","label":"Sólido"}]},
+    {"id":"bg","type":"enum","label":"Fondo","default":"brand","options":[{"value":"brand","label":"El de la marca (look.background)"},{"value":"hero","label":"Héroe (más intenso)"},{"value":"plain","label":"Solo color"}]},
     {"id":"exit","type":"enum","label":"Salida","default":"fade","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
     {"id":"dur","type":"number","label":"Duración de la escena (s)","default":4.5,"min":1,"max":30,"step":0.1,"unit":"s"}
   ]'
@@ -25,15 +25,14 @@
     <template>
       <style>
         #root { position: absolute; inset: 0; container-type: size; }
-        #root .tc { display: flex; flex-direction: column; justify-content: center; gap: 3cqmin; }
+        #root .tc { display: flex; flex-direction: column; justify-content: center; align-items: var(--look-items); text-align: var(--look-text-align); gap: calc(3cqmin * var(--look-space)); }
         #root .tc-top { display: flex; align-items: center; gap: 2.4cqmin; }
         #root .tc-mark { width: 7cqmin; height: 7cqmin; display: block; }
         #root .tc-mark svg { width: 100%; height: 100%; display: block; }
-        #root .tc-rule { width: 9cqmin; height: 0.35cqmin; background: var(--c-primary); transform-origin: left center; }
         #root .tc-headline { max-width: 82cqw; }
         #root .tc-sub { max-width: 70cqw; }
         @container (orientation: portrait) {
-          #root .tc { justify-content: center; gap: 4cqmin; }
+          #root .tc { justify-content: center; gap: calc(4cqmin * var(--look-space)); }
           #root .tc-headline { max-width: 100%; }
         }
       </style>
@@ -43,7 +42,7 @@
           <div class="bm-safe tc">
             <div class="tc-top">
               <div class="tc-mark bm-logo"></div>
-              <div class="tc-rule"></div>
+              <div class="bm-kicker-deco tc-rule"></div>
               <div class="bm-kicker tc-kicker"></div>
             </div>
             <h1 class="bm-h1 tc-headline"></h1>
@@ -54,10 +53,11 @@
       <script>
         (function () {
           var root = document.getElementById("root");
-          var v = BM.vars({ kicker: "Explainer", headline: "Qué es un *agente*|y por qué importa", subtitle: "", showMark: true, bg: "grid", exit: "fade", dur: 4.5 }, window.__hyperframes);
+          var v = BM.vars({ kicker: "Explainer", headline: "", subtitle: "", showMark: true, bg: "brand", exit: "fade", dur: 4.5 }, window.__hyperframes);
           var q = function (s) { return root.querySelector(s); };
-          q(".tc-bg").classList.add(v.bg === "glow" ? "glow" : v.bg === "solid" ? "solid" : "grid");
-          if (v.bg === "glow") q(".tc-bg").classList.add("grid");
+          // fondo: el del look de la marca; "hero" lo intensifica, "plain" deja solo el color (grid/glow/solid = valores viejos)
+          if (v.bg === "hero" || v.bg === "glow") q(".tc-bg").classList.add("is-hero");
+          if (v.bg === "plain" || v.bg === "solid") q(".tc-bg").classList.add("is-plain");
           var mark = q(".tc-mark");
           if (v.showMark && BRAND.logo.svgMark) mark.innerHTML = BRAND.logo.svgMark; else mark.remove();
           q(".tc-kicker").textContent = v.kicker;
@@ -68,7 +68,7 @@
           var tl = gsap.timeline({ paused: true });
           var t = 0.15;
           if (mark.isConnected) tl.fromTo(mark, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: BRAND.dur("enter"), ease: BRAND.ease("enter") }, t);
-          BM.drawLine(tl, q(".tc-rule"), t + 0.1, "x", { duration: BRAND.dur("enter") });
+          BM.decoIn(tl, q(".tc-rule"), t + 0.1);
           BM.fadeUp(tl, q(".tc-kicker"), t + 0.2, { yPercent: 40 });
           BM.revealLines(tl, lines, t + 0.35);
           var afterLines = t + 0.35 + BRAND.dur("enter") + (lines.length - 1) * BRAND.stagger("lines");

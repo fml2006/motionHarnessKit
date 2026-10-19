@@ -9,8 +9,8 @@
   lang="es"
   data-composition-variables='[
     {"id":"text","type":"string","label":"Afirmación (acento con *)","default":"⟦COMPLETAR: una *idea* por pantalla⟧","maxLength":120},
-    {"id":"align","type":"enum","label":"Alineación","default":"center","options":[{"value":"center","label":"Centro"},{"value":"left","label":"Izquierda"}]},
-    {"id":"size","type":"enum","label":"Tamaño","default":"h1","options":[{"value":"h1","label":"H1"},{"value":"hero","label":"Hero (≤5 palabras)"}]},
+    {"id":"align","type":"enum","label":"Alineación","default":"auto","options":[{"value":"auto","label":"La de la marca (look.statementAlign)"},{"value":"center","label":"Centro"},{"value":"left","label":"Izquierda"}]},
+    {"id":"size","type":"enum","label":"Tamaño","default":"auto","options":[{"value":"auto","label":"El de la marca (look.statementSize)"},{"value":"h1","label":"H1"},{"value":"hero","label":"Hero (≤5 palabras)"}]},
     {"id":"exit","type":"enum","label":"Salida","default":"fade","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
     {"id":"dur","type":"number","label":"Duración de la escena (s)","default":4.5,"min":1,"max":30,"step":0.1,"unit":"s"}
   ]'
@@ -23,15 +23,17 @@
     <template>
       <style>
         #root { position: absolute; inset: 0; container-type: size; }
-        #root .ks { display: flex; align-items: center; justify-content: center; }
+        #root .ks { display: flex; align-items: center; justify-content: var(--look-statement-items); }
         #root .ks.left { justify-content: flex-start; }
-        #root .ks-text { max-width: 78cqw; text-align: center; }
+        #root .ks.center { justify-content: center; }
+        #root .ks.center .ks-text { text-align: center; }
+        #root .ks-text { max-width: 78cqw; text-align: var(--look-statement-text-align); }
         #root .ks.left .ks-text { text-align: left; }
         @container (orientation: portrait) { #root .ks-text { max-width: 100%; } }
       </style>
       <div id="root" data-composition-id="b03-statement">
         <div class="bm-frame">
-          <div class="bm-bg grid"></div>
+          <div class="bm-bg"></div>
           <div class="bm-safe ks">
             <h2 class="ks-text"></h2>
           </div>
@@ -40,11 +42,15 @@
       <script>
         (function () {
           var root = document.getElementById("root");
-          var v = BM.vars({ text: "", align: "center", size: "h1", exit: "fade", dur: 4.5 }, window.__hyperframes);
+          var v = BM.vars({ text: "", align: "auto", size: "auto", exit: "fade", dur: 4.5 }, window.__hyperframes);
           var box = root.querySelector(".ks");
           if (v.align === "left") box.classList.add("left");
+          if (v.align === "center") box.classList.add("center");
           var h = root.querySelector(".ks-text");
-          h.classList.add(v.size === "hero" ? "bm-hero" : "bm-h1");
+          // "auto": el tamaño de la marca, pero hero solo con ≤ 5 palabras (más que eso no entra legible en 9:16)
+          var nWords = String(v.text).replace(/[*|]/g, " ").split(/\s+/).filter(Boolean).length;
+          var size = v.size === "auto" ? (BM.look.statementSize === "hero" && nWords <= 5 ? "hero" : "h1") : v.size;
+          h.classList.add(size === "hero" ? "bm-hero" : "bm-h1");
           var words = BM.words(h, v.text, v.accent);
           var accents = Array.prototype.slice.call(h.querySelectorAll(".bm-accent-word"));
 
@@ -53,8 +59,10 @@
           var done = 0.2 + BRAND.dur("short") * 1.6 + (words.length - 1) * BRAND.stagger("words");
           if (accents.length) {
             // el acento llega DESPUÉS de que se leyó la frase: un solo beat de énfasis
-            tl.fromTo(accents, { color: BRAND.color("text") }, { color: BRAND.color("accent"), duration: BRAND.dur("short"), ease: BRAND.ease("standard") }, done + 0.15);
-            tl.fromTo(accents, { scale: 1 }, { scale: 1.06, duration: BRAND.dur("micro"), ease: BRAND.ease("standard"), yoyo: true, repeat: 1, transformOrigin: "50% 70%" }, done + 0.15);
+            // la forma del acento la decide la marca (color, subrayado, resaltado o itálica)
+            BM.accentIn(tl, accents, done + 0.15);
+            if (BM.look.accentStyle === "color" || BM.look.accentStyle === "italic")
+              tl.fromTo(accents, { scale: 1 }, { scale: 1.06, duration: BRAND.dur("micro"), ease: BRAND.ease("standard"), yoyo: true, repeat: 1, transformOrigin: "50% 70%" }, done + 0.15);
           }
           BM.exit(tl, h, Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
           window.__timelines["b03-statement"] = tl;

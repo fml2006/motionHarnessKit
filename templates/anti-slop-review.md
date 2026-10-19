@@ -1,6 +1,6 @@
 # Revisión de dirección anti-slop — [PIEZA] · [VERSIÓN]
 
-> Usar en cada ronda de review (G8) y antes de picture lock (G9). Fuente: `docs/research/04-fundamentos-motion.md` §12 (las referencias "§N" de esta plantilla apuntan a ese informe). Los valores numéricos son los tokens de `brand/brand.config.json` (ver `MOTION.md`).
+> Usar en cada ronda de review (G8) y antes de picture lock (G9). Fuente: `docs/research/04-fundamentos-motion.md` §12 (las referencias "§N" de esta plantilla apuntan a ese informe). Los valores numéricos son los tokens de `brands/<marca>/brand.config.json` (ver `MOTION.md`).
 >
 > Secciones: **1** diagnóstico del "look IA" · **2** traducción de feedback vago · **3** checklist de 28 puntos (bloques A–G; el bloque **E** es "Look") · **4** plantilla de dirección por beat.
 

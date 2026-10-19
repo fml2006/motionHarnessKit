@@ -1,5 +1,5 @@
 /* TuMarca — tokens de marca para motion (GENERADO por scripts/brand-apply.mjs — no editar a mano) */
-/* Fuente: brand/brand.config.json v1.1.0 */
+/* Fuente: brands/tumarca/brand.config.json v1.2.0 · look: Oscuro técnico: grilla de ingeniería, todo alineado a la izquierda, titulares que suben por máscara y un solo acento ámbar por color. */
 @font-face { font-family: "Space Grotesk"; src: url("fonts/space-grotesk-500.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: block; }
 @font-face { font-family: "Space Grotesk"; src: url("fonts/space-grotesk-ext-500.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: block; unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 @font-face { font-family: "Space Grotesk"; src: url("fonts/space-grotesk-700.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: block; }
@@ -46,6 +46,7 @@
   --c-data-viz-5: #8A96B0;
   --c-gradients-hero-0: #4C8DFF;
   --c-gradients-hero-1: #2ED3A7;
+  --c-on-accent: #0B0F19;
   /* tipografía */
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -150,10 +151,6 @@
 }
 .bm-safe { position: absolute; top: var(--safe-top); bottom: var(--safe-bottom); left: var(--safe-x); right: var(--safe-right); }
 
-/* fondos */
-.bm-bg { position: absolute; inset: 0; background: var(--c-background); }
-.bm-bg.grid { background-image: linear-gradient(rgba(244, 246, 251, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(244, 246, 251, 0.06) 1px, transparent 1px); background-size: 6cqmin 6cqmin; background-position: center; }
-.bm-bg.glow::after { content: ""; position: absolute; inset: -20%; background: radial-gradient(40% 35% at 70% 30%, rgba(76, 141, 255, 0.18), transparent 70%), radial-gradient(35% 30% at 25% 80%, rgba(46, 211, 167, 0.12), transparent 70%); }
 
 /* tipografía */
 .bm-hero, .bm-h1, .bm-h2, .bm-h3 { font-family: var(--font-display); font-weight: var(--w-display); letter-spacing: var(--track-display); line-height: var(--lh-display); }
@@ -167,7 +164,6 @@
 .bm-kicker { font-family: var(--font-mono); font-size: var(--fs-label); letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-primary); }
 .bm-code { font-family: var(--font-mono); font-size: var(--fs-code); line-height: var(--lh-mono); font-variant-ligatures: none; }
 .bm-muted { color: var(--c-text-muted); }
-.bm-accent { color: var(--c-accent); }
 .bm-primary { color: var(--c-primary); }
 .bm-num { font-variant-numeric: tabular-nums; }
 
@@ -177,7 +173,31 @@
 .bm-word { display: inline-block; white-space: pre; }
 
 /* componentes */
-.bm-card { background: var(--c-surface); border: var(--stroke) solid var(--c-border); border-radius: var(--radius-lg); }
 .bm-chip { display: inline-flex; align-items: center; gap: 1cqmin; padding: 0.8cqmin 1.8cqmin; border-radius: 999px; background: var(--c-surface-alt); font-family: var(--font-mono); font-size: var(--fs-label); color: var(--c-text); }
 .bm-rule { height: var(--stroke); background: var(--c-border); }
 .bm-logo svg, .bm-logo img { display: block; height: 100%; width: auto; }
+
+/* ===== look: Oscuro técnico: grilla de ingeniería, todo alineado a la izquierda, titulares que suben por máscara y un solo acento ámbar por color. ===== */
+:root {
+  --look-items: flex-start;
+  --look-text-align: left;
+  --look-origin: left center;
+  --look-statement-items: center;
+  --look-statement-text-align: center;
+  --look-space: 1;
+}
+.bm-frame { --look: "grid+glow start color mask"; }
+/* fondo de marca: .bm-bg = textura del look · .is-hero = apertura/cierre (más intensa) · .is-plain = solo color */
+.bm-bg { position: absolute; inset: 0; background: var(--c-background); overflow: hidden; }
+.bm-bg::before, .bm-bg::after { content: ""; position: absolute; pointer-events: none; }
+.bm-bg::before { inset: 0; background-image: linear-gradient(rgba(244, 246, 251, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(244, 246, 251, 0.06) 1px, transparent 1px); background-size: 6cqmin 6cqmin; background-position: center; }
+.bm-bg.is-hero::after, .bm-bg.glow::after { inset: -20%; background: radial-gradient(40% 35% at 70% 30%, rgba(76, 141, 255, 0.18), transparent 70%), radial-gradient(35% 30% at 25% 80%, rgba(46, 211, 167, 0.12), transparent 70%); }
+.bm-bg.is-plain::before, .bm-bg.is-plain::after, .bm-bg.solid::before, .bm-bg.solid::after { display: none; }
+/* caja de titulares */
+
+/* acento (*palabra*): color */
+.bm-accent { color: var(--c-accent); font-style: normal; }
+/* decoración del kicker: line */
+.bm-kicker-deco { flex: 0 0 auto; width: 9cqmin; height: 0.35cqmin; background: var(--c-primary); transform-origin: left center; }
+/* tarjetas: filled */
+.bm-card { background: var(--c-surface); border: var(--stroke) solid var(--c-border); border-radius: var(--radius-lg); }
