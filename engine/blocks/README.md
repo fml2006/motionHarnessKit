@@ -27,12 +27,6 @@ Para ver todos con la marca actual: `npm run frames -- _galeria-bloques` (y `--f
 
 Una marca puede tener bloques propios en `brands/<marca>/blocks/`: con el nombre de un bloque del engine lo **reemplaza solo para esa marca** (p. ej. su `logo-sting`); con nombre propio es **exclusivo** (otra marca que lo pida falla en el build con un error claro).
 
-### CyberGoat3D (`cybergoat3d`)
-
-| Bloque | Tipo | Para qué | Duración sugerida |
-|---|---|---|---|
-| `logo-sting` | reemplaza al del engine | FIRMA de CyberGoat3D (reemplaza al logo-sting del engine solo para esta marca). "Sello": el anillo rojo se dibuja, la cabra sube dentro del disco y el logotipo entra letra por letra, todo centrado sobre blanco. | 3-3.6 s (registro balanced: calmo, sin rebote; los logos nunca llevan overshoot). |
-
 ### Northline (`northline`)
 
 | Bloque | Tipo | Para qué | Duración sugerida |

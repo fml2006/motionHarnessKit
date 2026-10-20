@@ -1,4 +1,4 @@
 {
   "$comment": "Registro del estudio multimarca. default = marca de las piezas nuevas sin --brand.",
-  "default": "cybergoat3d"
+  "default": "tumarca"
 }

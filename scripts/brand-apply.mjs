@@ -387,7 +387,10 @@ ${BG_CSS}
 .bm-bg.is-plain::before, .bm-bg.is-plain::after, .bm-bg.solid::before, .bm-bg.solid::after { display: none; }
 /* caja de titulares */
 ${upper ? `/* las citas quedan en caja normal: una cita en mayúsculas grita y se lee peor */
-.bm-hero, .bm-h1, .bm-h2:not(blockquote) { text-transform: uppercase; letter-spacing: ${T.display.trackingUpper || "-0.01em"}; line-height: ${T.display.lineHeightUpper || 1}; }` : ""}
+.bm-hero, .bm-h1, .bm-h2:not(blockquote) { text-transform: uppercase; letter-spacing: ${T.display.trackingUpper || "-0.01em"}; line-height: ${T.display.lineHeightUpper || 1}; }` : ""}${T.display.capsOnly ? `
+/* typography.display.capsOnly: la fuente display solo funciona en mayúsculas (sus minúsculas no son de texto): todo lo que va en display, en mayúsculas */
+:root { --display-case: uppercase; }
+.bm-hero, .bm-h1, .bm-h2, .bm-h3 { text-transform: uppercase; }` : ""}
 /* acento (*palabra*): ${look.accentStyle} */
 ${ACCENT_CSS}
 /* decoración del kicker: ${look.kicker} */

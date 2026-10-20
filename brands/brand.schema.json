@@ -83,6 +83,10 @@
             "title",
             "as-is"
           ]
+        },
+        "capsOnly": {
+          "type": "boolean",
+          "description": "La fuente está diseñada solo para mayúsculas (p. ej. Luckiest Guy): todo lo que va en esta fuente se pone en mayúsculas, citas y titulares chicos incluidos. Solo aplica a display."
         }
       }
     }
