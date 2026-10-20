@@ -28,7 +28,7 @@
 - Tagline (si existe):
 - Audiencia (quién mira) *:
 - Dónde se ve *:
-  _Opciones, una o varias: YouTube · LinkedIn · Instagram Reels · TikTok · YouTube Shorts · X · eventos / pantallas · web / producto_
+  _Opciones, una o varias: YouTube · LinkedIn · Instagram Reels · TikTok · YouTube Shorts · Mercado Libre · X · eventos / pantallas · web / producto_
 - Personalidad en 3 o 4 adjetivos *:
 - Qué tiene que sentir alguien en el primer segundo:
 - Idioma y registro *:
