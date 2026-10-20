@@ -26,11 +26,11 @@
 
 - Qué hace la marca, en una línea *: Vende productos de impresión 3D
 - Tagline (si existe):
-- Audiencia (quién mira) *:
+- Audiencia (quién mira) *: no sé
 - Dónde se ve *: Instagram Reels, TikTok, Mercado Libre
   _Opciones, una o varias: YouTube · LinkedIn · Instagram Reels · TikTok · YouTube Shorts · Mercado Libre · X · eventos / pantallas · web / producto_
-- Personalidad en 3 o 4 adjetivos *:
-- Qué tiene que sentir alguien en el primer segundo:
+- Personalidad en 3 o 4 adjetivos *: audaz, cercana, artesanal, precisa (propuesta desde el logo, a confirmar)
+- Qué tiene que sentir alguien en el primer segundo: que el producto está bien hecho y le dan ganas de tenerlo (propuesta desde el logo, a confirmar)
 - Idioma y registro *: es-AR (vos)
   _Opciones: es-AR (vos) · es-419 neutro (tú) · es-ES (tú) · en-US · otro: …_
 - Tono, en una frase: Sutil y con poco texto: el producto habla; cada texto en pantalla se consulta con la marca antes de ponerlo
@@ -39,96 +39,96 @@
 
 ## 3. Diferenciación
 
-- ¿De qué marcas tiene que diferenciarse? (otras marcas del estudio o competidores):
-- ¿Qué NO tiene que parecer? (p. ej. "startup genérica azul con partículas"):
+- ¿De qué marcas tiene que diferenciarse? (otras marcas del estudio o competidores): de las marcas de ejemplo del estudio (TuMarca, Northline, Pulso)
+- ¿Qué NO tiene que parecer? (p. ej. "startup genérica azul con partículas"): un video "tech" genérico oscuro con neón y partículas (propuesta desde el logo, a confirmar)
 
 ## 4. Logo
 
 Archivos en `logo/` (ver `logo/README.md`). Si todavía no hay logo, dejá la carpeta vacía: el kit usa uno provisorio marcado como PENDIENTE hasta que esté el definitivo.
 
-- [ ] `logo.svg`: logo completo, para fondos claros
-- [ ] `logo-dark.svg`: logo completo, para fondos oscuros
-- [ ] `mark.svg`: isotipo o símbolo solo
+- [x] `logo.svg`: logo completo, para fondos claros
+- [x] `logo-dark.svg`: logo completo, para fondos oscuros
+- [x] `mark.svg`: isotipo o símbolo solo
 - [ ] Manual o guía de marca en PDF (opcional): `logo/manual.pdf`
 
 Uso:
 
-- ¿Se puede animar por partes (símbolo y texto por separado)? (sí / no):
+- ¿Se puede animar por partes (símbolo y texto por separado)? (sí / no): sí (vectorizado: `data-part="mark"` y `data-part="wordmark"`; en el isologo, anillo y cabra por separado)
   _Si es sí, el SVG tiene `<g data-part="mark">` y `<g data-part="wordmark">`._
-- Área de respeto alrededor del logo (en proporción a su alto, p. ej. 0.5):
-- Alto mínimo en pantalla (px a 1080p, p. ej. 40):
-- Lo que nunca se le hace al logo:
-- Cómo debería aparecer la firma de logo al abrir un video:
+- Área de respeto alrededor del logo (en proporción a su alto, p. ej. 0.5): 0.5
+- Alto mínimo en pantalla (px a 1080p, p. ej. 40): 40
+- Lo que nunca se le hace al logo: deformar, rotar, cambiar sus colores, separar la cabra del anillo, sombras o glow (propuesta desde el logo, a confirmar)
+- Cómo debería aparecer la firma de logo al abrir un video: aparece el símbolo y después el texto: el anillo rojo se dibuja, entra la cabra y después el logotipo (propuesta desde el logo, a confirmar)
   _Opciones: aparece el símbolo y después el texto · revelado con máscara · escaneo técnico · fundido sereno · golpe enérgico · que decida el DA_
 
 ## 5. Colores
 
 Solo hex reales del manual de marca, nunca colores muestreados de un JPG. Si un color no existe, dejalo vacío y el kit propone uno derivado para que lo apruebes.
 
-- Modo principal *:
+- Modo principal *: claro
   _Opciones: oscuro · claro_
 
 | Rol | HEX | Para qué se usa |
 |---|---|---|
-| Fondo * | | |
-| Superficie (tarjetas, paneles) | | |
-| Borde | | |
-| Texto principal * | | |
-| Texto secundario | | |
-| Primario * | | |
-| Secundario | | |
-| Acento * | | El momento clave: máximo uno por pantalla |
-| Error | | |
-| Éxito | | |
-| Texto sobre primario | | |
+| Fondo * | #FFFFFF | Blanco: fondo de producto |
+| Superficie (tarjetas, paneles) | #F2F2F2 | Tarjetas y paneles |
+| Borde | #E0E0E0 | Filetes |
+| Texto principal * | #1A1A1A | Negro del logo |
+| Texto secundario | #5C5C5C | Bajadas y datos |
+| Primario * | #1A1A1A | Negro del logo: estructura, píldoras, números |
+| Secundario | #8E0505 | Rojo profundo (derivado del rojo) |
+| Acento * | #BE0707 | Rojo del logo: la palabra o el dato clave, uno por pantalla |
+| Error | #9E0000 |  |
+| Éxito | #2E7D32 | Funcional (no aparece en el logo) |
+| Texto sobre primario | #FFFFFF |  |
 
-- Colores para gráficos de datos, en orden (hasta 6 hex):
-- Gradiente de marca, si existe (2 hex):
-- Reglas de color (p. ej. "el acento solo para el dato clave"):
+- Colores para gráficos de datos, en orden (hasta 6 hex): #BE0707, #1A1A1A, #6B6B6B, #D9534F, #8E0505, #7A7A7A
+- Gradiente de marca, si existe (2 hex): #BE0707, #8E0505
+- Reglas de color (p. ej. "el acento solo para el dato clave"): rojo solo para la palabra o el dato clave (como CYBER y 3D en el logo); negro para estructura; fondo blanco para que el producto sea protagonista (propuesta desde el logo, a confirmar)
 
 ## 6. Tipografía
 
 | Rol | Familia | Origen | Pesos | ¿Itálica real? | ¿La licencia cubre video? |
 |---|---|---|---|---|---|
-| Display (titulares) * | | | | | |
-| Texto * | | | | | |
-| Mono (código y labels) | | | | | |
+| Display (titulares) * | Luckiest Guy | Google Fonts | 400 | no | sí (OFL) |
+| Texto * | Nunito | Google Fonts | 400, 700, 800 | no | sí (OFL) |
+| Mono (código y labels) | JetBrains Mono | Google Fonts | 400, 500 | no | sí (OFL) |
 
 - **Origen:** `Google Fonts` / `archivo propio`. Si es archivo propio, va en `fonts/` junto con su licencia.
 - **¿La licencia cubre video?** `sí` / `no` / `no sé`. Si respondés `no sé`, Legal tiene que confirmarlo antes de producir.
-- Titulares en mayúsculas o en caja normal:
+- Titulares en mayúsculas o en caja normal: MAYÚSCULAS (como el logotipo)
   _Opciones: caja normal · MAYÚSCULAS · que decida el DA_
 
 ## 7. Look (el estilo que la distingue)
 
 Con los mismos bloques, el look es lo que hace que tu marca no se parezca a otra. Si no sabés, `que decida el DA`: lo propone Claude y lo aprueba el director de arte con frames reales.
 
-- Fondo:
+- Fondo: flat (blanco liso: el producto es el protagonista) (propuesta desde el logo, a confirmar)
   _Opciones: grid (grilla técnica) · glow (luces suaves) · grid+glow · flat (liso) · paper (papel editorial) · gradient (gradiente de marca)_
-- Alineación de títulos y frases:
+- Alineación de títulos y frases: center (propuesta desde el logo, a confirmar)
   _Opciones: start (a la izquierda, directo) · center (centrado, editorial)_
-- Cómo se marca la palabra clave:
+- Cómo se marca la palabra clave: color (rojo de marca) (propuesta desde el logo, a confirmar)
   _Opciones: color · underline (subrayado) · highlight (resaltado tipo marcador) · italic (itálica)_
-- Cómo entra el texto:
+- Cómo entra el texto: rise (suave, con las duraciones calmas de balanced) (propuesta desde el logo, a confirmar)
   _Opciones: mask (sube desde una máscara, preciso) · fade (fundido, calmo) · rise (sube con fuerza) · blur (desenfoque suave)_
-- Kicker (la etiqueta chica sobre el título):
+- Kicker (la etiqueta chica sobre el título): dot (propuesta desde el logo, a confirmar)
   _Opciones: line (con línea) · dot (con punto) · none (sin decoración)_
-- Tarjetas (pasos, comparaciones):
+- Tarjetas (pasos, comparaciones): filled (gris claro) (propuesta desde el logo, a confirmar)
   _Opciones: outline (contorno) · filled (rellenas) · none (sin tarjeta)_
-- Densidad:
+- Densidad: airy (propuesta desde el logo, a confirmar)
   _Opciones: airy (mucho aire) · regular · compact (más información por pantalla)_
-- Esquinas:
+- Esquinas: redondeadas (como las letras del logotipo) (propuesta desde el logo, a confirmar)
   _Opciones: rectas · apenas redondeadas · redondeadas · muy redondeadas_
 
 ## 8. Motion
 
 - Personalidad del movimiento *: balanced
   _Opciones: productive (preciso y sobrio, B2B y tech) · balanced (editorial, más calmo) · expressive (enérgico, social y lanzamientos)_
-- Velocidad comparada con esa personalidad:
+- Velocidad comparada con esa personalidad: normal
   _Opciones: más rápida · normal · más calma_
-- Transición entre escenas por defecto:
+- Transición entre escenas por defecto: crossfade (propuesta desde el logo, a confirmar)
   _Opciones: cut (corte) · crossfade (fundido) · push (empuje) · mask-wipe (cortina) · que decida el DA_
-- Lo que el motion nunca debe hacer (p. ej. "rebotes", "glitch", "girar el logo"):
+- Lo que el motion nunca debe hacer (p. ej. "rebotes", "glitch", "girar el logo"): glitch, partículas, girar el logo, rebote en textos (propuesta desde el logo, a confirmar)
 
 ## 9. Referencias *
 
@@ -136,8 +136,8 @@ De 3 a 5 videos o frames que te gustan. Los archivos van en `references/` y los 
 
 | # | Archivo en `references/` o link | Qué tomar | Qué NO tomar |
 |---|---|---|---|
-| 1 | | | |
-| 2 | | | |
+| 1 | 01-isologo.png | Badge circular: anillo rojo grueso, figura negra plana, mucho contraste, formas redondeadas | — |
+| 2 | 02-logotipo.png | Mayúsculas gruesas y redondeadas con baile irregular; rojo para CYBER y 3D, negro para GOAT | Usar esa tipografía en textos largos |
 | 3 | | | |
 | 4 | | | |
 | 5 | | | |
@@ -146,6 +146,7 @@ De 3 a 5 videos o frames que te gustan. Los archivos van en `references/` y los 
 
 Opcional: si no sabés, que lo proponga el DA.
 
+- Producto destacado: la foto del producto con un movimiento de cámara suave y, como mucho, el nombre y un dato (consultados con la marca) (propuesta desde el logo, a confirmar)
 - Tipo de video principal: producto destacado (una pieza impresa como protagonista, con muy poco texto)
 - Material disponible: fotos del producto con fondo limpio y fotos o videos del producto en uso
 
@@ -179,6 +180,11 @@ Opcional: si no sabés, que lo proponga el DA.
 
 ## 14. Pendientes y dudas
 
+- Logos vectorizados desde las imágenes de Mercado Libre (originales en `logo/originales/`). Si existe un archivo vectorial original (AI, SVG, PDF o Canva), reemplaza a estos.
+- La tipografía del logotipo coincide con Luckiest Guy (Google Fonts, OFL): confirmar que es esa.
+- Audiencia: quién compra.
+- Referencias de motion: hoy son solo el logo y el isologo; sumar 3 videos o cuentas que les gusten.
+- Todo lo marcado "propuesta desde el logo" lo confirma el dueño viendo el brand board.
 - Si se usa TTS de HeyGen: el guion de cada pieza se envía a HeyGen (registrar en PROVENANCE) y el video lleva el aviso de IA (política de la casa).
 - Formato de Mercado Libre: confirmar si sus videos de producto van en 9:16 u otro formato.
 - Logos: las imágenes de Mercado Libre (JPG/WebP) no se pudieron descargar desde la sesión; falta el archivo y, si existe, el original vectorial.
