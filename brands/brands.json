@@ -1,4 +1,4 @@
 {
-  "$comment": "Registro del estudio multimarca. default = marca de las piezas nuevas sin --brand. Cada marca vive en brands/<slug>/.",
-  "default": "tumarca"
+  "$comment": "Registro del estudio multimarca. default = marca de las piezas nuevas sin --brand.",
+  "default": "cybergoat3d"
 }

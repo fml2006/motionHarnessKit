@@ -1,0 +1,95 @@
+<!doctype html>
+<!--
+  bm-block: logo-sting
+  Uso: FIRMA de CyberGoat3D (reemplaza al logo-sting del engine solo para esta marca). "Sello": el anillo rojo se dibuja, la cabra sube dentro del disco y el logotipo entra letra por letra, todo centrado sobre blanco.
+  Duración sugerida: 3-3.6 s (registro balanced: calmo, sin rebote; los logos nunca llevan overshoot).
+  Aperturas y cierres de marca. La bajada es opcional, corta y la aprueba la marca.
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"tagline","type":"string","label":"Bajada (opcional, corta)","default":"","maxLength":48},
+    {"id":"exit","type":"enum","label":"Salida","default":"none","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":3.2,"min":1,"max":10,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>logo-sting · cybergoat3d</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; }
+        #root .cg { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(4cqmin * var(--look-space)); }
+        #root .cg-mark { height: 34cqmin; aspect-ratio: 1; }
+        #root .cg-word { width: 74cqmin; }
+        #root .cg-mark svg, #root .cg-word svg { display: block; width: 100%; height: 100%; overflow: visible; }
+        #root .cg-tag { font-family: var(--font-body); font-weight: 700; font-size: var(--fs-h3); color: var(--c-text-muted); text-align: center; }
+        @container (max-aspect-ratio: 7/10) {
+          #root .cg-mark { height: 44cqmin; }
+          #root .cg-word { width: 86cqmin; }
+        }
+      </style>
+      <div id="root" data-composition-id="__ID__">
+        <div class="bm-frame">
+          <div class="bm-bg is-hero"></div>
+          <div class="bm-safe cg">
+            <div class="cg-mark"></div>
+            <div class="cg-word"></div>
+            <div class="cg-tag"></div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ tagline: "", exit: "none", dur: 3.2 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          var NS = "http://www.w3.org/2000/svg";
+          var wrap = function (el, cls) { var g = document.createElementNS(NS, "g"); g.setAttribute("class", cls); el.parentNode.insertBefore(g, el); g.appendChild(el); return g; };
+
+          // isologo: el SVG inline de la marca (disco, cabra y anillo como piezas separadas)
+          var markBox = q(".cg-mark");
+          markBox.innerHTML = BRAND.logo.svgMark || "";
+          // logotipo: se toma el grupo data-part="wordmark" del logo principal y se lo pone en su propio lienzo
+          var wordBox = q(".cg-word");
+          var tmp = document.createElement("div");
+          tmp.innerHTML = BRAND.logo.svgPrimary || "";
+          var wordG = tmp.querySelector('[data-part="wordmark"]');
+          if (wordG) {
+            wordG.removeAttribute("transform");
+            var svg = document.createElementNS(NS, "svg");
+            svg.setAttribute("viewBox", "0 0 1518 188");
+            svg.setAttribute("role", "img");
+            svg.setAttribute("aria-label", BRAND.meta && BRAND.meta.name ? BRAND.meta.name : "");
+            svg.appendChild(wordG);
+            wordBox.appendChild(svg);
+          }
+          var tag = q(".cg-tag");
+          if (v.tagline) tag.textContent = v.tagline; else tag.remove();
+
+          var disk = markBox.querySelector(".cg-disk");
+          var ring = markBox.querySelector(".cg-ring");
+          var goat = markBox.querySelector(".cg-goat-g");
+          var goatAnim = goat ? wrap(goat, "cg-goat-anim") : null;
+          var letters = Array.prototype.slice.call(wordBox.querySelectorAll(".cg-letter")).map(function (p) { return wrap(p, "cg-letter-anim"); });
+
+          var tl = gsap.timeline({ paused: true });
+          if (disk) tl.fromTo(disk, { opacity: 0, scale: 0.86, transformOrigin: "50% 50%" }, { opacity: 1, scale: 1, duration: BRAND.dur("enter"), ease: BRAND.ease("emphasized") }, 0.2);
+          if (ring) {
+            // el anillo se dibuja desde arriba, en sentido horario
+            var len = 2 * Math.PI * Number(ring.getAttribute("r"));
+            ring.setAttribute("transform", "rotate(-90 " + ring.getAttribute("cx") + " " + ring.getAttribute("cy") + ")");
+            tl.fromTo(ring, { attr: { "stroke-dasharray": len, "stroke-dashoffset": len } }, { attr: { "stroke-dashoffset": 0 }, duration: BRAND.dur("long"), ease: BRAND.ease("move") }, 0.25);
+          }
+          if (goatAnim) tl.fromTo(goatAnim, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: BRAND.dur("emphasis"), ease: BRAND.ease("emphasized") }, 0.75);
+          if (letters.length) tl.fromTo(letters, { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: BRAND.dur("enter"), ease: BRAND.ease("enter"), stagger: BRAND.stagger("items", letters.length) }, 1.45);
+          if (tag.isConnected) tl.fromTo(tag, { opacity: 0 }, { opacity: 1, duration: BRAND.dur("enter"), ease: BRAND.ease("standard") }, 2.2);
+          BM.exit(tl, q(".cg"), Number(v.dur) - BRAND.dur("exit") - 0.05, v.exit);
+          window.__timelines["__ID__"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

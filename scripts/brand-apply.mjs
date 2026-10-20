@@ -775,7 +775,7 @@ table{border-collapse:collapse;font-size:14px}td,th{border:1px solid ${C.border 
 <h2>Tipografía</h2><div class="type">
 <div style="font-family:var(--font-display);font-weight:${Math.max(...T.display.weights)};font-size:72px;letter-spacing:${T.display.tracking}">Display · ${T.display.family}</div>
 <div style="font-family:var(--font-body);font-size:32px">Body · ${T.body.family} — Una idea por pantalla, con números verificados.</div>
-<div style="font-family:var(--font-mono);font-size:24px;color:${C.code?.keyword || C.primary}">const mono = "${T.mono.family}"; // código y labels</div></div>
+<div style="font-family:var(--font-mono);font-size:24px;display:inline-block;padding:8px 14px;border-radius:8px;background:${C.code?.background || C.surface};color:${C.code?.keyword || C.primary}">const mono = "${T.mono.family}"; // código y labels</div></div>
 <h2>Easings</h2><div class="curves">${Object.entries(cfg.motion.easings).map(([k, v]) => `<figure>${curve(v)}<figcaption>${k}<br>(${v.join(", ")})</figcaption></figure>`).join("")}</div>
 <h2>Duraciones (ms)</h2><table><tr>${Object.keys(cfg.motion.durations).map((k) => `<th>${k}</th>`).join("")}</tr><tr>${Object.values(cfg.motion.durations).map((v) => `<td>${v}</td>`).join("")}</tr></table>
 <h2>Principios de motion</h2><ul>${(cfg.motion.principles || []).map((p) => `<li>${p}</li>`).join("")}</ul>

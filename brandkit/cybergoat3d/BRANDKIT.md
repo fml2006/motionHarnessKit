@@ -189,3 +189,7 @@ Opcional: si no sabés, que lo proponga el DA.
 - Formato de Mercado Libre: confirmar si sus videos de producto van en 9:16 u otro formato.
 - Logos: las imágenes de Mercado Libre (JPG/WebP) no se pudieron descargar desde la sesión; falta el archivo y, si existe, el original vectorial.
 - Specs de video de Mercado Libre: confirmar formato, duración y peso antes de la primera entrega (no están en `delivery/specs.json`).
+
+---
+
+Importado a `brands/cybergoat3d/` el 2026-10-20 (versión 0.1.0). Los campos marcados "propuesta desde el logo" los confirma el dueño viendo el brand board.
