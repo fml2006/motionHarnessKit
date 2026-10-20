@@ -1,6 +1,6 @@
 # Motion graphics con IA: guía de uso para el equipo de video
 
-> Versión Markdown de la guía publicada (documento editable con comentarios en Claude Docs). Generada el 2026-10-19 para el kit v1.2 (multimarca + orquestador `/pieza`). Para arrancar: `docs/EMPEZAR.md`. Verificación: `docs/VERIFICACION.md`.
+> Versión Markdown de la guía publicada (documento editable con comentarios en Claude Docs). Generada el 2026-10-19 para el kit v1.3. Para arrancar: el README (prompts de instalación, brandkit y primer video) y `docs/EMPEZAR.md`. Verificación: `docs/VERIFICACION.md`.
 
 Oct 19, 2026 · @Facundo Lemos
 
@@ -229,6 +229,8 @@ El motion se vende con el sonido y se pierde en la entrega: estas son las especi
 
 Los videos del kit y la descarga del zip están en su página: [Motion Harness Kit](https://claude.ai/artifact/VcYVRMMxVjBTFVnXXzKmAv).
 
+El código vive en [github.com/fml2006/motionHarnessKit](https://github.com/fml2006/motionHarnessKit). Su README trae tres prompts para copiar y pegar: uno instala y verifica el kit solo (clona, `npm ci`, setup, doctor y selftest), otro carga la marca desde un **brandkit** (un formulario `BRANDKIT.md` con logos, fuentes y referencias, plantilla en `brandkit/_plantilla/`, validado con `npm run brandkit:check`) y el tercero arranca el primer video con `/pieza`.
+
 ![Los 13 bloques de marca del kit en 16:9 con la marca por defecto, con los datos de demostración rotulados como ficticios](img/galeria-bloques-16x9.jpg)
 
 ![Los mismos bloques adaptados automáticamente a 9:16, dentro de la safe zone de Reels, TikTok y Shorts](img/galeria-bloques-9x16.jpg)
@@ -253,7 +255,7 @@ Los videos del kit y la descarga del zip están en su página: [Motion Harness K
 
 1. Prerrequisitos: Node 22 o superior, ffmpeg, git y Claude Code. Docker es opcional (`--docker` da renders idénticos entre máquinas).
 2. `npm install`, `npm run setup` (apaga la telemetría de HyperFrames y descarga el Chrome fijado), `npm run doctor` y `npm run selftest` (prueba la cadena de audio y master de punta a punta).
-3. En Claude Code, `/marca`: crea o edita una marca en `brands/<marca>/` con una entrevista en dos tandas que pide hex reales, fuentes con licencia para video, el logo en SVG (con `data-part="mark"` y `data-part="wordmark"` si se quiere animar por partes), 3–5 referencias, el *look* y los bloques firma, y escribe su `LOOK.md`.
+3. En Claude Code, `/marca`: crea o edita una marca, o la importa de un brandkit con /marca desde brandkit/\<marca>, en `brands/<marca>/` con una entrevista en dos tandas que pide hex reales, fuentes con licencia para video, el logo en SVG (con `data-part="mark"` y `data-part="wordmark"` si se quiere animar por partes), 3–5 referencias, el *look* y los bloques firma, y escribe su `LOOK.md`.
 4. `npm run brand -- <marca>`: valida, genera todo y reporta contraste. Después, `npm run brand:compare -- _galeria-bloques --brands <marca>,<otra>` muestra los 13 bloques con tu marca al lado de las demás.
 5. Los proyectos existentes quedan protegidos: cada `scenes.json` guarda la marca con la que se hizo (brandLock) y el build se frena si cambió. Para pasar una pieza a la versión nueva de su marca, o a otra marca, `npm run build:roots -- <proyecto> [--brand <otra>] --rebrand` (queda en su changelog).
 
