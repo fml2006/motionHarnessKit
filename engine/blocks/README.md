@@ -14,6 +14,8 @@
 | [`kinetic-statement`](#kinetic-statement) | una afirmación clave, palabra por palabra (hook, tesis, transición de argumento). | BRAND.hold(texto) + 1.5 s (≈ 3.5-6 s). |
 | [`logo-sting`](#logo-sting) | firma de marca (apertura corta o cierre). Usa los SVG de brand/ inline (BRAND.logo). | 2-3 s. |
 | [`lower-third`](#lower-third) | identificar a una persona/fuente sobre video (talking head, entrevista, demo). | 4-6 s (nunca menos de BRAND.hold(nombre + rol)). |
+| [`producto-video`](#producto-video) | un tramo de video real del producto (en uso, en la mano, girando) a pantalla completa, con un movimiento de cámara suave y, como mucho, una etiqueta corta. Le da realidad a una pieza de producto o e-commerce (Reels, TikTok, Mercado Libre); para fotos, `producto`. | 1.5-3 s por tramo (ritmo dinámico); con etiqueta, al menos BRAND.hold(etiqueta) + 0.8 s. |
+| [`producto`](#producto) | la foto del producto a pantalla completa, con un movimiento de cámara suave y, como mucho, una etiqueta corta (nombre o uso). Para piezas de producto y e-commerce (Reels, TikTok, Mercado Libre). Para un tramo de video, `producto-video`. | 2-3.5 s por foto (ritmo dinámico); con etiqueta, al menos BRAND.hold(etiqueta) + 0.8 s. |
 | [`quote`](#quote) | cita textual con atribución (cliente, experto, documentación oficial). | BRAND.hold(cita) + 2 s. |
 | [`split-compare`](#split-compare) | A vs B, antes/después, mito/realidad. 2-4 ítems por lado, paralelos en estructura. | 7-9 s. |
 | [`stat-hit`](#stat-hit) | UN dato duro con conteo. El número es el momento de acento del frame. | 4-6 s. |
@@ -162,6 +164,46 @@ identificar a una persona/fuente sobre video (talking head, entrevista, demo).
 | `transparent` | boolean | true | Fondo transparente |
 | `exit` | enum (none / fade / up) | "fade" | Salida |
 | `dur` | number | 5 | Duración de la escena (s) |
+
+### producto-video
+
+un tramo de video real del producto (en uso, en la mano, girando) a pantalla completa, con un movimiento de cámara suave y, como mucho, una etiqueta corta. Le da realidad a una pieza de producto o e-commerce (Reels, TikTok, Mercado Libre); para fotos, `producto`.
+
+- El video de la escena va en comp/assets/video/<id-de-la-escena>.mp4 (p. ej. s03-mate.mp4) y se registra en PROVENANCE.md. Si falta, `hyperframes lint` frena con missing_local_asset.
+- Puede ser la toma entera: `mediaStart` elige el segundo donde arranca el tramo y la escena dura lo que dice scenes.json. Va sin sonido (la voz y los efectos van en el audio de la pieza).
+- Los videos de celular (HEVC, a veces HDR) conviene pasarlos antes a H.264 SDR, p. ej.:
+- ffmpeg -i IMG.MOV -vf "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=hable,zscale=t=bt709:m=bt709:r=tv,format=yuv420p,scale=-2:1920" -r 30 -an -c:v libx264 -crf 18 comp/assets/video/s03-mate.mp4
+- (si la toma es SDR, alcanza con -vf "scale=-2:1920,format=yuv420p").
+
+| Variable | Tipo | Default | Descripción |
+|---|---|---|---|
+| `mediaStart` | number | 0 | Segundo del video donde arranca el tramo |
+| `focus` | string | "50% 50%" | Punto de interés (object-position, p. ej. 50% 40%) |
+| `move` | enum (push-in / pull-out / pan-up / pan-down / none) | "push-in" | Movimiento de cámara |
+| `amount` | number | 0.05 | Intensidad del movimiento (escala) |
+| `entry` | enum (snap / fade / cut) | "snap" | Entrada |
+| `label` | string | "" | Etiqueta (opcional, 1-3 palabras, acento con *) |
+| `labelPos` | enum (top / bottom) | "top" | Posición de la etiqueta |
+| `exit` | enum (none / fade / up) | "none" | Salida |
+| `dur` | number | 2.4 | Duración de la escena (s) |
+
+### producto
+
+la foto del producto a pantalla completa, con un movimiento de cámara suave y, como mucho, una etiqueta corta (nombre o uso). Para piezas de producto y e-commerce (Reels, TikTok, Mercado Libre). Para un tramo de video, `producto-video`.
+
+- La imagen va en comp/assets/images/ y se registra en PROVENANCE.md. Etiqueta: 1-3 palabras, acento con *asteriscos*; se le consulta a la marca antes de ponerla.
+
+| Variable | Tipo | Default | Descripción |
+|---|---|---|---|
+| `src` | string | "⟦COMPLETAR: assets/images/producto.jpg⟧" | Foto (ruta dentro de comp/, p. ej. assets/images/producto.jpg) |
+| `focus` | string | "50% 50%" | Punto de interés (object-position, p. ej. 50% 40%) |
+| `move` | enum (push-in / pull-out / pan-up / pan-down / none) | "push-in" | Movimiento de cámara |
+| `amount` | number | 0.08 | Intensidad del movimiento (escala) |
+| `entry` | enum (snap / fade / cut) | "snap" | Entrada |
+| `label` | string | "" | Etiqueta (opcional, 1-3 palabras, acento con *) |
+| `labelPos` | enum (top / bottom) | "top" | Posición de la etiqueta |
+| `exit` | enum (none / fade / up) | "none" | Salida |
+| `dur` | number | 2.8 | Duración de la escena (s) |
 
 ### quote
 

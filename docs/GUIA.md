@@ -225,7 +225,7 @@ El motion se vende con el sonido y se pierde en la entrega: estas son las especi
 
 ## El kit harness: qué trae y cómo se usa
 
-`motion-harness-kit` convierte el método del video en un proceso de equipo: marca como código, 13 bloques de marca que se adaptan solos a 16:9, 9:16, 4:5 y 1:1, el pipeline con 7 skills propias y 8 subagentes por rol, gates automáticos que frenan el render cuando algo falla (contenido sin fuente, lint, check, QA) y una cadena de entrega con master de archivo y loudness por plataforma. Qué se verificó y qué no figura al final de esta sección.
+`motion-harness-kit` convierte el método del video en un proceso de equipo: marca como código, 15 bloques de marca que se adaptan solos a 16:9, 9:16, 4:5 y 1:1, el pipeline con 7 skills propias y 8 subagentes por rol, gates automáticos que frenan el render cuando algo falla (contenido sin fuente, lint, check, QA) y una cadena de entrega con master de archivo y loudness por plataforma. Qué se verificó y qué no figura al final de esta sección.
 
 Los videos del kit y la descarga del zip están en su página: [Motion Harness Kit](https://claude.ai/artifact/VcYVRMMxVjBTFVnXXzKmAv).
 
@@ -240,7 +240,7 @@ El código vive en [github.com/fml2006/motionHarnessKit](https://github.com/fml2
 | Pieza | Qué hace | Dónde |
 | --- | --- | --- |
 | Estudio de marcas | Una carpeta por marca: su JSON genera tokens CSS/JS, `frame.md` para HyperFrames, `MOTION.md` y `brand.md`, theme de Remotion, brand board y reporte de contraste. Cada marca suma su *look*, su `LOOK.md` y sus bloques firma | `brands/<marca>/` → `npm run brand` |
-| 13 bloques de marca | Título, afirmación cinética, dato con conteo, código, terminal, barras, pasos, comparación, cita, lower third, capítulo, logo y cierre. Parametrizables, en 4 formatos, con placeholders visibles (⟦COMPLETAR⟧) en vez de datos de ejemplo creíbles, y que cambian de composición según el look de la marca | `engine/blocks/` (catálogo generado) |
+| 15 bloques de marca | Título, afirmación cinética, dato con conteo, código, terminal, barras, pasos, comparación, cita, lower third, capítulo, logo, cierre, y foto y tramo de video del producto con movimiento de cámara (para e-commerce y redes). Parametrizables, en 4 formatos, con placeholders visibles (⟦COMPLETAR⟧) en vez de datos de ejemplo creíbles, y que cambian de composición según el look de la marca | `engine/blocks/` (catálogo generado) |
 | Orquestador | `/pieza` lleva la pieza de punta a punta con los subagentes de cada rol y una aprobación humana por checkpoint; el estado queda en `pipeline.json` | `.claude/skills/pieza/`, `npm run pipeline` |
 | Proyecto por pieza | Preproducción numerada, registro de claims, horas por rol y gate, `scenes.json` con la marca fijada (brandLock), composición maestra y variantes por formato | `npm run new -- <slug> --brand <marca>` |
 | Gates automáticos | Build estricto (placeholders, cifras sin claim firmado, valores fuera de marca), lint y check por código de salida, QA que corta el render si da FAIL | `build:roots --strict`, `render`, `deliver` |
@@ -256,7 +256,7 @@ El código vive en [github.com/fml2006/motionHarnessKit](https://github.com/fml2
 1. Prerrequisitos: Node 22 o superior, ffmpeg, git y Claude Code. Docker es opcional (`--docker` da renders idénticos entre máquinas).
 2. `npm install`, `npm run setup` (apaga la telemetría de HyperFrames y descarga el Chrome fijado), `npm run doctor` y `npm run selftest` (prueba la cadena de audio y master de punta a punta).
 3. En Claude Code, `/marca`: crea o edita una marca, o la importa de un brandkit con /marca desde brandkit/\<marca>, en `brands/<marca>/` con una entrevista en dos tandas que pide hex reales, fuentes con licencia para video, el logo en SVG (con `data-part="mark"` y `data-part="wordmark"` si se quiere animar por partes), 3–5 referencias, el *look* y los bloques firma, y escribe su `LOOK.md`.
-4. `npm run brand -- <marca>`: valida, genera todo y reporta contraste. Después, `npm run brand:compare -- _galeria-bloques --brands <marca>,<otra>` muestra los 13 bloques con tu marca al lado de las demás.
+4. `npm run brand -- <marca>`: valida, genera todo y reporta contraste. Después, `npm run brand:compare -- _galeria-bloques --brands <marca>,<otra>` muestra los bloques con tu marca al lado de las demás.
 5. Los proyectos existentes quedan protegidos: cada `scenes.json` guarda la marca con la que se hizo (brandLock) y el build se frena si cambió. Para pasar una pieza a la versión nueva de su marca, o a otra marca, `npm run build:roots -- <proyecto> [--brand <otra>] --rebrand` (queda en su changelog).
 
 La prueba de que la marca es realmente un parámetro: la misma pieza, sin tocar una escena, con dos archivos de marca distintos.
@@ -334,7 +334,7 @@ El kit usa HyperFrames porque es el motor del flujo del video, no cobra licencia
 
 - **HyperFrames** si el equipo es de diseño o contenido con base web, el presupuesto de licencias importa, ya hay material GSAP o HTML para reutilizar, o se quiere el flujo exacto del video. Mitigaciones obligatorias (el kit las trae): versión exacta fijada, skills fijadas a un commit, telemetría apagada, GSAP y fuentes vendorizados, y comandos de nube y feedback denegados en los permisos del agente (una mitigación, no un bloqueo: ver *Legal, seguridad y gobernanza*).
 - **Remotion** si el equipo es React-first, necesita render distribuido a gran escala o un Player embebido en producto, o compras exige un proveedor con contrato. Es lo que recomendó el informe de motores para un equipo tech. Presupuesto de licencia: USD 100–600/mes para la mayoría de los equipos.
-- **Nunca dos motores primarios:** duplica componentes de marca. Del kit, solo la capa de marca es agnóstica (genera también `remotion-theme.ts`), y siguen sirviendo las plantillas, los gates, el registro de claims y el QA de archivos (`npm run qa`). Los 13 bloques, `build:roots`, `frames`, `render` y el lint son de HyperFrames: con Remotion hay que reescribirlos como componentes React.
+- **Nunca dos motores primarios:** duplica componentes de marca. Del kit, solo la capa de marca es agnóstica (genera también `remotion-theme.ts`), y siguen sirviendo las plantillas, los gates, el registro de claims y el QA de archivos (`npm run qa`). Los bloques, `build:roots`, `frames`, `render` y el lint son de HyperFrames: con Remotion hay que reescribirlos como componentes React.
 
 **Complementos, no motores:** After Effects (con Lottie o Rive) para piezas héroe de diseñadores; un editor (Premiere o DaVinci Resolve) para talking heads y screen recordings; video generativo (Veo, Kling, Runway) **solo para b-roll y texturas**, nunca para texto, UI, código, datos ni logos.
 

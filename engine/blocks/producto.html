@@ -1,0 +1,101 @@
+<!doctype html>
+<!--
+  bm-block: producto
+  Uso: la foto del producto a pantalla completa, con un movimiento de cámara suave y, como mucho, una etiqueta corta (nombre o uso). Para piezas de producto y e-commerce (Reels, TikTok, Mercado Libre). Para un tramo de video, `producto-video`.
+  La imagen va en comp/assets/images/ y se registra en PROVENANCE.md. Etiqueta: 1-3 palabras, acento con *asteriscos*; se le consulta a la marca antes de ponerla.
+  Duración sugerida: 2-3.5 s por foto (ritmo dinámico); con etiqueta, al menos BRAND.hold(etiqueta) + 0.8 s.
+-->
+<html
+  lang="es"
+  data-composition-variables='[
+    {"id":"src","type":"string","label":"Foto (ruta dentro de comp/, p. ej. assets/images/producto.jpg)","default":"⟦COMPLETAR: assets/images/producto.jpg⟧","maxLength":200},
+    {"id":"focus","type":"string","label":"Punto de interés (object-position, p. ej. 50% 40%)","default":"50% 50%","maxLength":20},
+    {"id":"move","type":"enum","label":"Movimiento de cámara","default":"push-in","options":[{"value":"push-in","label":"Acercar"},{"value":"pull-out","label":"Alejar"},{"value":"pan-up","label":"Subir"},{"value":"pan-down","label":"Bajar"},{"value":"none","label":"Quieta"}]},
+    {"id":"amount","type":"number","label":"Intensidad del movimiento (escala)","default":0.08,"min":0,"max":0.25,"step":0.01},
+    {"id":"entry","type":"enum","label":"Entrada","default":"snap","options":[{"value":"snap","label":"Golpe de zoom corto (dinámico)"},{"value":"fade","label":"Fundido"},{"value":"cut","label":"Corte seco"}]},
+    {"id":"label","type":"string","label":"Etiqueta (opcional, 1-3 palabras, acento con *)","default":"","maxLength":28},
+    {"id":"labelPos","type":"enum","label":"Posición de la etiqueta","default":"top","options":[{"value":"top","label":"Arriba"},{"value":"bottom","label":"Abajo (fuera de la zona de UI en vertical)"}]},
+    {"id":"exit","type":"enum","label":"Salida","default":"none","options":[{"value":"none","label":"Corte"},{"value":"fade","label":"Fade"},{"value":"up","label":"Hacia arriba"}]},
+    {"id":"dur","type":"number","label":"Duración de la escena (s)","default":2.8,"min":0.8,"max":20,"step":0.1,"unit":"s"}
+  ]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>producto</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; container-type: size; overflow: hidden; }
+        #root .pr-stage { position: absolute; inset: 0; overflow: hidden; background: var(--c-surface); }
+        #root .pr-media { position: absolute; inset: 0; transform-origin: var(--pr-origin, 50% 50%); will-change: transform; }
+        #root .pr-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        #root .pr-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+        #root .pr-ui { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+        #root .pr-ui.bottom { justify-content: flex-end; }
+        #root .pr-label { background: var(--c-background); color: var(--c-text); border-radius: var(--radius-md);
+          padding: calc(1.4cqmin * var(--look-space)) calc(2.8cqmin * var(--look-space)); text-align: center; max-width: 86%; }
+      </style>
+      <div id="root" data-composition-id="__ID__">
+        <div class="bm-frame">
+          <div class="pr-stage"><div class="pr-media"></div></div>
+          <div class="bm-safe pr-ui"><div class="pr-label bm-h3"></div></div>
+        </div>
+      </div>
+      <script>
+        (function () {
+          var root = document.getElementById("root");
+          var v = BM.vars({ src: "", focus: "50% 50%", move: "push-in", amount: 0.08, entry: "snap", label: "", labelPos: "top", exit: "none", dur: 2.8 }, window.__hyperframes);
+          var q = function (s) { return root.querySelector(s); };
+          var media = q(".pr-media");
+          var dur = Number(v.dur);
+          var amt = Math.max(0, Math.min(0.25, Number(v.amount)));
+
+          // la foto. Sin foto → placeholder visible.
+          var src = String(v.src || "");
+          if (BM.empty(src)) {
+            var e = document.createElement("div");
+            e.className = "pr-empty bm-label";
+            e.textContent = BM.PLACEHOLDER + " foto del producto";
+            q(".pr-stage").appendChild(e);
+          } else {
+            var img = document.createElement("img");
+            img.src = src; img.alt = "";
+            img.style.objectPosition = v.focus;
+            media.appendChild(img);
+          }
+          media.style.setProperty("--pr-origin", v.focus);
+
+          var ui = q(".pr-ui");
+          if (v.labelPos === "bottom") ui.classList.add("bottom");
+          var label = q(".pr-label");
+          var words = BM.empty(v.label) ? [] : BM.words(label, v.label);
+          if (!words.length) label.remove();
+
+          var tl = gsap.timeline({ paused: true });
+          // cámara: un solo movimiento lineal-suave durante toda la escena (determinista, sin azar)
+          var from = { scale: 1, yPercent: 0 }, to = { scale: 1, yPercent: 0 };
+          if (v.move === "push-in") { from.scale = 1; to.scale = 1 + amt; }
+          if (v.move === "pull-out") { from.scale = 1 + amt; to.scale = 1; }
+          if (v.move === "pan-up") { from.scale = to.scale = 1 + amt; from.yPercent = amt * 30; to.yPercent = -amt * 30; }
+          if (v.move === "pan-down") { from.scale = to.scale = 1 + amt; from.yPercent = -amt * 30; to.yPercent = amt * 30; }
+          if (v.entry === "snap") {
+            // golpe de zoom corto al entrar (energía del corte) que aterriza en el movimiento lento
+            tl.fromTo(media, { scale: from.scale + 0.07, yPercent: from.yPercent }, { scale: from.scale, yPercent: from.yPercent, duration: BRAND.dur("enter") * 0.8, ease: BRAND.ease("emphasized") }, 0);
+            tl.fromTo(media, { scale: from.scale, yPercent: from.yPercent }, { scale: to.scale, yPercent: to.yPercent, duration: Math.max(0.2, dur - BRAND.dur("enter") * 0.8), ease: "none", immediateRender: false }, BRAND.dur("enter") * 0.8);
+          } else {
+            tl.fromTo(media, from, Object.assign({ duration: dur, ease: "none" }, to), 0);
+            if (v.entry === "fade") tl.fromTo(q(".pr-stage"), { opacity: 0 }, { opacity: 1, duration: BRAND.dur("enter"), ease: BRAND.ease("standard") }, 0);
+          }
+          if (label.isConnected) {
+            tl.fromTo(label, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: BRAND.dur("enter"), ease: BRAND.ease("enter") }, 0.25);
+            var acc = Array.prototype.slice.call(label.querySelectorAll(".bm-accent-word"));
+            if (acc.length) BM.accentIn(tl, acc, 0.25 + BRAND.dur("enter"));
+          }
+          BM.exit(tl, q(".bm-frame"), dur - BRAND.dur("exit") - 0.05, v.exit);
+          window.__timelines["__ID__"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

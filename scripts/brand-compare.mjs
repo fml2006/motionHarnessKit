@@ -7,7 +7,7 @@
 // clave por escena y compone una hoja por formato: <proyecto>/review/compare/compare-<formato>.png (+ .jpg).
 // No toca el proyecto original. Escenas "custom" se copian tal cual; una escena con un bloque firma exclusivo de
 // otra marca queda como "no disponible" en las marcas que no lo tienen.
-import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync, readdirSync, copyFileSync, renameSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync, readdirSync, copyFileSync, cpSync, renameSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { ROOT, readJson, resolveProject, runHf, esc } from "./lib/common.mjs";
@@ -47,6 +47,9 @@ for (const b of brands) {
   }
   const dir = join(work, b);
   mkdirSync(join(dir, "comp", "compositions"), { recursive: true });
+  // fotos, video y audio de la pieza (p. ej. el bloque producto): la comparación los necesita para verse igual que la pieza
+  const assets = join(projectDir, "comp", "assets");
+  if (existsSync(assets)) cpSync(assets, join(dir, "comp", "assets"), { recursive: true });
   const missing = [];
   const scenes = [];
   for (const s of plan.scenes || []) {

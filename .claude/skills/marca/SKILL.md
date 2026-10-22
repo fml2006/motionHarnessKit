@@ -7,7 +7,7 @@ description: Crear o editar una marca del estudio multimarca (brands/<slug>/) co
 
 El kit es un **estudio multimarca**: cada marca vive en `brands/<slug>/` (`brand.config.json`, `logo/`, `references/`,
 `LOOK.md`, `blocks/`, y `dist/` generado) y cada pieza elige UNA (`scenes.json → brand`). Colores y fuentes solos no
-alcanzan: con los mismos 13 bloques, dos marcas que solo cambian paleta se ven "hermanas". Lo que las separa es el
+alcanzan: con los mismos bloques, dos marcas que solo cambian paleta se ven "hermanas". Lo que las separa es el
 **look** (fondo, alineación, caja de titulares, forma del acento, cómo entra el texto, kicker, tarjetas, densidad),
 el **motion** (duraciones, curvas, stagger) y sus **bloques firma**. Esta skill define las tres cosas con datos REALES.
 Nunca rellenes un hueco con un supuesto: preguntá o dejá el placeholder marcado ("PENDIENTE").

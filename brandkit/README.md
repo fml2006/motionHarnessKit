@@ -34,7 +34,7 @@ brandkit/
    ```
    - Claude lee el formulario y pregunta en una sola tanda lo que falte.
    - Crea `brands/acme/`, decide el look a partir de tus referencias y escribe `LOOK.md`.
-   - Arma al menos un bloque firma, genera el brand board y el reporte de contraste, y te muestra la galería de 13 bloques con tu marca al lado de las otras.
+   - Arma al menos un bloque firma, genera el brand board y el reporte de contraste, y te muestra la galería de bloques con tu marca al lado de las otras.
    - **El director de arte la aprueba** antes de producir.
 
 ## Qué se puede dejar en "que decida el DA"

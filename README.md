@@ -5,7 +5,7 @@
 ## Qué es
 
 - **Motion graphics como código.** Claude escribe cada escena en HTML y GSAP, y HyperFrames la renderiza a MP4, cuadro por cuadro. El texto sale nítido, los colores son exactos y el mismo proyecto da siempre el mismo video. Funciona para explainers, datos, código, lanzamientos y piezas para redes.
-- **Estudio multimarca.** Cada marca vive en `brands/<marca>/`: colores, tipografía, motion, un *look* propio (fondo, alineación, acento, cómo entra el texto) y escenas firma. Con los mismos 13 bloques, dos marcas no se ven iguales; dentro de una marca, todas las piezas comparten estilo.
+- **Estudio multimarca.** Cada marca vive en `brands/<marca>/`: colores, tipografía, motion, un *look* propio (fondo, alineación, acento, cómo entra el texto) y escenas firma. Con los mismos 15 bloques, dos marcas no se ven iguales; dentro de una marca, todas las piezas comparten estilo.
 - **Orquestador `/pieza`.** Lleva un video de punta a punta: brief → guion → storyboard → animatic → revisión → lock → entrega. En cada fase llama al subagente del rol (productor, investigador, guionista, director de arte, storyboarder, motion designer, sonido, QA) y frena en cada checkpoint para preguntar si aprobás, pedís cambios o pausás.
 - **Controles que frenan.**
   - Ninguna cifra sale sin fuente firmada.
@@ -101,7 +101,7 @@ No cambies ningún hex sin mi OK.
 Al final te muestra:
 
 - **El brand board**, con logo, paleta, contraste, tipografía y curvas.
-- **La galería de 13 bloques con tu marca**, al lado de las otras.
+- **La galería de bloques con tu marca**, al lado de las otras.
 - **Lo que quedó PENDIENTE.**
 
 Lo aprueba el director de arte. Las marcas de ejemplo (`tumarca`, `northline`, `pulso`) se pueden borrar cuando tengas las tuyas; el paso a paso está en `docs/EMPEZAR.md`.
@@ -182,7 +182,7 @@ brandkit/
   _ejemplo-northline/       ← el formulario completo, como ejemplo
   <marca>/                  ← el brandkit de cada marca: lo que pidió la marca (fuente de /marca desde brandkit/<marca>)
 engine/
-  blocks/*.html            ← 13 bloques comunes que leen tokens y look de la marca de la pieza + README (catálogo generado, con los bloques firma de cada marca)
+  blocks/*.html            ← 15 bloques comunes que leen tokens y look de la marca de la pieza + README (catálogo generado, con los bloques firma de cada marca)
   runtime/bm-motion.js     ← helpers de motion que leen los tokens (BM.revealLines, countUp, typeText…)
 projects/
   _galeria-bloques/        ← todos los bloques, para revisar una marca o compararlas (review/compare/)
@@ -264,7 +264,7 @@ Lo que **tiene que sumar la organización** para un uso enterprise:
 
 ## Decisiones de diseño (y por qué)
 
-- **HyperFrames como motor del kit, aunque el research recomendó Remotion.** El informe comparativo (`docs/research/03-remotion-y-comparativa.md`) recomendó **Remotion como motor primario** para un equipo de contenido tech (maduro desde 2021, Lambda distribuido probado, plantillas tipadas, skills oficiales para Claude Code; el costo de licencia es marginal para una empresa) y HyperFrames como secundario (pre-1.0, roadmap controlado por HeyGen, telemetría activada por defecto, y "sin camino de vuelta" hacia Remotion). El kit eligió HyperFrames igual, como decisión explícita y revisable, porque es el flujo exacto del video que replica, es Apache-2.0 sin costo por seat (Remotion exige Company License desde 4 personas), es HTML/CSS (lo dominan diseñadores web) y trae tooling pensado para agentes (lint, check, snapshot, skills). **Contras asumidos:** pre-1.0 con releases diarios (versión exacta fijada), telemetría por defecto (apagada y mitigada), depende de GSAP (licencia propia, no OSI). **Si tu equipo elige Remotion, del kit se lleva** la marca como código (`brands/<marca>/brand.config.json` → `brands/<marca>/dist/remotion-theme.ts`), las plantillas, skills de preproducción, subagentes, `qa.mjs`, `loudnorm`/`master` y `delivery/specs.json`; **se pierden** los 13 bloques, `build:roots`, `frames`, `render`, `deliver` (la parte de render) y los gates de lint/check, que son específicos de HyperFrames.
+- **HyperFrames como motor del kit, aunque el research recomendó Remotion.** El informe comparativo (`docs/research/03-remotion-y-comparativa.md`) recomendó **Remotion como motor primario** para un equipo de contenido tech (maduro desde 2021, Lambda distribuido probado, plantillas tipadas, skills oficiales para Claude Code; el costo de licencia es marginal para una empresa) y HyperFrames como secundario (pre-1.0, roadmap controlado por HeyGen, telemetría activada por defecto, y "sin camino de vuelta" hacia Remotion). El kit eligió HyperFrames igual, como decisión explícita y revisable, porque es el flujo exacto del video que replica, es Apache-2.0 sin costo por seat (Remotion exige Company License desde 4 personas), es HTML/CSS (lo dominan diseñadores web) y trae tooling pensado para agentes (lint, check, snapshot, skills). **Contras asumidos:** pre-1.0 con releases diarios (versión exacta fijada), telemetría por defecto (apagada y mitigada), depende de GSAP (licencia propia, no OSI). **Si tu equipo elige Remotion, del kit se lleva** la marca como código (`brands/<marca>/brand.config.json` → `brands/<marca>/dist/remotion-theme.ts`), las plantillas, skills de preproducción, subagentes, `qa.mjs`, `loudnorm`/`master` y `delivery/specs.json`; **se pierden** los bloques, `build:roots`, `frames`, `render`, `deliver` (la parte de render) y los gates de lint/check, que son específicos de HyperFrames.
 - **Tamaños en `cqmin` + container queries:** una escena escrita una vez funciona en 16:9, 9:16, 4:5 y 1:1; el vertical escala la tipografía ×1,22 (×1,1 en 4:5) y respeta la safe zone universal de Reels/TikTok/Shorts.
 - **Bloques que se copian, no librería opaca:** la escena arranca desde un bloque probado y después es editable por el agente o el motion designer.
 - **Determinismo y offline:** GSAP, fuentes y logo se vendorizan en cada proyecto; nada se baja en el render.

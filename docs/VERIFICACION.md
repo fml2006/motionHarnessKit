@@ -44,6 +44,15 @@ Se corrigieron los 25. Los cambios están en los commits posteriores a `v1.0` y 
 | Orquestador: chequeos | `check brief` sobre la plantilla da 7 bloqueantes y exit 1; con un brief mínimo válido pasa; `check storyboard` del ejemplo pasa con build OK | ídem |
 | Orquestador: aprobaciones | `approve` sin `--by` → exit 2; con el chequeo en falla → exit 1; fuera de orden → se niega; `--force` exige motivo y queda marcado; `reject` bloquea hasta una versión nueva; `reopen` y `pause` registran | ídem |
 
+## Bloques de producto (v1.4)
+
+| Chequeo | Resultado | Cómo |
+|---|---|---|
+| Contrato | Pieza de prueba con los movimientos `push-in` y `pan-up`, entradas `snap` y `fade`, etiqueta arriba y abajo: build, lint (0/0) y check sin errores | `npm run build:roots`, `npx hyperframes lint`, `npx hyperframes check` |
+| Tramos de video (`producto-video`) | Dos tramos de la misma toma (desde 3 s y desde 6 s) con una foto en el medio: el render y los frames clave muestran el segundo correcto de la toma en cada escena (toma de prueba con el tiempo impreso). Un `<video>` creado por script queda en el segundo 0 de la pieza y no se ve en escenas posteriores: por eso el bloque lo escribe en el HTML | `npm run render`, `npm run frames` |
+| Se adapta a cada marca | La misma pieza con `tumarca`, `northline` y `pulso` en 9:16: la foto se ve igual y la etiqueta toma la superficie, la tipografía y el acento de cada marca | `npm run brand:compare` (ahora copia `comp/assets/` de la pieza) |
+| Pieza real | Video de producto de 7 escenas en 9:16 (5 con `producto`, voz y efectos): build `--strict`, check 7/7 y render con QA sin FAIL | `npm run render` |
+
 ## Renders de referencia
 
 - **Galería** (`projects/_galeria-bloques`): 13 bloques, 78,5 s, 16:9 y 9:16, con datos rotulados "ficticio · demo" (v005, marca tumarca v1.2).
